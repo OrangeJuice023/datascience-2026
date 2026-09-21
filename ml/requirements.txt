@@ -1,0 +1,5 @@
+# Minimal scaffold dependencies. Additional libraries (scikit-learn,
+# statsmodels, geopandas, shapely) will be added when TRACE/ANALYZE/SIMULATE
+# modules are actually implemented.
+numpy
+pandas
