@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function StatCard({
@@ -5,15 +6,21 @@ export function StatCard({
   value,
   hint,
   tone = "default",
+  badge,
 }: {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "elevated" | "muted";
+  /** e.g. an EvidenceBadge naming what kind of evidence the value is. */
+  badge?: ReactNode;
 }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-slate-500">{label}</p>
+        {badge}
+      </div>
       <p
         className={cn(
           "mt-2 text-2xl font-semibold tabular-nums",

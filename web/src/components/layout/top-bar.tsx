@@ -18,8 +18,11 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           Spatial Intelligence &amp; Geographic Modeling for Action
         </p>
       </div>
-      <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700">
-        Demo environment
+      <span
+        className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700"
+        title="Formal dengue data is real (OpenDengue, historical, national). Signals, anomaly and simulation outputs are demo data."
+      >
+        Prototype<span className="hidden sm:inline"> · mixed real and demo data</span>
       </span>
     </header>
   );

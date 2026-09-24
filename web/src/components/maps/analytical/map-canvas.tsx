@@ -11,6 +11,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { ArcLayer, ColumnLayer, ScatterplotLayer } from "@deck.gl/layers";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import type { PickingInfo } from "@deck.gl/core";
 import { FALLBACK_BASEMAP, type ResolvedBasemap } from "@/lib/map/basemap";
 import { EXTENT_BOUNDS, GLOBE_CAMERA, VIEW_CAMERA } from "@/lib/map/geo";
@@ -87,7 +88,24 @@ function buildLayers(
   const points = frame.features.filter((f) => !columnIds.has(f.id));
   const focused = frame.features.filter((f) => f.id === selectedId || f.id === hoveredId);
 
+  type HeatPoint = NonNullable<ModeFrame["heat"]>[number];
+
   return [
+    // Screen-space density; not drawn on the globe, where aggregation is unreliable.
+    frame.heat &&
+      frame.heat.length > 0 &&
+      view !== "globe" &&
+      new HeatmapLayer<HeatPoint>({
+        id: "heat",
+        data: frame.heat,
+        getPosition: (d) => d.position,
+        getWeight: (d) => d.weight,
+        radiusPixels: 70,
+        intensity: 1,
+        threshold: 0.05,
+        colorRange: frame.heatColors?.map((c) => [c[0], c[1], c[2]] as [number, number, number]),
+        aggregation: "SUM",
+      }),
     toggles.links &&
       frame.links.length > 0 &&
       new ArcLayer<ModeFrame["links"][number]>({

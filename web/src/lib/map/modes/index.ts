@@ -1,4 +1,15 @@
-import type { MapModeDefinition, MapModeId } from "../types";
+import type { MapModeDefinition, MapModeId, ModeEvidence } from "../types";
+import type { EvidenceKind } from "@/components/ui/evidence-badge";
+
+/** Collapses mode evidence into the four categories the UI badges. */
+export const EVIDENCE_KIND: Record<ModeEvidence, EvidenceKind> = {
+  health_observations: "formal",
+  public_health_signals: "signal",
+  model_output: "model",
+  scenario: "model",
+  context: "context",
+};
+import { ACCESS_MODE } from "./access";
 import { ANOMALY_MODE } from "./anomaly";
 import { DISEASE_MODE } from "./disease";
 import { SIGNALS_MODE } from "./signals";
@@ -9,27 +20,13 @@ const ENVIRONMENT_MODE: MapModeDefinition = {
   label: "Environment",
   question: "What contextual conditions surround the signals?",
   availability: "planned",
-  evidence: "none",
+  evidence: "context",
   evidenceLabel: "Environmental covariates",
   extent: "metro",
   filters: [],
   layerToggles: [],
   unavailableReason:
     "Planned: weekly rainfall and temperature covariates (Open-Meteo). No covariate data is connected yet.",
-};
-
-const ACCESS_MODE: MapModeDefinition = {
-  id: "access",
-  label: "Access",
-  question: "How reachable are health services?",
-  availability: "planned",
-  evidence: "none",
-  evidenceLabel: "Health-service access",
-  extent: "metro",
-  filters: [],
-  layerToggles: [],
-  unavailableReason:
-    "Planned: health-facility access layer. No facility dataset has been selected or verified yet.",
 };
 
 /** Display order follows TRACE → ANALYZE → SIMULATE. */

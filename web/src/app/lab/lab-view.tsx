@@ -11,11 +11,21 @@ import { SpatialTab } from "@/components/lab/spatial-tab";
 import { ComparisonTab } from "@/components/lab/comparison-tab";
 import { SourcesTab } from "@/components/lab/sources-tab";
 import { AskDataPanel } from "@/components/lab/ask-data-panel";
-import { NationalObservationsPanel } from "@/components/lab/national-observations-panel";
+import {
+  NationalObservationsPanel,
+  type ObservationSourceMeta,
+} from "@/components/lab/national-observations-panel";
+import { DataStateNotice } from "@/components/ui/data-state-notice";
+import { EvidenceBadge } from "@/components/ui/evidence-badge";
 import { DEMO_DISEASES, getLocationIdsForDisease, getSignal } from "@/data/demo-signals";
 import { getLguById } from "@/data/demo-lgus";
 import { getTrendSeries } from "@/data/demo-trends";
 import type { NationalSummary } from "@/lib/national-observations";
+import type { AnomalyResult } from "@/types/data";
+
+export type NationalLoad =
+  | { status: "ok"; national: NationalSummary; meta: ObservationSourceMeta; anomalies: AnomalyResult[] }
+  | { status: "unavailable"; message: string };
 
 const TABS = [
   { id: "trend", label: "Trend" },
@@ -29,7 +39,7 @@ const TABS = [
 const NATIONAL_ID = "ph";
 const NATIONAL_DISEASE = "Dengue";
 
-export function LabView({ national }: { national: NationalSummary }) {
+export function LabView({ load }: { load: NationalLoad }) {
   const [disease, setDisease] = useState(NATIONAL_DISEASE);
   const [locationId, setLocationId] = useState(NATIONAL_ID);
   const [activeTab, setActiveTab] = useState("trend");
@@ -76,7 +86,8 @@ export function LabView({ national }: { national: NationalSummary }) {
         />
         <div className="flex flex-col gap-1">
           <p className="text-[11px] font-medium text-slate-500">Evidence</p>
-          <p className="px-0.5 py-1.5 text-sm text-slate-700">
+          <p className="flex items-center gap-2 px-0.5 py-1.5 text-sm text-slate-700">
+            <EvidenceBadge kind={isNational ? "formal" : "signal"} />
             {isNational
               ? "Formal observations · OpenDengue v1.3"
               : "Open-source signal · demo data"}
@@ -85,7 +96,13 @@ export function LabView({ national }: { national: NationalSummary }) {
       </Card>
 
       {isNational ? (
-        <NationalObservationsPanel national={national} />
+        load.status === "ok" ? (
+          <NationalObservationsPanel national={load.national} meta={load.meta} anomalies={load.anomalies} />
+        ) : (
+          <DataStateNotice state="source-unavailable" title="Formal data source unavailable">
+            {load.message} No observations are shown rather than substitute values.
+          </DataStateNotice>
+        )
       ) : lgu && signal && trend ? (
         <Card>
           <Tabs items={TABS} activeId={activeTab} onChange={setActiveTab} />

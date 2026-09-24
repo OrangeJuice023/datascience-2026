@@ -14,6 +14,8 @@ import type {
   PreparedMode,
 } from "@/lib/map/types";
 import { cn } from "@/lib/utils";
+import { EVIDENCE_KIND } from "@/lib/map/modes";
+import { EVIDENCE_CONFIG, EvidenceBadge } from "@/components/ui/evidence-badge";
 import { AnalyticalLegend } from "../legend/analytical-legend";
 import { MapTimeline } from "../timeline/map-timeline";
 import type { MapHover } from "./map-canvas";
@@ -48,7 +50,7 @@ const TOGGLE_LABEL: Record<MapModeId, Partial<Record<LayerToggleId, string>>> = 
   anomaly: { columns: "3D columns" },
   disease: {},
   environment: {},
-  access: {},
+  access: { columns: "3D columns" },
 };
 
 export interface AnalyticalMapProps {
@@ -68,6 +70,8 @@ export interface AnalyticalMapProps {
   selectedId?: string;
   onSelect: (id: string | undefined) => void;
   heightClassName?: string;
+  /** Hide the mode tabs, e.g. on a page dedicated to one mode. */
+  hideModeTabs?: boolean;
 }
 
 export function AnalyticalMap({
@@ -87,6 +91,7 @@ export function AnalyticalMap({
   selectedId,
   onSelect,
   heightClassName = "h-[60vh] min-h-[22rem] lg:h-[34rem]",
+  hideModeTabs = false,
 }: AnalyticalMapProps) {
   const [basemap, setBasemap] = useState<ResolvedBasemap>(INITIAL_BASEMAP);
   const [issue, setIssue] = useState<string | null>(null);
@@ -100,11 +105,11 @@ export function AnalyticalMap({
   return (
     <div className="flex flex-col">
       {/* Modes */}
-      <div className="border-b border-slate-200 px-3 py-2.5 sm:px-4">
+      <div className={cn("border-b border-slate-200 px-3 py-2.5 sm:px-4", hideModeTabs && "hidden")}>
         <div
           role="radiogroup"
           aria-label="Map mode"
-          className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5"
+          className="relative -mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5"
         >
           {modes.map((m) => {
             const active = m.id === mode.id;
@@ -125,7 +130,12 @@ export function AnalyticalMap({
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
                 )}
               >
+                <span
+                  className={cn("h-1.5 w-1.5 rounded-full", EVIDENCE_CONFIG[EVIDENCE_KIND[m.evidence]].dotClass)}
+                  aria-hidden="true"
+                />
                 {m.label}
+                <span className="sr-only">({EVIDENCE_CONFIG[EVIDENCE_KIND[m.evidence]].label} evidence)</span>
                 {m.availability === "planned" && (
                   <span
                     className={cn(
@@ -145,6 +155,7 @@ export function AnalyticalMap({
       {/* Mode context, layers and view */}
       <div className="flex flex-col gap-3 px-3 pt-3 sm:px-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <EvidenceBadge kind={EVIDENCE_KIND[mode.evidence]} />
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",

@@ -1,4 +1,4 @@
-import type { HealthObservation, TemporalResolution } from "@/types/data";
+import type { AnomalyResult, HealthObservation, TemporalResolution } from "@/types/data";
 import type { Signal, LGU, TrendPoint, NeighborSummary } from "@/types";
 
 export interface SignalQuery {
@@ -27,4 +27,10 @@ export interface DataProvider {
   getLguById(id: string): Promise<LGU | undefined>;
   getTrendSeries(geographyId: string): Promise<TrendPoint[] | undefined>;
   getNeighborSummaries(geographyId: string): Promise<NeighborSummary[]>;
+  /**
+   * Model outputs for a formal series. Empty until a baseline model has
+   * actually been fitted and run; callers must show "not fitted", never a
+   * placeholder score.
+   */
+  getAnomalyResults(diseaseId: string, geographyId: string): Promise<AnomalyResult[]>;
 }

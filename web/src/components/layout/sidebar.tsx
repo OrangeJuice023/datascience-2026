@@ -84,15 +84,21 @@ export function SidebarContent({
       <div className="border-t border-slate-200 px-4 py-4">
         <dl className="space-y-2 text-[11px]">
           <div className="flex items-center justify-between">
-            <dt className="font-medium text-slate-400">Data status</dt>
+            <dt className="font-medium text-slate-400">Formal data</dt>
+            <dd className="rounded-full bg-teal-50 px-2 py-0.5 font-medium text-teal-700 ring-1 ring-teal-200">
+              OpenDengue · static
+            </dd>
+          </div>
+          <div className="flex items-center justify-between">
+            <dt className="font-medium text-slate-400">Signals</dt>
             <dd className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700 ring-1 ring-amber-200">
               Demo data
             </dd>
           </div>
           <div className="flex items-center justify-between">
-            <dt className="font-medium text-slate-400">Model status</dt>
+            <dt className="font-medium text-slate-400">Models</dt>
             <dd className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600 ring-1 ring-slate-200">
-              Prototype
+              Not fitted
             </dd>
           </div>
         </dl>
