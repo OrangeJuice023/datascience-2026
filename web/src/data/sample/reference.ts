@@ -25,10 +25,11 @@ export const DISEASES: Disease[] = [
 const REGISTRY_DATE = "2026-09-23T00:00:00Z";
 
 /**
- * Real sources SIGMA intends to use. None is connected yet (status
- * "planned"). License, attribution and resolution stay null / empty unless
- * verified against the source's own documentation; see
- * docs/data-sources.md for the evidence behind each value.
+ * Real sources SIGMA uses or intends to use. OpenDengue is the one active
+ * source (static national extract); the rest are "planned". License,
+ * attribution and resolution stay null / empty unless verified against the
+ * source's own documentation; see docs/data-sources.md for the evidence
+ * behind each value.
  */
 export const PLANNED_SOURCES: Source[] = [
   {
@@ -37,6 +38,40 @@ export const PLANNED_SOURCES: Source[] = [
     type: "formal_surveillance",
     url: "https://opendengue.org/",
     accessMethod: "bulk_download",
+    license: "CC BY 4.0",
+    attribution: null,
+    // Only the national series is used; the extract's sub-national rows await
+    // geography reconciliation.
+    geographicLevels: ["national"],
+    temporalResolution: "weekly",
+    status: "active",
+    metadataVerifiedAt: "2026-09-24",
+    isSample: false,
+    createdAt: REGISTRY_DATE,
+    updatedAt: REGISTRY_DATE,
+  },
+  {
+    id: "doh-weekly",
+    name: "DOH weekly disease surveillance reports",
+    type: "government_release",
+    url: "https://doh.gov.ph/health-statistics/weekly-disease-surveillance-report/",
+    accessMethod: "manual",
+    license: null,
+    attribution: null,
+    geographicLevels: [],
+    temporalResolution: null,
+    status: "planned",
+    metadataVerifiedAt: null,
+    isSample: false,
+    createdAt: REGISTRY_DATE,
+    updatedAt: REGISTRY_DATE,
+  },
+  {
+    id: "ritm-surveillance",
+    name: "RITM surveillance reports",
+    type: "government_release",
+    url: "https://ritm.gov.ph/data/surveillance/",
+    accessMethod: "manual",
     license: null,
     attribution: null,
     geographicLevels: [],

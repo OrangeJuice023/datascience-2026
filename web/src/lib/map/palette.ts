@@ -40,3 +40,30 @@ export function hexToRgba(hex: string, alpha = 255): Rgba {
     alpha,
   ];
 }
+
+/** ACCESS: availability states (paired with labels; unknown is neutral). */
+export const AVAILABILITY_HEX = {
+  available: "#1baf7a",
+  low: "#eda100",
+  unavailable: "#e34948",
+  unknown: "#b8b6ae",
+} as const;
+
+/** ACCESS: freshness, an ordinal blue ramp (fresh darkest) plus neutral unknown. */
+export const FRESHNESS_HEX = {
+  fresh: "#1c5cab",
+  aging: "#5598e7",
+  stale: "#b7d3f6",
+  unknown: "#b8b6ae",
+} as const;
+
+/** ACCESS: sequential demand ramp, low → high (one hue). */
+export const DEMAND_RAMP = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"] as const;
+
+/** ACCESS: illustrative access-gap classes; insufficient data is deliberately pale. */
+export const GAP_HEX = {
+  low: "#b8b6ae",
+  moderate: "#f19a82",
+  elevated: "#d03b3b",
+  insufficient_data: "#e2e8f0",
+} as const;

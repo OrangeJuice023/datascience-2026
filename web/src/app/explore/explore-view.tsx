@@ -9,6 +9,8 @@ import { SelectFilter } from "@/components/ui/select-filter";
 import { Button } from "@/components/ui/button";
 import { AnalyticalMap } from "@/components/maps/analytical/analytical-map";
 import { LocationDetailPanel } from "@/components/maps/location-detail-panel";
+import { AccessDetailPanel } from "@/components/access/access-detail-panel";
+import { ACCESS_METRIC_LABEL, type AccessMetricView } from "@/lib/access/bundle";
 import { MAP_MODES, getMapMode } from "@/lib/map/modes";
 import { applySignalFilters } from "@/lib/map/modes/signals";
 import type {
@@ -22,6 +24,8 @@ import type {
   ModeFrame,
 } from "@/lib/map/types";
 import { SEVERITY_ORDER } from "@/lib/status";
+import { daysBetweenIso, formatCount, formatIsoDate } from "@/lib/map/format";
+import { EvidenceBadge } from "@/components/ui/evidence-badge";
 
 const DEFAULT_FILTERS: MapFilters = {
   disease: "all",
@@ -29,6 +33,8 @@ const DEFAULT_FILTERS: MapFilters = {
   status: "all",
   confidence: "all",
   window: "7",
+  medicine: "oral-rehydration-salts",
+  accessMetric: "gap",
 };
 
 const EMPTY_FRAME: ModeFrame = { features: [], links: [] };
@@ -81,6 +87,27 @@ export function ExploreView({
         (a, b) => SEVERITY_ORDER[b.status] - SEVERITY_ORDER[a.status] || b.date.localeCompare(a.date),
       )[0];
   }, [bundle, filters, modeId, selectedId]);
+
+  const nationalCoverage = useMemo(() => {
+    const weeks = bundle.nationalWeekly;
+    if (weeks.length === 0) return null;
+    let gaps = 0;
+    let missingWeeks = 0;
+    for (let i = 1; i < weeks.length; i++) {
+      const step = daysBetweenIso(weeks[i - 1].periodStart, weeks[i].periodStart) / 7;
+      if (step > 1) {
+        gaps++;
+        missingWeeks += step - 1;
+      }
+    }
+    return {
+      count: weeks.length,
+      first: weeks[0].periodStart,
+      last: weeks[weeks.length - 1].periodEnd,
+      gaps,
+      missingWeeks,
+    };
+  }, [bundle.nationalWeekly]);
 
   const ranked = useMemo(
     () => [...frame.features].sort((a, b) => b.rank - a.rank),
@@ -141,6 +168,27 @@ export function ExploreView({
           { value: "medium", label: "Medium confidence" },
           { value: "low", label: "Low confidence" },
         ]}
+      />
+    ),
+    medicine: (
+      <SelectFilter
+        key="medicine"
+        label="Medicine (demo)"
+        value={filters.medicine}
+        onChange={(v) => updateFilter("medicine", v)}
+        options={bundle.access.medicines.map((m) => ({ value: m.id, label: m.name }))}
+      />
+    ),
+    accessMetric: (
+      <SelectFilter
+        key="accessMetric"
+        label="Access metric"
+        value={filters.accessMetric}
+        onChange={(v) => updateFilter("accessMetric", v)}
+        options={(Object.keys(ACCESS_METRIC_LABEL) as AccessMetricView[]).map((k) => ({
+          value: k,
+          label: ACCESS_METRIC_LABEL[k],
+        }))}
       />
     ),
     window: (
@@ -226,7 +274,18 @@ export function ExploreView({
         </Card>
 
         <div className="flex flex-col gap-4">
-          {mode.availability === "planned" ? (
+          {mode.id === "access" && selectedId ? (
+            <Card className="overflow-hidden">
+              <AccessDetailPanel
+                bundle={bundle.access}
+                lgus={bundle.lgus}
+                selectedId={selectedId}
+                medicineId={filters.medicine}
+                weekIndex={index}
+                onClose={() => setSelectedId(undefined)}
+              />
+            </Card>
+          ) : mode.availability === "planned" ? (
             <Card className="p-5">
               <p className="text-sm font-semibold text-slate-900">{mode.label}: not connected</p>
               <p className="mt-1 text-sm text-slate-600">{mode.unavailableReason}</p>
@@ -236,11 +295,35 @@ export function ExploreView({
             </Card>
           ) : mode.id === "disease" ? (
             <Card className="p-5">
-              <p className="text-sm font-semibold text-slate-900">National formal observations</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-slate-900">National formal observations</p>
+                <EvidenceBadge kind="formal" />
+              </div>
               <p className="mt-1 text-sm text-slate-600">
-                OpenDengue v1.3 reports dengue for the Philippines at national resolution. Weekly
-                records exist for 2013 and 2022–2023; other years are annual totals.
+                OpenDengue v1.3 reports dengue for the Philippines at national resolution only.
               </p>
+              {nationalCoverage ? (
+                <dl className="mt-3 space-y-1 text-xs">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-400">Weekly records</dt>
+                    <dd className="text-right text-slate-700">{formatCount(nationalCoverage.count)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-400">Coverage</dt>
+                    <dd className="text-right text-slate-700">
+                      {formatIsoDate(nationalCoverage.first)} – {formatIsoDate(nationalCoverage.last)}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-400">Gaps in the record</dt>
+                    <dd className="text-right text-slate-700">
+                      {nationalCoverage.missingWeeks} weeks in {nationalCoverage.gaps} gaps
+                    </dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="mt-3 text-xs text-slate-500">No weekly national records available.</p>
+              )}
               <p className="mt-2 text-xs text-slate-500">
                 Sub-national case maps are not drawn because no sub-national formal data is
                 connected. Open-source signals stay in the Signals mode and are never shown as

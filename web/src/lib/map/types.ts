@@ -1,4 +1,5 @@
 import type { HealthObservation } from "@/types/data";
+import type { AccessBundle } from "@/lib/access/bundle";
 import type { LGU, NeighborSummary, SimulationInputs, Signal, TrendPoint } from "@/types";
 
 export type MapViewMode = "2d" | "3d" | "globe";
@@ -20,7 +21,8 @@ export type ModeEvidence =
   | "health_observations"
   | "model_output"
   | "scenario"
-  | "none";
+  /** Environmental or access covariates: inform analysis, never measure disease. */
+  | "context";
 
 /** demo = illustrative sample data; observed = real upstream data; planned = no source connected. */
 export type ModeAvailability = "demo" | "observed" | "planned";
@@ -46,6 +48,8 @@ export interface MapFeature {
   elevation?: number;
   /** Short class label shown in tooltips and the ranked list. */
   classLabel: string;
+  /** Distinguishes facility points from area summaries in modes that draw both. */
+  kind?: "area" | "facility";
   /** Sort key for the ranked list (higher first). */
   rank: number;
   rows: DetailRow[];
@@ -71,6 +75,10 @@ export interface ModeFrame {
   links: MapLink[];
   /** Mode has no spatial layer at this resolution; show a national readout instead. */
   national?: NationalIndicator;
+  /** Weighted points for a density heatmap (e.g. aggregated search demand). */
+  heat?: Array<{ position: [number, number]; weight: number }>;
+  /** Sequential color range for `heat`, low → high. */
+  heatColors?: Rgba[];
 }
 
 export interface TimelineSlice {
@@ -120,7 +128,14 @@ export interface LegendSpec {
   note?: string;
 }
 
-export type FilterKey = "disease" | "geography" | "status" | "confidence" | "window";
+export type FilterKey =
+  | "disease"
+  | "geography"
+  | "status"
+  | "confidence"
+  | "window"
+  | "medicine"
+  | "accessMetric";
 
 export interface MapFilters {
   disease: string;
@@ -129,6 +144,10 @@ export interface MapFilters {
   confidence: string;
   /** Trailing window in days, or "all". */
   window: string;
+  /** ACCESS: selected medicine id. */
+  medicine: string;
+  /** ACCESS: which indicator the map encodes. */
+  accessMetric: "availability" | "demand" | "freshness" | "gap";
 }
 
 export type LayerToggleId = "links" | "columns";
@@ -153,6 +172,8 @@ export interface MapDataBundle {
   /** Formal national observations (OpenDengue), weekly rows only, trimmed to what the map draws. */
   nationalWeekly: NationalWeeklyPoint[];
   scenario: SimulationInputs;
+  /** ACCESS demo bundle (aggregated on the server). */
+  access: AccessBundle;
 }
 
 export interface PreparedMode {

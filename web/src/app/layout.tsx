@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
@@ -20,7 +21,13 @@ export const metadata: Metadata = {
     "Scaffold for a public-health intelligence and scenario-analysis platform.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// Explicit props rather than the generated LayoutProps global: CI runs
+// `tsc --noEmit` before `next build`, when .next/types does not exist yet.
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <html
       lang="en"

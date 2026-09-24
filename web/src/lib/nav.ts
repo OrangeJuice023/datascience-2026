@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Map,
   FlaskConical,
+  PackageSearch,
   Waypoints,
   ShieldCheck,
   Database,
@@ -19,6 +20,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/explore", label: "Explore", icon: Map },
   { href: "/lab", label: "Lab", icon: FlaskConical },
+  { href: "/access", label: "Access", icon: PackageSearch },
   { href: "/simulate", label: "Simulate", icon: Waypoints },
   { href: "/policy", label: "Policy", icon: ShieldCheck },
 ];
