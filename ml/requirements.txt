@@ -3,3 +3,8 @@
 # modules are actually implemented.
 numpy
 pandas
+# Dengue pipeline: Excel input/output (ml/clean_dengue.py, ml/ears.py)
+openpyxl
+# QA reports (ml/qa/): charts and PDF output
+matplotlib
+reportlab
