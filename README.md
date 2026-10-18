@@ -7,9 +7,10 @@ for a hackathon project. It combines formal health data and open-source
 public-health signals, identifies spatiotemporal patterns and anomalies, and
 provides interactive analysis and scenario-based decision support.
 
-> **Status:** initial scaffold only. No live data sources, scraping,
-> ML models, simulations, or policy logic are implemented yet. All
-> dashboard content is placeholder UI.
+> **Status:** early build. A dengue data pipeline (cleaning, DOH alert and
+> epidemic thresholds, EARS C1/C2/C3 anomaly detection) is implemented in
+> `ml/`; see [docs/dengue-pipeline.md](docs/dengue-pipeline.md). No live data
+> sources, scraping, simulations, or policy logic yet.
 
 ## Core modules
 
@@ -78,7 +79,8 @@ values as needed. No real credentials are included in this repository.
 ## Documentation
 
 See [docs/architecture.md](docs/architecture.md) for the high-level system
-architecture.
+architecture, and [docs/dengue-pipeline.md](docs/dengue-pipeline.md) for the
+dengue cleaning and EARS pipeline (QA reports in [docs/reports/](docs/reports/)).
 
 ## Notes
 
