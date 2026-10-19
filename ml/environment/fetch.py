@@ -1,4 +1,4 @@
-"""Download raw HDX resources into data/raw/<source>/ and write a manifest.
+"""Download raw HDX resources into data/raw/<source>/ with a manifest per source.
 
 Raw files are never modified. The manifest records the resolved URL, the
 upstream last_modified, retrieval time, byte size and SHA-256 so every
@@ -9,24 +9,12 @@ downstream table can name exactly what it was built from.
 """
 
 import argparse
-import hashlib
 import json
 import urllib.request
 from datetime import datetime, timezone
-from pathlib import Path
 
+from .paths import REPO, manifest_path, raw_dir, sha256
 from .sources import HDX_API, HDX_DATASETS
-
-REPO = Path(__file__).resolve().parents[2]
-RAW = REPO / "data" / "raw"
-
-
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def resolve_resources(dataset: str) -> dict:
@@ -37,10 +25,10 @@ def resolve_resources(dataset: str) -> dict:
 
 def fetch(force: bool = False) -> None:
     for key, spec in HDX_DATASETS.items():
-        out_dir = RAW / key
+        out_dir = raw_dir(key)
         out_dir.mkdir(parents=True, exist_ok=True)
-        manifest_path = out_dir / "manifest.json"
-        manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+        mpath = manifest_path(key)
+        manifest = json.loads(mpath.read_text()) if mpath.exists() else {}
         resources = resolve_resources(spec["dataset"])
 
         for name in spec["resources"]:
@@ -62,8 +50,8 @@ def fetch(force: bool = False) -> None:
                 "license": spec["license"],
                 "attribution": spec["attribution"],
             }
-        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
-        print(f"wrote {manifest_path.relative_to(REPO)}")
+        mpath.write_text(json.dumps(manifest, indent=2) + "\n")
+        print(f"wrote {mpath.relative_to(REPO)}")
 
 
 if __name__ == "__main__":

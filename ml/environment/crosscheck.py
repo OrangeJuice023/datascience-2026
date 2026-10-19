@@ -13,9 +13,11 @@ import json
 
 import pandas as pd
 
-from .build import OUT, RAW, REPO
+from .paths import OUT, raw_dir, verified_inputs
 
-HDX = REPO / "data" / "raw" / "hdx_dengue" / "DOH-Epi Dengue Data 2016-2021.csv"
+RAW = raw_dir("cchain")
+HDX_NAME = "DOH-Epi Dengue Data 2016-2021.csv"
+HDX = raw_dir("hdx_dengue") / HDX_NAME
 
 # CCHAIN adm3_en -> HDX `loc` (after stripping whitespace).
 CITY_TO_HDX = {
@@ -59,6 +61,8 @@ def compare(a: pd.Series, b: pd.Series, offset: int) -> dict:
 
 
 def main() -> None:
+    inputs = verified_inputs("cchain", ["disease_pidsr_totals.csv", "location.csv"])
+    inputs |= verified_inputs("hdx_dengue", [HDX_NAME])
     pidsr, hdx = load()
     a_of = {c: pidsr[pidsr["city"] == c].set_index("date")["case_total"] for c in CITY_TO_HDX}
     b_of = lambda loc: hdx[hdx["loc"] == loc].set_index("date")["cases"]
@@ -74,6 +78,7 @@ def main() -> None:
     province = {c: compare(a_of[c], b_of(p), best) | {"hdx_province": p} for c, p in CITY_TO_PROVINCE.items()}
 
     report = {
+        "inputs": inputs,
         "hdx_weekday": sorted(hdx["date"].dt.day_name().unique().tolist()),
         "best_offset_days": best,
         "by_offset": by_offset,
