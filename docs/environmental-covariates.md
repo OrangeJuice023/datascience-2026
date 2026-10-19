@@ -6,6 +6,17 @@
 > end of this document are a **proposal for team review**; nothing downstream
 > (hub ENVIRONMENT tab, `web/`) should be built against them until agreed.
 >
+> **Update, 2026-10-19.** Pipeline reproducibility verified. `fetch`, `build`
+> and `crosscheck` share one path layout (`ml/environment/paths.py`: one
+> `data/raw/<source>/manifest.json` per source). `build` and `crosscheck` check
+> every raw file against its manifest SHA-256 before writing anything, and both
+> outputs record their inputs. A clean-copy run (empty `data/`, fresh download
+> of all 5 files including the 570 MB `climate_atmosphere.csv`, about 1 h 45 min)
+> gave raw files byte-identical to the 2026-10-18 download, city-week CSVs
+> byte-identical to the 2026-10-18 build, and the same quality report and
+> crosscheck (best offset −13 d, 9 modeling cities). Only the `inputs`
+> provenance block changed format.
+>
 > Nothing here establishes that weather causes dengue. Every relationship this
 > track estimates is a conditional association in observational data.
 
@@ -64,8 +75,18 @@ static hazard area, not events).
 
 ## 4. Alignment analysis
 
-Reproduce with `python -m environment.crosscheck` and `python -m environment.build`
-(from `ml/`). Outputs land in `data/processed/environment/`.
+Reproduce from `ml/`:
+
+```
+python -m environment.fetch       # data/raw/<source>/ + data/raw/<source>/manifest.json
+python -m environment.build       # city-week tables + quality_report.json
+python -m environment.crosscheck  # crosscheck.json
+```
+
+`build` and `crosscheck` stop before writing anything if a manifest is missing
+or a raw file no longer matches its manifest SHA-256. Each output records the
+inputs it used (`inputs`: sha256, retrieval time, upstream last_modified, URL).
+Outputs land in `data/processed/environment/`.
 
 ### 4.1 Grid
 

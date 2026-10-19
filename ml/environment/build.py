@@ -24,16 +24,14 @@ Rules (see docs/environmental-covariates.md, "Alignment"):
 """
 
 import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from .sources import CLIMATE_VARIABLES
+from .paths import OUT, raw_dir, verified_inputs
+from .sources import CLIMATE_VARIABLES, HDX_DATASETS
 
-REPO = Path(__file__).resolve().parents[2]
-RAW = REPO / "data" / "raw" / "cchain"
-OUT = REPO / "data" / "processed" / "environment"
+RAW = raw_dir("cchain")
 
 ZERO_RUN_WEEKS = 4
 LOW_COUNT_MEDIAN = 3  # median weekly cases (2008-2019) below this => low_count
@@ -170,15 +168,15 @@ def build_climate(cities: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 
 
 def main() -> None:
+    inputs = verified_inputs("cchain", HDX_DATASETS["cchain"]["resources"])
     OUT.mkdir(parents=True, exist_ok=True)
     cities = load_cities()
     dengue, dq = build_dengue(cities)
     climate, cq = build_climate(cities)
     dengue.to_csv(OUT / "city_weekly_dengue.csv", index=False, date_format="%Y-%m-%d")
     climate.to_csv(OUT / "city_weekly_climate.csv", index=False, date_format="%Y-%m-%d", float_format="%.3f")
-    manifest = json.loads((RAW / "manifest.json").read_text())
     report = {
-        "inputs": {k: {"sha256": v["sha256"], "retrieved_at": v["retrieved_at"]} for k, v in manifest.items()},
+        "inputs": inputs,
         "dengue": dq,
         "climate": cq,
     }
