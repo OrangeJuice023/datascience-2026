@@ -9,6 +9,7 @@
  *   data/raw/hdx_dengue/doh-epi-dengue-data-2016-2021.csv
  *   data/raw/cod_ab_phl/phl_admin_boundaries.xlsx          (COD-AB v03, admin 1–3)
  *   data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv        (pcode-compatibility check only)
+ *   data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx (PSA codes and city classes; manual download)
  *   data/raw/geo-sources-manifest.json                     (hashes, retrieval dates)
  *   data/reference/geo/{source_region_labels,name_overrides,city_classes}.csv  (curated, logged decisions)
  *   web/src/data/opendengue-ph.json                        (national cross-check only; never merged)
@@ -23,7 +24,8 @@
  *
  * The script exits non-zero if any hard invariant fails (unmatched or ambiguous
  * identifiers, admin-3 units not partitioned exactly once, curated parents that
- * disagree with COD-AB, unexpected input hashes). Case counts are read only for
+ * disagree with COD-AB, codes or city classes that disagree with PSA PSGC,
+ * unexpected input hashes). Case counts are read only for
  * coverage and consistency checks; this script never writes case values.
  */
 import crypto from "node:crypto";
@@ -68,6 +70,8 @@ if (errors.length) finish();
 const DENGUE_FILE = p("data/raw/hdx_dengue/doh-epi-dengue-data-2016-2021.csv");
 const CODAB_FILE = p("data/raw/cod_ab_phl/phl_admin_boundaries.xlsx");
 const CODPS_ADM2_FILE = p("data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv");
+const PSGC_FILE = p("data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx");
+const PSGC_EDITION = "PSA PSGC 3Q 2026";
 
 const regionLabels = readCsvRecords(p("data/reference/geo/source_region_labels.csv"));
 const overrides = new Map(readCsvRecords(p("data/reference/geo/name_overrides.csv")).map((r) => [r.source_loc, r]));
@@ -135,8 +139,50 @@ function index(records, nameField) {
 const adm2Index = index(adm2, "adm2_name");
 const adm3Index = index(adm3, "adm3_name");
 
-/** COD-AB pcodes are the PSGC digits; 10-digit PSGC = digits right-padded. Unverified against a PSA publication. */
+/** COD-AB pcodes are the PSGC digits; 10-digit PSGC = digits right-padded. Verified against PSA by psaFor. */
 const psgc10 = (pcode) => pcode.slice(2).padEnd(10, "0");
+
+// ---------------------------------------------------------------------------
+// PSA PSGC (current edition). COD-AB v03 keeps older codes for HUCs, NCR and a few
+// re-assigned provinces, so a pcode is resolved in three steps:
+//   exact          — the derived 10-digit code is a PSGC code
+//   correspondence — the derived code minus its 3rd digit is PSA's 9-digit Correspondence Code
+//                    (a sub-municipality match is lifted to its city)
+//   name           — the only non-barangay PSGC row with that name (Sulu, Special Geographic Area)
+// ---------------------------------------------------------------------------
+
+const psgcRows = toRecords(readWorkbook(PSGC_FILE, { sheets: ["PSGC"] }).get("PSGC")).filter((r) => r["10-digit PSGC"] && r.Name);
+const psgcByCode = new Map(psgcRows.map((r) => [r["10-digit PSGC"], r]));
+const psgcByCorr = new Map(
+  psgcRows.filter((r) => r["Correspondence Code"]).map((r) => [String(r["Correspondence Code"]).padStart(9, "0"), r]),
+);
+// PSA appends footnote marks to some names ("City of Lucenaa/"); names are compared without them.
+const psgcName = (r) => r.Name.replace(/a\/$/, "").trim();
+const psgcByName = new Map();
+for (const r of psgcRows) {
+  if (r["Geographic Level"] === "Bgy") continue;
+  const k = norm(psgcName(r));
+  if (!psgcByName.has(k)) psgcByName.set(k, []);
+  psgcByName.get(k).push(r);
+}
+const codabName = (pcode) =>
+  adm1.find((r) => r.adm1_pcode === pcode)?.adm1_name ?? adm2ByPcode.get(pcode)?.adm2_name ?? adm3ByPcode.get(pcode)?.adm3_name;
+function psaFor(pcode) {
+  const d = psgc10(pcode);
+  if (psgcByCode.has(d)) return { row: psgcByCode.get(d), via: "exact" };
+  const corr = d.slice(0, 2) + d.slice(3);
+  if (d[2] === "0" && psgcByCorr.has(corr)) {
+    // Manila's old city code is now the code of its first district (Tondo I/II); use the parent city.
+    const row = psgcByCorr.get(corr);
+    const city = row["Geographic Level"] === "SubMun" ? psgcByCode.get(row["10-digit PSGC"].slice(0, 5) + "00000") : row;
+    return { row: city, via: "correspondence" };
+  }
+  const byName = psgcByName.get(norm(codabName(pcode) ?? "")) ?? [];
+  if (byName.length === 1) return { row: byName[0], via: "name" };
+  fail(`COD-AB ${pcode} (${codabName(pcode)}) has no ${PSGC_EDITION} code (derived ${d})`);
+  return null;
+}
+const psaCode = (x) => x?.row["10-digit PSGC"] ?? "";
 
 fs.mkdirSync(p("data/processed/geo"), { recursive: true });
 writeCsv(
@@ -318,6 +364,18 @@ for (const m of cityUnits) {
 const unexplainedParent = parentDisagreements.filter((d) => !(d.city === "ISABELA CITY" && d.codab === "(own admin-2 / NCR)"));
 for (const d of unexplainedParent) fail(`City parent mismatch for ${d.city}: curated ${d.curated}, COD-AB ${d.codab}`);
 for (const c of cityClasses.keys()) if (!cityUnits.some((m) => m.target === c)) fail(`city_classes.csv lists ${c}, which is not in the source`);
+
+// PSA codes for every reporting unit; city classes checked against PSA.
+for (const m of resolved) m.psa = (m.kind === "province" ? m.adm2Pcodes : [m.record.adm3_pcode]).map(psaFor).filter(Boolean);
+for (const m of cityUnits) {
+  if (m.kind !== "city") continue;
+  const psa = m.psa[0]?.row["City Class"] ?? null;
+  if (psa !== m.cityClass) fail(`City class of ${m.clean} disagrees with ${PSGC_EDITION}: city_classes.csv ${m.cityClass}, PSA ${psa}`);
+}
+const unitPsaCodes = new Set(resolved.flatMap((m) => m.psa.map(psaCode)));
+const psaSeparateCities = psgcRows.filter((r) => ["HUC", "ICC"].includes(r["City Class"]));
+for (const r of psaSeparateCities)
+  if (!unitPsaCodes.has(r["10-digit PSGC"])) fail(`${PSGC_EDITION} ${r["City Class"]} ${psgcName(r)} is not a reporting unit`);
 
 // Region consistency: source-period region vs COD-AB v03 region of the unit's territory.
 for (const m of resolved) {
@@ -613,7 +671,7 @@ writeCsv(
   [
     "source_loc_raw", "source_loc_clean", "ml_geography_name", "source_region_raw", "unit_id", "unit_name", "unit_type", "sigma_level",
     "geographic_entity_id", "geographic_province_id", "match_decision", "matched_via", "cod_ab_level", "cod_ab_pcodes",
-    "psgc10_derived", "member_adm3_count", "excluded_unit_ids", "analysis_region_pcode", "analysis_region_id",
+    "psgc10_derived", "psa_psgc_codes", "psa_psgc_match", "member_adm3_count", "excluded_unit_ids", "analysis_region_pcode", "analysis_region_id",
     "cod_ab_v03_region_pcodes", "region_consistency", "rep_lat", "rep_lon", "rep_point_adm3", "area_sqkm",
     "weeks_reported", "weeks_expected", "notes",
   ],
@@ -634,6 +692,8 @@ writeCsv(
     cod_ab_level: m.kind === "province" ? "adm2" : "adm3",
     cod_ab_pcodes: m.kind === "province" ? m.adm2Pcodes.join(";") : m.record.adm3_pcode,
     psgc10_derived: (m.kind === "province" ? m.adm2Pcodes : [m.record.adm3_pcode]).map(psgc10).join(";"),
+    psa_psgc_codes: m.psa.map(psaCode).join(";"),
+    psa_psgc_match: m.psa.map((x) => x.via).join(";"),
     member_adm3_count: m.adm3.length,
     excluded_unit_ids: (m.carvedOut ?? []).map((c) => c.unitId).sort().join(";"),
     analysis_region_pcode: m.sourceRegionPcode,
@@ -655,12 +715,15 @@ writeCsv(
 // 2. Rows for the master data hub GEOGRAPHY tab (its exact column order).
 const hubRows = [];
 const asOf = CODAB_VALID_ON;
-const hubSource = "OCHA COD-AB PHL v03 (NAMRIA/PSA) + HDX DOH-Epi dengue crosswalk";
+const hubSource = `OCHA COD-AB PHL v03 (NAMRIA/PSA) + HDX DOH-Epi dengue crosswalk; codes ${PSGC_EDITION}`;
+// psgc_code is the current PSA code, filled only where the row is exactly one PSGC area. A province
+// remainder is not, and neither is a 2016–2021 province that is now several PSGC areas.
+const singleCode = (m) => (m.psa.length === 1 ? psaCode(m.psa[0]) : "");
 const hubUrl = "https://data.humdata.org/dataset/cod-ab-phl";
 hubRows.push({ geography_id: "ph", geography_name: "Philippines", geographic_level: "national", parent_id: "", psgc_code: "", latitude: "", longitude: "", region: "", province: "", city_municipality: "", barangay: "", source: hubSource, source_url: hubUrl, as_of_date: asOf, resolution_status: "RESOLVED", notes: "" });
 for (const r of adm1) {
   const label = regionById.get(r.adm1_pcode);
-  hubRows.push({ geography_id: label.region_id, geography_name: r.adm1_name, geographic_level: "regional", parent_id: "ph", psgc_code: "", latitude: round(Number(r.center_lat), 5), longitude: round(Number(r.center_lon), 5), region: r.adm1_name, province: "", city_municipality: "", barangay: "", source: hubSource, source_url: hubUrl, as_of_date: asOf, resolution_status: "RESOLVED", notes: `COD-AB ${r.adm1_pcode}; derived PSGC ${psgc10(r.adm1_pcode)} (unverified)` });
+  hubRows.push({ geography_id: label.region_id, geography_name: r.adm1_name, geographic_level: "regional", parent_id: "ph", psgc_code: psaCode(psaFor(r.adm1_pcode)), latitude: round(Number(r.center_lat), 5), longitude: round(Number(r.center_lon), 5), region: r.adm1_name, province: "", city_municipality: "", barangay: "", source: hubSource, source_url: hubUrl, as_of_date: asOf, resolution_status: "RESOLVED", notes: `COD-AB ${r.adm1_pcode}` });
 }
 const adm1Name = new Map(adm1.map((r) => [r.adm1_pcode, r.adm1_name]));
 for (const m of sorted) {
@@ -669,12 +732,12 @@ for (const m of sorted) {
   const base = { source: hubSource, source_url: hubUrl, as_of_date: asOf, region: regionName, barangay: "" };
   if (m.unitType === "province_remainder") {
     // Full province entity first (aggregation target), then the reporting unit.
-    hubRows.push({ ...base, geography_id: m.entityId, geography_name: m.canonicalName, geographic_level: "provincial", parent_id: regionIdByPcode(m.sourceRegionPcode), psgc_code: "", latitude: "", longitude: "", province: m.canonicalName, city_municipality: "", resolution_status: status, notes: `Full province (aggregate of ${[m.unitId, ...m.carvedOut.map((c) => c.unitId)].join(" + ")}); COD-AB ${m.adm2Pcodes.join("+")}` });
+    hubRows.push({ ...base, geography_id: m.entityId, geography_name: m.canonicalName, geographic_level: "provincial", parent_id: regionIdByPcode(m.sourceRegionPcode), psgc_code: singleCode(m), latitude: "", longitude: "", province: m.canonicalName, city_municipality: "", resolution_status: status, notes: `Full province (aggregate of ${[m.unitId, ...m.carvedOut.map((c) => c.unitId)].join(" + ")}); COD-AB ${m.adm2Pcodes.join("+")}` });
     hubRows.push({ ...base, geography_id: m.unitId, geography_name: m.unitName, geographic_level: "provincial", parent_id: m.entityId, psgc_code: "", latitude: m.repPoint.latitude, longitude: m.repPoint.longitude, province: m.canonicalName, city_municipality: "", resolution_status: status, notes: `REPORTING UNIT, not a full province: excludes separately reported ${m.carvedOut.map((c) => c.unitId).join(", ")}. Source loc "${m.clean}".` });
   } else if (m.kind === "province") {
-    hubRows.push({ ...base, geography_id: m.unitId, geography_name: m.unitName, geographic_level: "provincial", parent_id: regionIdByPcode(m.sourceRegionPcode), psgc_code: "", latitude: m.repPoint.latitude, longitude: m.repPoint.longitude, province: m.canonicalName, city_municipality: "", resolution_status: status, notes: `COD-AB ${m.adm2Pcodes.join("+")}; source loc "${m.clean}"` });
+    hubRows.push({ ...base, geography_id: m.unitId, geography_name: m.unitName, geographic_level: "provincial", parent_id: regionIdByPcode(m.sourceRegionPcode), psgc_code: singleCode(m), latitude: m.repPoint.latitude, longitude: m.repPoint.longitude, province: m.canonicalName, city_municipality: "", resolution_status: status, notes: `COD-AB ${m.adm2Pcodes.join("+")}${m.psa.length > 1 ? `; PSA ${m.psa.map(psaCode).join("+")} (no single current code)` : ""}; source loc "${m.clean}"` });
   } else {
-    hubRows.push({ ...base, geography_id: m.unitId, geography_name: m.unitName, geographic_level: "municipal", parent_id: m.geoProvince?.entityId ?? regionIdByPcode(m.sourceRegionPcode), psgc_code: "", latitude: m.repPoint.latitude, longitude: m.repPoint.longitude, province: m.geoProvince?.canonicalName ?? "", city_municipality: m.unitName, resolution_status: status, notes: `${m.cityClass ?? "municipality"}; COD-AB ${m.record.adm3_pcode}; source loc "${m.clean}"` });
+    hubRows.push({ ...base, geography_id: m.unitId, geography_name: m.unitName, geographic_level: "municipal", parent_id: m.geoProvince?.entityId ?? regionIdByPcode(m.sourceRegionPcode), psgc_code: singleCode(m), latitude: m.repPoint.latitude, longitude: m.repPoint.longitude, province: m.geoProvince?.canonicalName ?? "", city_municipality: m.unitName, resolution_status: status, notes: `${m.cityClass ?? "municipality"}; COD-AB ${m.record.adm3_pcode}; source loc "${m.clean}"` });
   }
 }
 writeCsv(
@@ -700,14 +763,14 @@ const provenanceFor = (upstreamId) => ({
 const entities = [];
 entities.push({ id: "ph", name: "Philippines", level: "national", parentId: null, psgcCode: null, centroid: null, provenance: provenanceFor("PH"), kind: "admin" });
 for (const r of adm1) {
-  entities.push({ id: regionById.get(r.adm1_pcode).region_id, name: r.adm1_name, level: "regional", parentId: "ph", psgcCode: null, centroid: { latitude: round(Number(r.center_lat), 5), longitude: round(Number(r.center_lon), 5) }, provenance: provenanceFor(r.adm1_pcode), kind: "admin", codAbPcodes: [r.adm1_pcode] });
+  entities.push({ id: regionById.get(r.adm1_pcode).region_id, name: r.adm1_name, level: "regional", parentId: "ph", psgcCode: psaCode(psaFor(r.adm1_pcode)) || null, centroid: { latitude: round(Number(r.center_lat), 5), longitude: round(Number(r.center_lon), 5) }, provenance: provenanceFor(r.adm1_pcode), kind: "admin", codAbPcodes: [r.adm1_pcode] });
 }
 for (const m of sorted) {
   const region = regionIdByPcode(m.sourceRegionPcode);
-  const common = { psgcCode: null, provenance: provenanceFor((m.kind === "province" ? m.adm2Pcodes : [m.record.adm3_pcode]).join("+")) };
+  const common = { psgcCode: singleCode(m) || null, psgcCodes: m.psa.map(psaCode), provenance: provenanceFor((m.kind === "province" ? m.adm2Pcodes : [m.record.adm3_pcode]).join("+")) };
   if (m.unitType === "province_remainder") {
     entities.push({ id: m.entityId, name: m.canonicalName, level: "provincial", parentId: region, centroid: m.provinceRepPoint, ...common, kind: "admin", codAbPcodes: m.adm2Pcodes, reportingUnitIds: [m.unitId, ...m.carvedOut.map((c) => c.unitId)].sort() });
-    entities.push({ id: m.unitId, name: m.unitName, level: "provincial", parentId: m.entityId, centroid: m.repPoint, ...common, kind: "reporting_unit", partialOf: m.entityId, excludes: m.carvedOut.map((c) => c.unitId).sort(), analysisRegionId: region, sourceLoc: m.clean });
+    entities.push({ id: m.unitId, name: m.unitName, level: "provincial", parentId: m.entityId, centroid: m.repPoint, ...common, psgcCode: null, psgcCodes: undefined, kind: "reporting_unit", partialOf: m.entityId, excludes: m.carvedOut.map((c) => c.unitId).sort(), analysisRegionId: region, sourceLoc: m.clean });
   } else {
     const parent = m.kind === "province" ? region : (m.geoProvince?.entityId ?? region);
     entities.push({
@@ -731,6 +794,7 @@ const fixture = {
     pipelineVersion: PIPELINE_VERSION,
     boundaryReference: { source: "OCHA COD-AB PHL", version: CODAB_VERSION, validOn: CODAB_VALID_ON, license: "CC BY-IGO", sha256: prov("cod-ab-phl").sha256 },
     observationSource: { source: "HDX — Philippine Dengue Cases and Deaths (Cirrolytix; DOH-EB data)", license: "CC BY", sha256: prov("hdx-doh-epi-dengue").sha256 },
+    codeReference: { source: PSGC_EDITION, publisher: "Philippine Statistics Authority", sha256: prov("psa-psgc").sha256 },
     crosswalk: "data/reference/geo/hdx_dengue_crosswalk.csv",
     report: "docs/geo/geo-data-quality-report.md",
     schemaProposal: "docs/geo/geographic-schema-proposal.md",
@@ -740,7 +804,7 @@ const fixture = {
       "Sum only upward (unit → province → region → national) and only for weeks where every member unit reported.",
       "Never split a unit, province, region or national value into smaller areas.",
       "centroid is a representative point inside the unit for markers, not a boundary and not a location of cases.",
-      "psgcCode stays null until codes are verified against a PSA PSGC publication; codAbPcodes carry the COD-AB codes.",
+      `psgcCode is the current ${PSGC_EDITION} code, checked per unit; psgcCodes lists every code. psgcCode is null for province remainders (not a PSGC area) and for 2016–2021 provinces that are now several PSGC areas. Current codes follow today's regions (Negros Island Region, Sulu in Region IX): aggregate by analysisRegionId, never by code prefix.`,
     ],
     counts: {
       reportingUnits: resolved.length,
@@ -843,7 +907,14 @@ ${sources.map((s) => `| ${s.title} | \`${manifest[s.id].file}\` | \`${manifest[s
 - Source identifiers: **${matches.length}**. Matched: **${resolved.length}**. **Unmatched: ${unmatched.length}.** **Ambiguous: ${ambiguous.length}.**
 - How each was matched: ${Object.entries(decisionCounts).map(([k, v]) => `${k} ${v}`).join(", ")}.
 - Reporting-unit types: ${Object.entries(typeCounts).map(([k, v]) => `${k} ${v}`).join(", ")}.
-- City classes (curated in \`city_classes.csv\`): HUC ${cityUnits.filter((m) => m.cityClass === "HUC").length}, ICC ${cityUnits.filter((m) => m.cityClass === "ICC").length}, CC ${cityUnits.filter((m) => m.cityClass === "CC").length}. These numbers match PSA's count of 33 HUCs and 5 ICCs, which means **every** HUC and ICC is reported separately, plus 6 component cities, 5 of them in Caraga. The class list was curated by hand because psa.gov.ph returns HTTP 403 to scripted downloads. A team member should check it against the current PSGC publication.
+- City classes (curated in \`city_classes.csv\`): HUC ${cityUnits.filter((m) => m.cityClass === "HUC").length}, ICC ${cityUnits.filter((m) => m.cityClass === "ICC").length}, CC ${cityUnits.filter((m) => m.cityClass === "CC").length}. Every class agrees with ${PSGC_EDITION} (checked on every build). PSA lists ${psaSeparateCities.filter((r) => r["City Class"] === "HUC").length} HUCs and ${psaSeparateCities.filter((r) => r["City Class"] === "ICC").length} ICCs, and **every** one is a separate reporting unit. The other 6 cities are component cities, 5 of them in Caraga.
+
+### 3.2a PSA PSGC codes
+
+${psaSummary()}
+- **exact**: the code derived from the COD-AB pcode is a current PSGC code. **correspondence**: COD-AB keeps an older code (HUCs, NCR, Negros and Siquijor before the 2024 Negros Island Region); it equals PSA's 9-digit Correspondence Code. **name**: the area moved region and got a new code (Sulu, now Region IX; the Special Geographic Area, now in BARMM).
+- Units whose current PSA region differs from the source-period region: ${sorted.filter((m) => m.psa.some((x) => psaCode(x).slice(0, 2) !== m.sourceRegionPcode.slice(2))).map((m) => `${m.unitId} (${m.psa.map(psaCode).join("+")})`).join(", ")}. Analysis keeps the source-period region (\`analysis_region_id\`). Never aggregate by code prefix.
+- No single current code (blank \`psgc_code\` in the hub rows): every province remainder, plus ${sorted.filter((m) => m.psa.length > 1).map((m) => m.unitId).join(", ")}.
 
 ### 3.3 Duplicate and one-to-many mappings
 
@@ -947,6 +1018,13 @@ Reading:
 `;
   fs.mkdirSync(p("docs/geo"), { recursive: true });
   fs.writeFileSync(p("docs/geo/geo-data-quality-report.md"), md);
+}
+
+function psaSummary() {
+  const all = resolved.flatMap((m) => m.psa);
+  const by = {};
+  for (const x of all) by[x.via] = (by[x.via] ?? 0) + 1;
+  return `- All ${all.length} COD-AB codes used by the ${resolved.length} units resolve to a ${PSGC_EDITION} code: ${Object.entries(by).map(([k, v]) => `${k} ${v}`).join(", ")}.`;
 }
 
 function finish() {

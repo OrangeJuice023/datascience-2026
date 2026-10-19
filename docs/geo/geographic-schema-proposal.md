@@ -33,8 +33,10 @@ export interface GeographicEntity {
   reportingUnitIds?: string[];
   /** Region used for aggregation in the source period (may differ from parentId chain; e.g. Cotabato City). */
   analysisRegionId?: string;
-  /** OCHA COD-AB P-codes (one or more, for boundary-vintage unions). psgcCode stays null until PSA-verified. */
+  /** OCHA COD-AB P-codes (one or more, for boundary-vintage unions). */
   codAbPcodes?: string[];
+  /** admin only: current PSA PSGC codes, parallel to codAbPcodes. psgcCode is set only when there is exactly one. */
+  psgcCodes?: string[];
   /** HUC | ICC | CC for cities. */
   cityClass?: "HUC" | "ICC" | "CC";
 }
@@ -70,7 +72,7 @@ Rules to enforce in the data layer:
 `data/reference/geo/geography_hub_rows.csv` uses the hub GEOGRAPHY tab's exact columns. It has 166
 rows: national, 17 regions, 126 reporting units and the 22 full provinces that have remainders.
 `resolution_status` is `RESOLVED` or `RESOLVED_WITH_CAVEAT` (vintage or region-change cases).
-`psgc_code` is left blank until PSA verification.
+`psgc_code` is the current PSA PSGC code (3Q 2026). It is blank for province remainders and for Cotabato and Maguindanao, whose 2016–2021 extent is now two PSGC areas each.
 
 ## Questions for Software Eng
 
