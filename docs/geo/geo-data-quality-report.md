@@ -12,6 +12,7 @@
 | Philippines - Subnational Administrative Boundaries (COD-AB v03), tabular attributes | `data/raw/cod_ab_phl/phl_admin_boundaries.xlsx` | `3fbaa5f9aab05896…` | CC BY-IGO | 2026-10-17 |
 | Philippines - Subnational Population Statistics, admin 1, 2022 projection | `data/raw/cod_ps_phl/phl_admpop_adm1_2022.csv` | `40ac6ef448da1231…` | CC BY-IGO | 2026-10-17 |
 | Philippines - Subnational Population Statistics, admin 2, 2022 projection (v2) | `data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv` | `dd06a7d799371900…` | CC BY-IGO | 2026-10-17 |
+| Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile | `data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx` | `8aad47f84e4f6317…` | PSA terms of use; kept in git-ignored data/raw, not redistributed | 2026-10-19 |
 
 - Boundary reference: OCHA COD-AB PHL **v03**, valid on 2025-02-13: 17 regions, 88 admin-2, 1,642 admin-3 units.
 - The dengue file is published on HDX by **Cirrolytix** (a third party), attributed to DOH-EB. Its description calls the counts "confirmed", then says they include suspect, probable and confirmed cases. Treat the case definition as **total reported (suspect + probable + confirmed)**.
@@ -56,7 +57,14 @@
 - Source identifiers: **126**. Matched: **126**. **Unmatched: 0.** **Ambiguous: 0.**
 - How each was matched: exact 118, manual_typo 3, normalized 2, manual_vintage 2, manual_name 1.
 - Reporting-unit types: province_full 59, province_remainder 22, city_huc 33, city_cc 6, city_icc 5, municipality 1.
-- City classes (curated in `city_classes.csv`): HUC 33, ICC 5, CC 6. These numbers match PSA's count of 33 HUCs and 5 ICCs, which means **every** HUC and ICC is reported separately, plus 6 component cities, 5 of them in Caraga. The class list was curated by hand because psa.gov.ph returns HTTP 403 to scripted downloads. A team member should check it against the current PSGC publication.
+- City classes (curated in `city_classes.csv`): HUC 33, ICC 5, CC 6. Every class agrees with PSA PSGC 3Q 2026 (checked on every build). PSA lists 33 HUCs and 5 ICCs, and **every** one is a separate reporting unit. The other 6 cities are component cities, 5 of them in Caraga.
+
+### 3.2a PSA PSGC codes
+
+- All 128 COD-AB codes used by the 126 units resolve to a PSA PSGC 3Q 2026 code: exact 88, correspondence 38, name 2.
+- **exact**: the code derived from the COD-AB pcode is a current PSGC code. **correspondence**: COD-AB keeps an older code (HUCs, NCR, Negros and Siquijor before the 2024 Negros Island Region); it equals PSA's 9-digit Correspondence Code. **name**: the area moved region and got a new code (Sulu, now Region IX; the Special Geographic Area, now in BARMM).
+- Units whose current PSA region differs from the source-period region: bacolod-city (1830200000), cotabato (1204700000+1999900000), cotabato-city (1908703000), negros-occidental-remainder (1804500000), negros-oriental (1804600000), siquijor (1806100000), sulu (0906600000). Analysis keeps the source-period region (`analysis_region_id`). Never aggregate by code prefix.
+- No single current code (blank `psgc_code` in the hub rows): every province remainder, plus cotabato, maguindanao-remainder.
 
 ### 3.3 Duplicate and one-to-many mappings
 

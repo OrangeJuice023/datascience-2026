@@ -30,7 +30,15 @@ for (const src of sources) {
   const dest = path.join(rawDir, src.dir, src.file);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   let retrievedAt = previous[src.id]?.retrievedAt ?? null;
-  if (force || !fs.existsSync(dest)) {
+  if (src.manual) {
+    // No scripted download (e.g. psa.gov.ph answers 403); the file is placed by hand.
+    if (!fs.existsSync(dest)) {
+      console.error(`✗ ${src.id}: download it by hand from ${src.datasetUrl} to ${path.relative(root, dest)}`);
+      failed = true;
+      continue;
+    }
+    retrievedAt ??= fs.statSync(dest).mtime.toISOString();
+  } else if (force || !fs.existsSync(dest)) {
     process.stdout.write(`Downloading ${src.id} … `);
     const res = await fetch(src.url, { redirect: "follow" });
     if (!res.ok) {

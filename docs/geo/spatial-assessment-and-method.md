@@ -54,7 +54,7 @@ reporting units**:
 | **OCHA COD-AB PHL v03** (NAMRIA/PSA, via HDX) | Admin 0–4 (17 / 88 / 1,642 / 11,920+) | **CC BY-IGO**: redistribution allowed with attribution | **Canonical reference** for P-codes, names, areas and centres. The geometry (shapefile/GeoJSON) is 0.9–1 GB, so it should be simplified before use in the frontend. |
 | **geoBoundaries gbOpen PHL** (derived from COD-AB) | ADM1–3, simplified GeoJSON | **CC BY 3.0 IGO** (ADM2 verified via API) | **Recommended geometry** for frontend polygons and adjacency: pre-simplified and openly licensed. ADM2 has 87 units. The boundary year is 2020, which predates the Maguindanao split. |
 | **GADM 4.1** | Admin 0–3 | **Non-commercial only; redistribution not allowed without permission** | **Do not use.** We cannot commit or serve it. `source-catalog.ts` lists it as planned; it should be replaced by COD-AB / geoBoundaries. `planning/SIGMA_RESEARCH.md` also says GADM only has province level for the Philippines, which is wrong; it goes down to admin 3. |
-| **PSA PSGC** | Region → barangay codes and city classes | Official government publication | The authoritative code list. psa.gov.ph returns **HTTP 403 to scripts**, so a team member must download the quarterly file by hand into `data/raw/psgc/`. Until then `psgcCode` stays `null`; derived 10-digit codes are in the crosswalk but marked unverified. |
+| **PSA PSGC** | Region → barangay codes and city classes | Official government publication | The authoritative code list. psa.gov.ph returns **HTTP 403 to scripts**, so the quarterly file is downloaded by hand into `data/raw/psa_psgc/` (3Q 2026 in use, hash-pinned). All 126 units resolve to a PSA code and every city class agrees; see report §3.2a. Current codes follow today's regions, so aggregation uses `analysisRegionId`, not the code prefix. |
 | **COD-PS PHL** (UNFPA/PSA) | Admin 0–2 population, 2022–2025 | CC BY-IGO | **Not usable as a denominator here** (see §2). It needs an old→v03 P-code crosswalk and city-level rows. PSA 2015 POPCEN / 2020 CPH city tables would be the right source. |
 | **OpenStreetMap** | Basemap (already connected) | ODbL | Basemap only. No analytical joins. |
 
@@ -186,7 +186,7 @@ The map today draws **points**, not polygons. That fits this data.
 | --- | --- |
 | Software Eng | Review the [schema proposal](geographic-schema-proposal.md) (`kind`, `partialOf`, `excludes`, `analysisRegionId`, `codAbPcodes`). Add swap-row and missing-week handling to the ingestion and cleaning procedure. Replace `gadm` in `source-catalog.ts` with `cod-ab-phl` and `geoboundaries`. Load `data/reference/geo/geography_hub_rows.csv` into the hub GEOGRAPHY tab. |
 | Physics 1 (temporal / EARS) | The date-semantics question (A5). The rule that suspect swap rows are missing (A4). The EARS baseline rule for missing weeks. The Davao del Sur + Davao Occidental merge for 2016. |
-| Whole team | Download the latest PSA PSGC file by hand so codes and city classes can be verified. Ask DOH-EB or Cirrolytix whether province rows exclude HUCs/ICCs (A1) and whether counts are by residence (A2). |
+| Whole team | ~~Download the PSA PSGC file~~ (done 2026-10-19, 3Q 2026). Ask DOH-EB or Cirrolytix whether province rows exclude HUCs/ICCs (A1) and whether counts are by residence (A2). |
 | Public Administration | The display rules in §5 and the wording of the map caveat. |
 
 ### 6.1 Status against the merged EARS pipeline (PR #2, 2026-10-18)

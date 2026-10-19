@@ -1,5 +1,5 @@
 {
-  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Licences were checked on the HDX dataset pages on 2026-10-17.",
+  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Entries with `manual: true` cannot be scripted (psa.gov.ph returns HTTP 403); download them by hand from `datasetUrl` into the same place. Licences were checked on the HDX dataset pages on 2026-10-17.",
   "sources": [
     {
       "id": "hdx-doh-epi-dengue",
@@ -48,6 +48,19 @@
       "license": "CC BY-IGO",
       "upstreamModified": "2022-07-28",
       "sha256": "dd06a7d799371900580c93e2ee8d1d63e6c0ee4ca2899d4e8a8a68a33a3eb063"
+    },
+    {
+      "id": "psa-psgc",
+      "title": "Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile",
+      "publisher": "Philippine Statistics Authority (PSA)",
+      "datasetUrl": "https://psa.gov.ph/classification/psgc/",
+      "url": null,
+      "manual": true,
+      "dir": "psa_psgc",
+      "file": "PSGC-3Q-2026-Publication-Datafile.xlsx",
+      "license": "PSA terms of use; kept in git-ignored data/raw, not redistributed",
+      "upstreamModified": "2026-09-30",
+      "sha256": "8aad47f84e4f6317dc4222b9fe35d36b5d71f2b74ad8f0c7622289c131dc9a59"
     }
   ]
 }

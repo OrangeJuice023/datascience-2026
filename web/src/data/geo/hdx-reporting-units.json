@@ -15,6 +15,11 @@
    "license": "CC BY",
    "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c"
   },
+  "codeReference": {
+   "source": "PSA PSGC 3Q 2026",
+   "publisher": "Philippine Statistics Authority",
+   "sha256": "8aad47f84e4f6317dc4222b9fe35d36b5d71f2b74ad8f0c7622289c131dc9a59"
+  },
   "crosswalk": "data/reference/geo/hdx_dengue_crosswalk.csv",
   "report": "docs/geo/geo-data-quality-report.md",
   "schemaProposal": "docs/geo/geographic-schema-proposal.md",
@@ -24,7 +29,7 @@
    "Sum only upward (unit → province → region → national) and only for weeks where every member unit reported.",
    "Never split a unit, province, region or national value into smaller areas.",
    "centroid is a representative point inside the unit for markers, not a boundary and not a location of cases.",
-   "psgcCode stays null until codes are verified against a PSA PSGC publication; codAbPcodes carry the COD-AB codes."
+   "psgcCode is the current PSA PSGC 3Q 2026 code, checked per unit; psgcCodes lists every code. psgcCode is null for province remainders (not a PSGC area) and for 2016–2021 provinces that are now several PSGC areas. Current codes follow today's regions (Negros Island Region, Sulu in Region IX): aggregate by analysisRegionId, never by code prefix."
   ],
   "counts": {
    "reportingUnits": 126,
@@ -65,7 +70,7 @@
    "name": "Region I (Ilocos Region)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0100000000",
    "centroid": {
     "latitude": 17.13415,
     "longitude": 120.61362
@@ -94,7 +99,7 @@
    "name": "Region II (Cagayan Valley)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0200000000",
    "centroid": {
     "latitude": 17.19156,
     "longitude": 121.9863
@@ -123,7 +128,7 @@
    "name": "Region III (Central Luzon)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0300000000",
    "centroid": {
     "latitude": 15.45841,
     "longitude": 120.69724
@@ -152,7 +157,7 @@
    "name": "Region IV-A (Calabarzon)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0400000000",
    "centroid": {
     "latitude": 14.18943,
     "longitude": 120.88922
@@ -181,7 +186,7 @@
    "name": "Region V (Bicol Region)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0500000000",
    "centroid": {
     "latitude": 13.44103,
     "longitude": 123.43978
@@ -210,7 +215,7 @@
    "name": "Region VI (Western Visayas)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0600000000",
    "centroid": {
     "latitude": 11.17273,
     "longitude": 122.55604
@@ -239,7 +244,7 @@
    "name": "Region VII (Central Visayas)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0700000000",
    "centroid": {
     "latitude": 9.88064,
     "longitude": 124.20675
@@ -268,7 +273,7 @@
    "name": "Region VIII (Eastern Visayas)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0800000000",
    "centroid": {
     "latitude": 11.79778,
     "longitude": 125.16927
@@ -297,7 +302,7 @@
    "name": "Region IX (Zamboanga Peninsula)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "0900000000",
    "centroid": {
     "latitude": 7.8079,
     "longitude": 122.78502
@@ -326,7 +331,7 @@
    "name": "Region X (Northern Mindanao)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1000000000",
    "centroid": {
     "latitude": 8.24726,
     "longitude": 124.7935
@@ -355,7 +360,7 @@
    "name": "Region XI (Davao Region)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1100000000",
    "centroid": {
     "latitude": 6.77904,
     "longitude": 125.21978
@@ -384,7 +389,7 @@
    "name": "Region XII (Soccsksargen)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1200000000",
    "centroid": {
     "latitude": 6.60347,
     "longitude": 124.42029
@@ -413,7 +418,7 @@
    "name": "National Capital Region (NCR)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1300000000",
    "centroid": {
     "latitude": 14.56855,
     "longitude": 121.03981
@@ -442,7 +447,7 @@
    "name": "Cordillera Administrative Region (CAR)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1400000000",
    "centroid": {
     "latitude": 17.36676,
     "longitude": 121.06353
@@ -471,7 +476,7 @@
    "name": "Region XIII (Caraga)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1600000000",
    "centroid": {
     "latitude": 8.87179,
     "longitude": 125.78563
@@ -500,7 +505,7 @@
    "name": "Mimaropa Region",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1700000000",
    "centroid": {
     "latitude": 12.86905,
     "longitude": 121.1342
@@ -529,7 +534,7 @@
    "name": "Bangsamoro Autonomous Region In Muslim Mindanao (BARMM)",
    "level": "regional",
    "parentId": "ph",
-   "psgcCode": null,
+   "psgcCode": "1900000000",
    "centroid": {
     "latitude": 5.97358,
     "longitude": 121.1563
@@ -562,7 +567,10 @@
     "latitude": 17.58041,
     "longitude": 120.86195
    },
-   "psgcCode": null,
+   "psgcCode": "1400100000",
+   "psgcCodes": [
+    "1400100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -596,7 +604,10 @@
     "latitude": 9.03118,
     "longitude": 125.54167
    },
-   "psgcCode": null,
+   "psgcCode": "1600200000",
+   "psgcCodes": [
+    "1600200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -663,7 +674,10 @@
     "latitude": 8.42361,
     "longitude": 125.79655
    },
-   "psgcCode": null,
+   "psgcCode": "1600300000",
+   "psgcCodes": [
+    "1600300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -728,7 +742,10 @@
     "latitude": 11.60431,
     "longitude": 122.22946
    },
-   "psgcCode": null,
+   "psgcCode": "0600400000",
+   "psgcCodes": [
+    "0600400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -762,7 +779,10 @@
     "latitude": 13.17242,
     "longitude": 123.57068
    },
-   "psgcCode": null,
+   "psgcCode": "0500500000",
+   "psgcCodes": [
+    "0500500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -796,7 +816,10 @@
     "latitude": 15.16543,
     "longitude": 120.54364
    },
-   "psgcCode": null,
+   "psgcCode": "0330100000",
+   "psgcCodes": [
+    "0330100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -831,7 +854,10 @@
     "latitude": 11.15848,
     "longitude": 122.09499
    },
-   "psgcCode": null,
+   "psgcCode": "0600600000",
+   "psgcCodes": [
+    "0600600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -865,7 +891,10 @@
     "latitude": 18.02852,
     "longitude": 121.13878
    },
-   "psgcCode": null,
+   "psgcCode": "1408100000",
+   "psgcCodes": [
+    "1408100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -899,7 +928,10 @@
     "latitude": 15.98708,
     "longitude": 121.60005
    },
-   "psgcCode": null,
+   "psgcCode": "0307700000",
+   "psgcCodes": [
+    "0307700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -933,7 +965,10 @@
     "latitude": 10.65016,
     "longitude": 123.01311
    },
-   "psgcCode": null,
+   "psgcCode": "1830200000",
+   "psgcCodes": [
+    "1830200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -968,7 +1003,10 @@
     "latitude": 16.39618,
     "longitude": 120.602
    },
-   "psgcCode": null,
+   "psgcCode": "1430300000",
+   "psgcCodes": [
+    "1430300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1003,7 +1041,10 @@
     "latitude": 6.5366,
     "longitude": 122.0985
    },
-   "psgcCode": null,
+   "psgcCode": "1900700000",
+   "psgcCodes": [
+    "1900700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1037,7 +1078,10 @@
     "latitude": 14.65353,
     "longitude": 120.48757
    },
-   "psgcCode": null,
+   "psgcCode": "0300800000",
+   "psgcCodes": [
+    "0300800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1071,7 +1115,10 @@
     "latitude": 20.45428,
     "longitude": 121.99179
    },
-   "psgcCode": null,
+   "psgcCode": "0200900000",
+   "psgcCodes": [
+    "0200900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1105,7 +1152,10 @@
     "latitude": 13.90401,
     "longitude": 121.05418
    },
-   "psgcCode": null,
+   "psgcCode": "0401000000",
+   "psgcCodes": [
+    "0401000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1139,7 +1189,10 @@
     "latitude": 8.74795,
     "longitude": 125.7772
    },
-   "psgcCode": null,
+   "psgcCode": "1600301000",
+   "psgcCodes": [
+    "1600301000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1174,7 +1227,10 @@
     "latitude": 16.58896,
     "longitude": 120.70217
    },
-   "psgcCode": null,
+   "psgcCode": "1401100000",
+   "psgcCodes": [
+    "1401100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1239,7 +1295,10 @@
     "latitude": 11.56725,
     "longitude": 124.44293
    },
-   "psgcCode": null,
+   "psgcCode": "0807800000",
+   "psgcCodes": [
+    "0807800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1273,7 +1332,10 @@
     "latitude": 8.18026,
     "longitude": 126.29809
    },
-   "psgcCode": null,
+   "psgcCode": "1606803000",
+   "psgcCodes": [
+    "1606803000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1308,7 +1370,10 @@
     "latitude": 9.82804,
     "longitude": 124.2144
    },
-   "psgcCode": null,
+   "psgcCode": "0701200000",
+   "psgcCodes": [
+    "0701200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1342,7 +1407,10 @@
     "latitude": 8.08105,
     "longitude": 124.94635
    },
-   "psgcCode": null,
+   "psgcCode": "1001300000",
+   "psgcCodes": [
+    "1001300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1376,7 +1444,10 @@
     "latitude": 14.92384,
     "longitude": 121.00977
    },
-   "psgcCode": null,
+   "psgcCode": "0301400000",
+   "psgcCodes": [
+    "0301400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1410,7 +1481,10 @@
     "latitude": 8.90447,
     "longitude": 125.55322
    },
-   "psgcCode": null,
+   "psgcCode": "1630400000",
+   "psgcCodes": [
+    "1630400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1445,7 +1519,10 @@
     "latitude": 9.1441,
     "longitude": 125.6625
    },
-   "psgcCode": null,
+   "psgcCode": "1600203000",
+   "psgcCodes": [
+    "1600203000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1480,7 +1557,10 @@
     "latitude": 18.03876,
     "longitude": 121.77941
    },
-   "psgcCode": null,
+   "psgcCode": "0201500000",
+   "psgcCodes": [
+    "0201500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1514,7 +1594,10 @@
     "latitude": 8.34071,
     "longitude": 124.53117
    },
-   "psgcCode": null,
+   "psgcCode": "1030500000",
+   "psgcCodes": [
+    "1030500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1549,7 +1632,10 @@
     "latitude": 14.74666,
     "longitude": 121.04341
    },
-   "psgcCode": null,
+   "psgcCode": "1380100000",
+   "psgcCodes": [
+    "1380100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1584,7 +1670,10 @@
     "latitude": 14.11764,
     "longitude": 122.69766
    },
-   "psgcCode": null,
+   "psgcCode": "0501600000",
+   "psgcCodes": [
+    "0501600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1618,7 +1707,10 @@
     "latitude": 13.71586,
     "longitude": 123.23859
    },
-   "psgcCode": null,
+   "psgcCode": "0501700000",
+   "psgcCodes": [
+    "0501700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1683,7 +1775,10 @@
     "latitude": 9.16548,
     "longitude": 124.67904
    },
-   "psgcCode": null,
+   "psgcCode": "1001800000",
+   "psgcCodes": [
+    "1001800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1717,7 +1812,10 @@
     "latitude": 11.37924,
     "longitude": 122.69941
    },
-   "psgcCode": null,
+   "psgcCode": "0601900000",
+   "psgcCodes": [
+    "0601900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1751,7 +1849,10 @@
     "latitude": 13.70709,
     "longitude": 124.24993
    },
-   "psgcCode": null,
+   "psgcCode": "0502000000",
+   "psgcCodes": [
+    "0502000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1785,7 +1886,10 @@
     "latitude": 14.26973,
     "longitude": 120.86571
    },
-   "psgcCode": null,
+   "psgcCode": "0402100000",
+   "psgcCodes": [
+    "0402100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1819,7 +1923,10 @@
     "latitude": 10.3763,
     "longitude": 123.84773
    },
-   "psgcCode": null,
+   "psgcCode": "0730600000",
+   "psgcCodes": [
+    "0730600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1854,7 +1961,10 @@
     "latitude": 10.36391,
     "longitude": 123.69229
    },
-   "psgcCode": null,
+   "psgcCode": "0702200000",
+   "psgcCodes": [
+    "0702200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1924,6 +2034,10 @@
     "longitude": 124.84296
    },
    "psgcCode": null,
+   "psgcCodes": [
+    "1204700000",
+    "1999900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1958,7 +2072,10 @@
     "latitude": 7.20383,
     "longitude": 124.21185
    },
-   "psgcCode": null,
+   "psgcCode": "1908703000",
+   "psgcCodes": [
+    "1908703000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -1993,7 +2110,10 @@
     "latitude": 16.06101,
     "longitude": 120.33837
    },
-   "psgcCode": null,
+   "psgcCode": "0105518000",
+   "psgcCodes": [
+    "0105518000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2028,7 +2148,10 @@
     "latitude": 7.26312,
     "longitude": 125.40337
    },
-   "psgcCode": null,
+   "psgcCode": "1130700000",
+   "psgcCodes": [
+    "1130700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2063,7 +2186,10 @@
     "latitude": 7.54258,
     "longitude": 126.0247
    },
-   "psgcCode": null,
+   "psgcCode": "1108200000",
+   "psgcCodes": [
+    "1108200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2097,7 +2223,10 @@
     "latitude": 7.51276,
     "longitude": 125.63414
    },
-   "psgcCode": null,
+   "psgcCode": "1102300000",
+   "psgcCodes": [
+    "1102300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2131,7 +2260,10 @@
     "latitude": 6.882,
     "longitude": 125.40631
    },
-   "psgcCode": null,
+   "psgcCode": "1102400000",
+   "psgcCodes": [
+    "1102400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2196,7 +2328,10 @@
     "latitude": 6.16528,
     "longitude": 125.64987
    },
-   "psgcCode": null,
+   "psgcCode": "1108600000",
+   "psgcCodes": [
+    "1108600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2230,7 +2365,10 @@
     "latitude": 7.18406,
     "longitude": 126.41359
    },
-   "psgcCode": null,
+   "psgcCode": "1102500000",
+   "psgcCodes": [
+    "1102500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2264,7 +2402,10 @@
     "latitude": 10.19914,
     "longitude": 125.59846
    },
-   "psgcCode": null,
+   "psgcCode": "1608500000",
+   "psgcCodes": [
+    "1608500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2298,7 +2439,10 @@
     "latitude": 11.59069,
     "longitude": 125.31026
    },
-   "psgcCode": null,
+   "psgcCode": "0802600000",
+   "psgcCodes": [
+    "0802600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2332,7 +2476,10 @@
     "latitude": 6.1261,
     "longitude": 125.11538
    },
-   "psgcCode": null,
+   "psgcCode": "1230800000",
+   "psgcCodes": [
+    "1230800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2367,7 +2514,10 @@
     "latitude": 10.58934,
     "longitude": 122.67063
    },
-   "psgcCode": null,
+   "psgcCode": "0607900000",
+   "psgcCodes": [
+    "0607900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2401,7 +2551,10 @@
     "latitude": 16.86783,
     "longitude": 121.2582
    },
-   "psgcCode": null,
+   "psgcCode": "1402700000",
+   "psgcCodes": [
+    "1402700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2435,7 +2588,10 @@
     "latitude": 8.23026,
     "longitude": 124.40893
    },
-   "psgcCode": null,
+   "psgcCode": "1030900000",
+   "psgcCodes": [
+    "1030900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2470,7 +2626,10 @@
     "latitude": 18.18825,
     "longitude": 120.73182
    },
-   "psgcCode": null,
+   "psgcCode": "0102800000",
+   "psgcCodes": [
+    "0102800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2504,7 +2663,10 @@
     "latitude": 17.25653,
     "longitude": 120.53121
    },
-   "psgcCode": null,
+   "psgcCode": "0102900000",
+   "psgcCodes": [
+    "0102900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2538,7 +2700,10 @@
     "latitude": 10.73122,
     "longitude": 122.55745
    },
-   "psgcCode": null,
+   "psgcCode": "0631000000",
+   "psgcCodes": [
+    "0631000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2573,7 +2738,10 @@
     "latitude": 11.00402,
     "longitude": 122.6489
    },
-   "psgcCode": null,
+   "psgcCode": "0603000000",
+   "psgcCodes": [
+    "0603000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2638,7 +2806,10 @@
     "latitude": 6.65294,
     "longitude": 121.97728
    },
-   "psgcCode": null,
+   "psgcCode": "0990101000",
+   "psgcCodes": [
+    "0990101000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2673,7 +2844,10 @@
     "latitude": 16.96411,
     "longitude": 121.89119
    },
-   "psgcCode": null,
+   "psgcCode": "0203100000",
+   "psgcCodes": [
+    "0203100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2738,7 +2912,10 @@
     "latitude": 17.41044,
     "longitude": 121.40183
    },
-   "psgcCode": null,
+   "psgcCode": "1403200000",
+   "psgcCodes": [
+    "1403200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2772,7 +2949,10 @@
     "latitude": 16.60792,
     "longitude": 120.4668
    },
-   "psgcCode": null,
+   "psgcCode": "0103300000",
+   "psgcCodes": [
+    "0103300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2806,7 +2986,10 @@
     "latitude": 14.2303,
     "longitude": 121.3653
    },
-   "psgcCode": null,
+   "psgcCode": "0403400000",
+   "psgcCodes": [
+    "0403400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2840,7 +3023,10 @@
     "latitude": 8.03353,
     "longitude": 124.0596
    },
-   "psgcCode": null,
+   "psgcCode": "1003500000",
+   "psgcCodes": [
+    "1003500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2905,7 +3091,10 @@
     "latitude": 7.79583,
     "longitude": 124.37054
    },
-   "psgcCode": null,
+   "psgcCode": "1903600000",
+   "psgcCodes": [
+    "1903600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2939,7 +3128,10 @@
     "latitude": 10.29406,
     "longitude": 123.97393
    },
-   "psgcCode": null,
+   "psgcCode": "0731100000",
+   "psgcCodes": [
+    "0731100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -2974,7 +3166,10 @@
     "latitude": 14.43107,
     "longitude": 121.00363
    },
-   "psgcCode": null,
+   "psgcCode": "1380200000",
+   "psgcCodes": [
+    "1380200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3009,7 +3204,10 @@
     "latitude": 10.92403,
     "longitude": 124.71151
    },
-   "psgcCode": null,
+   "psgcCode": "0803700000",
+   "psgcCodes": [
+    "0803700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3076,7 +3274,10 @@
     "latitude": 13.94008,
     "longitude": 121.61138
    },
-   "psgcCode": null,
+   "psgcCode": "0431200000",
+   "psgcCodes": [
+    "0431200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3112,6 +3313,10 @@
     "longitude": 124.38623
    },
    "psgcCode": null,
+   "psgcCodes": [
+    "1908700000",
+    "1908800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3177,7 +3382,10 @@
     "latitude": 14.55447,
     "longitude": 121.03282
    },
-   "psgcCode": null,
+   "psgcCode": "1380300000",
+   "psgcCodes": [
+    "1380300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3212,7 +3420,10 @@
     "latitude": 14.67382,
     "longitude": 120.96024
    },
-   "psgcCode": null,
+   "psgcCode": "1380400000",
+   "psgcCodes": [
+    "1380400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3247,7 +3458,10 @@
     "latitude": 14.58446,
     "longitude": 121.03988
    },
-   "psgcCode": null,
+   "psgcCode": "1380500000",
+   "psgcCodes": [
+    "1380500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3282,7 +3496,10 @@
     "latitude": 10.35061,
     "longitude": 123.94146
    },
-   "psgcCode": null,
+   "psgcCode": "0731300000",
+   "psgcCodes": [
+    "0731300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3317,7 +3534,10 @@
     "latitude": 14.59932,
     "longitude": 120.98494
    },
-   "psgcCode": null,
+   "psgcCode": "1380600000",
+   "psgcCodes": [
+    "1380600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3352,7 +3572,10 @@
     "latitude": 14.64674,
     "longitude": 121.1083
    },
-   "psgcCode": null,
+   "psgcCode": "1380700000",
+   "psgcCodes": [
+    "1380700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3387,7 +3610,10 @@
     "latitude": 13.38741,
     "longitude": 121.91584
    },
-   "psgcCode": null,
+   "psgcCode": "1704000000",
+   "psgcCodes": [
+    "1704000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3421,7 +3647,10 @@
     "latitude": 12.35056,
     "longitude": 123.56978
    },
-   "psgcCode": null,
+   "psgcCode": "0504100000",
+   "psgcCodes": [
+    "0504100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3455,7 +3684,10 @@
     "latitude": 8.32837,
     "longitude": 123.75991
    },
-   "psgcCode": null,
+   "psgcCode": "1004200000",
+   "psgcCodes": [
+    "1004200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3489,7 +3721,10 @@
     "latitude": 8.6524,
     "longitude": 124.77036
    },
-   "psgcCode": null,
+   "psgcCode": "1004300000",
+   "psgcCodes": [
+    "1004300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3554,7 +3789,10 @@
     "latitude": 17.09406,
     "longitude": 121.13477
    },
-   "psgcCode": null,
+   "psgcCode": "1404400000",
+   "psgcCodes": [
+    "1404400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3588,7 +3826,10 @@
     "latitude": 14.40972,
     "longitude": 121.03301
    },
-   "psgcCode": null,
+   "psgcCode": "1380800000",
+   "psgcCodes": [
+    "1380800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3623,7 +3864,10 @@
     "latitude": 13.63835,
     "longitude": 123.2403
    },
-   "psgcCode": null,
+   "psgcCode": "0501724000",
+   "psgcCodes": [
+    "0501724000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3658,7 +3902,10 @@
     "latitude": 14.67342,
     "longitude": 120.93644
    },
-   "psgcCode": null,
+   "psgcCode": "1380900000",
+   "psgcCodes": [
+    "1380900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3693,7 +3940,10 @@
     "latitude": 10.26878,
     "longitude": 122.91928
    },
-   "psgcCode": null,
+   "psgcCode": "1804500000",
+   "psgcCodes": [
+    "1804500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3758,7 +4008,10 @@
     "latitude": 9.6145,
     "longitude": 123.07076
    },
-   "psgcCode": null,
+   "psgcCode": "1804600000",
+   "psgcCodes": [
+    "1804600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3792,7 +4045,10 @@
     "latitude": 12.39833,
     "longitude": 124.7834
    },
-   "psgcCode": null,
+   "psgcCode": "0804800000",
+   "psgcCodes": [
+    "0804800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3826,7 +4082,10 @@
     "latitude": 15.58807,
     "longitude": 121.05704
    },
-   "psgcCode": null,
+   "psgcCode": "0304900000",
+   "psgcCodes": [
+    "0304900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3860,7 +4119,10 @@
     "latitude": 16.3886,
     "longitude": 121.08588
    },
-   "psgcCode": null,
+   "psgcCode": "0205000000",
+   "psgcCodes": [
+    "0205000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3894,7 +4156,10 @@
     "latitude": 12.92596,
     "longitude": 121.01145
    },
-   "psgcCode": null,
+   "psgcCode": "1705100000",
+   "psgcCodes": [
+    "1705100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3928,7 +4193,10 @@
     "latitude": 14.82526,
     "longitude": 120.30782
    },
-   "psgcCode": null,
+   "psgcCode": "0331400000",
+   "psgcCodes": [
+    "0331400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3963,7 +4231,10 @@
     "latitude": 12.93234,
     "longitude": 121.37094
    },
-   "psgcCode": null,
+   "psgcCode": "1705200000",
+   "psgcCodes": [
+    "1705200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -3997,7 +4268,10 @@
     "latitude": 11.04832,
     "longitude": 124.6636
    },
-   "psgcCode": null,
+   "psgcCode": "0803738000",
+   "psgcCodes": [
+    "0803738000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4032,7 +4306,10 @@
     "latitude": 9.89985,
     "longitude": 118.67667
    },
-   "psgcCode": null,
+   "psgcCode": "1705300000",
+   "psgcCodes": [
+    "1705300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4097,7 +4374,10 @@
     "latitude": 15.0699,
     "longitude": 120.65415
    },
-   "psgcCode": null,
+   "psgcCode": "0305400000",
+   "psgcCodes": [
+    "0305400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4162,7 +4442,10 @@
     "latitude": 16.00833,
     "longitude": 120.28775
    },
-   "psgcCode": null,
+   "psgcCode": "0105500000",
+   "psgcCodes": [
+    "0105500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4227,7 +4510,10 @@
     "latitude": 14.48437,
     "longitude": 121.01646
    },
-   "psgcCode": null,
+   "psgcCode": "1381000000",
+   "psgcCodes": [
+    "1381000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4262,7 +4548,10 @@
     "latitude": 14.53289,
     "longitude": 121.00565
    },
-   "psgcCode": null,
+   "psgcCode": "1381100000",
+   "psgcCodes": [
+    "1381100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4297,7 +4586,10 @@
     "latitude": 14.57809,
     "longitude": 121.08157
    },
-   "psgcCode": null,
+   "psgcCode": "1381200000",
+   "psgcCodes": [
+    "1381200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4332,7 +4624,10 @@
     "latitude": 14.54533,
     "longitude": 121.07075
    },
-   "psgcCode": null,
+   "psgcCode": "1381701000",
+   "psgcCodes": [
+    "1381701000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4366,7 +4661,10 @@
     "latitude": 9.89985,
     "longitude": 118.67667
    },
-   "psgcCode": null,
+   "psgcCode": "1731500000",
+   "psgcCodes": [
+    "1731500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4401,7 +4699,10 @@
     "latitude": 14.6837,
     "longitude": 121.06467
    },
-   "psgcCode": null,
+   "psgcCode": "1381300000",
+   "psgcCodes": [
+    "1381300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4436,7 +4737,10 @@
     "latitude": 14.17937,
     "longitude": 121.95886
    },
-   "psgcCode": null,
+   "psgcCode": "0405600000",
+   "psgcCodes": [
+    "0405600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4501,7 +4805,10 @@
     "latitude": 16.38094,
     "longitude": 121.57803
    },
-   "psgcCode": null,
+   "psgcCode": "0205700000",
+   "psgcCodes": [
+    "0205700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4535,7 +4842,10 @@
     "latitude": 14.65972,
     "longitude": 121.24875
    },
-   "psgcCode": null,
+   "psgcCode": "0405800000",
+   "psgcCodes": [
+    "0405800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4569,7 +4879,10 @@
     "latitude": 12.55171,
     "longitude": 122.28546
    },
-   "psgcCode": null,
+   "psgcCode": "1705900000",
+   "psgcCodes": [
+    "1705900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4603,7 +4916,10 @@
     "latitude": 11.85399,
     "longitude": 124.97303
    },
-   "psgcCode": null,
+   "psgcCode": "0806000000",
+   "psgcCodes": [
+    "0806000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4637,7 +4953,10 @@
     "latitude": 14.60231,
     "longitude": 121.03932
    },
-   "psgcCode": null,
+   "psgcCode": "1381400000",
+   "psgcCodes": [
+    "1381400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4672,7 +4991,10 @@
     "latitude": 16.66582,
     "longitude": 121.55789
    },
-   "psgcCode": null,
+   "psgcCode": "0203135000",
+   "psgcCodes": [
+    "0203135000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4707,7 +5029,10 @@
     "latitude": 5.94543,
     "longitude": 124.97125
    },
-   "psgcCode": null,
+   "psgcCode": "1208000000",
+   "psgcCodes": [
+    "1208000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4741,7 +5066,10 @@
     "latitude": 9.14576,
     "longitude": 123.61187
    },
-   "psgcCode": null,
+   "psgcCode": "1806100000",
+   "psgcCodes": [
+    "1806100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4775,7 +5103,10 @@
     "latitude": 12.81503,
     "longitude": 123.88579
    },
-   "psgcCode": null,
+   "psgcCode": "0506200000",
+   "psgcCodes": [
+    "0506200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4809,7 +5140,10 @@
     "latitude": 6.34941,
     "longitude": 124.96918
    },
-   "psgcCode": null,
+   "psgcCode": "1206300000",
+   "psgcCodes": [
+    "1206300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4874,7 +5208,10 @@
     "latitude": 10.33208,
     "longitude": 125.06586
    },
-   "psgcCode": null,
+   "psgcCode": "0806400000",
+   "psgcCodes": [
+    "0806400000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4908,7 +5245,10 @@
     "latitude": 6.49747,
     "longitude": 124.49796
    },
-   "psgcCode": null,
+   "psgcCode": "1206500000",
+   "psgcCodes": [
+    "1206500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4942,7 +5282,10 @@
     "latitude": 5.9481,
     "longitude": 121.09572
    },
-   "psgcCode": null,
+   "psgcCode": "0906600000",
+   "psgcCodes": [
+    "0906600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -4976,7 +5319,10 @@
     "latitude": 9.74499,
     "longitude": 125.50182
    },
-   "psgcCode": null,
+   "psgcCode": "1606724000",
+   "psgcCodes": [
+    "1606724000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5011,7 +5357,10 @@
     "latitude": 9.56316,
     "longitude": 125.62156
    },
-   "psgcCode": null,
+   "psgcCode": "1606700000",
+   "psgcCodes": [
+    "1606700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5076,7 +5425,10 @@
     "latitude": 8.74667,
     "longitude": 126.19861
    },
-   "psgcCode": null,
+   "psgcCode": "1606800000",
+   "psgcCodes": [
+    "1606800000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5143,7 +5495,10 @@
     "latitude": 11.26999,
     "longitude": 124.93989
    },
-   "psgcCode": null,
+   "psgcCode": "0831600000",
+   "psgcCodes": [
+    "0831600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5178,7 +5533,10 @@
     "latitude": 14.5071,
     "longitude": 121.06106
    },
-   "psgcCode": null,
+   "psgcCode": "1381500000",
+   "psgcCodes": [
+    "1381500000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5213,7 +5571,10 @@
     "latitude": 9.06828,
     "longitude": 126.13644
    },
-   "psgcCode": null,
+   "psgcCode": "1606819000",
+   "psgcCodes": [
+    "1606819000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5248,7 +5609,10 @@
     "latitude": 15.58155,
     "longitude": 120.45023
    },
-   "psgcCode": null,
+   "psgcCode": "0306900000",
+   "psgcCodes": [
+    "0306900000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5282,7 +5646,10 @@
     "latitude": 5.16144,
     "longitude": 119.99313
    },
-   "psgcCode": null,
+   "psgcCode": "1907000000",
+   "psgcCodes": [
+    "1907000000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5316,7 +5683,10 @@
     "latitude": 14.71345,
     "longitude": 120.96968
    },
-   "psgcCode": null,
+   "psgcCode": "1381600000",
+   "psgcCodes": [
+    "1381600000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5351,7 +5721,10 @@
     "latitude": 15.23182,
     "longitude": 120.21588
    },
-   "psgcCode": null,
+   "psgcCode": "0307100000",
+   "psgcCodes": [
+    "0307100000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5416,7 +5789,10 @@
     "latitude": 7.201,
     "longitude": 122.18289
    },
-   "psgcCode": null,
+   "psgcCode": "0931700000",
+   "psgcCodes": [
+    "0931700000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5451,7 +5827,10 @@
     "latitude": 8.0598,
     "longitude": 122.80949
    },
-   "psgcCode": null,
+   "psgcCode": "0907200000",
+   "psgcCodes": [
+    "0907200000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5485,7 +5864,10 @@
     "latitude": 7.76699,
     "longitude": 123.15286
    },
-   "psgcCode": null,
+   "psgcCode": "0907300000",
+   "psgcCodes": [
+    "0907300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
@@ -5550,7 +5932,10 @@
     "latitude": 7.73354,
     "longitude": 122.87689
    },
-   "psgcCode": null,
+   "psgcCode": "0908300000",
+   "psgcCodes": [
+    "0908300000"
+   ],
    "provenance": {
     "sourceIds": [
      "cod-ab-phl",
