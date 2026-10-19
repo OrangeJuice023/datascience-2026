@@ -1,0 +1,8 @@
+source_loc,target_kind,target_name,extra_adm2_pcodes,decision,reason
+SISQUIJOR,province,SIQUIJOR,,manual_typo,Misspelling of Siquijor (Region VII). No other candidate.
+NUEVA VISCAYA,province,NUEVA VIZCAYA,,manual_typo,Misspelling of Nueva Vizcaya (Region II).
+BASILIG CITY,city,BISLIG CITY,,manual_typo,"Misspelling of Bislig City, Surigao del Sur (Caraga). No city named Basilig exists; Basilan is a province in another region."
+TACLOBAN,city,TACLOBAN CITY,,manual_name,Source omits 'City'. Tacloban is an HUC; no province of that name exists.
+NORTH COTABATO,province,COTABATO,PH19099,manual_vintage,"COD-AB names the province 'Cotabato (North Cotabato)'. Before the 2024 creation of the BARMM Special Geographic Area (PH19099), its 63 barangays belonged to North Cotabato municipalities (Carmen, Kabacan, Midsayap, Pigkawayan, Pikit). The 2016-2021 reporting unit is therefore taken as PH12047 + PH19099. ASSUMPTION: reporting for those barangays stayed with North Cotabato LGUs through 2021; unverified."
+MAGUINDANAO,province,MAGUINDANAO DEL NORTE,PH19088,manual_vintage,"Maguindanao was split into Maguindanao del Norte (PH19087) and del Sur (PH19088) in 2022 (RA 11550, ratified 2022-09-17). The 2016-2021 province is the union of both, excluding Cotabato City, which is reported separately."
+PATEROS,municipality,PATEROS,,exact,Pateros is a municipality in NCR (Fourth District) and is reported as its own unit.

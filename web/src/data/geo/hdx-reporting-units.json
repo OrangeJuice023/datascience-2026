@@ -1,0 +1,7155 @@
+{
+ "meta": {
+  "description": "Canonical geography for the HDX DOH-Epi dengue dataset (2016–2021): 126 reporting units, the 81 provinces and 17 regions they aggregate to, and representative points. Geography only — no case values.",
+  "generator": "scripts/geo/build-geo.mjs",
+  "pipelineVersion": "geo-1.0.0",
+  "boundaryReference": {
+   "source": "OCHA COD-AB PHL",
+   "version": "v03",
+   "validOn": "2025-02-13",
+   "license": "CC BY-IGO",
+   "sha256": "3fbaa5f9aab058960ec48e8c8c490b8c7e1257db911913f967d70a7497091f49"
+  },
+  "observationSource": {
+   "source": "HDX — Philippine Dengue Cases and Deaths (Cirrolytix; DOH-EB data)",
+   "license": "CC BY",
+   "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c"
+  },
+  "crosswalk": "data/reference/geo/hdx_dengue_crosswalk.csv",
+  "report": "docs/geo/geo-data-quality-report.md",
+  "schemaProposal": "docs/geo/geographic-schema-proposal.md",
+  "rules": [
+   "Reporting units are mutually exclusive and together cover all 1,642 COD-AB admin-3 units (checked).",
+   "A province_remainder unit is NOT the whole province; aggregate with its excluded cities to obtain the province.",
+   "Sum only upward (unit → province → region → national) and only for weeks where every member unit reported.",
+   "Never split a unit, province, region or national value into smaller areas.",
+   "centroid is a representative point inside the unit for markers, not a boundary and not a location of cases.",
+   "psgcCode stays null until codes are verified against a PSA PSGC publication; codAbPcodes carry the COD-AB codes."
+  ],
+  "counts": {
+   "reportingUnits": 126,
+   "provinceFull": 59,
+   "provinceRemainder": 22,
+   "cities": 44,
+   "municipalities": 1,
+   "provinces": 81,
+   "regions": 17
+  }
+ },
+ "entities": [
+  {
+   "id": "ph",
+   "name": "Philippines",
+   "level": "national",
+   "parentId": null,
+   "psgcCode": null,
+   "centroid": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin"
+  },
+  {
+   "id": "ilocos",
+   "name": "Region I (Ilocos Region)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 17.13415,
+    "longitude": 120.61362
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH01"
+   ]
+  },
+  {
+   "id": "cagayan-valley",
+   "name": "Region II (Cagayan Valley)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 17.19156,
+    "longitude": 121.9863
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02"
+   ]
+  },
+  {
+   "id": "central-luzon",
+   "name": "Region III (Central Luzon)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 15.45841,
+    "longitude": 120.69724
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03"
+   ]
+  },
+  {
+   "id": "calabarzon",
+   "name": "Region IV-A (Calabarzon)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 14.18943,
+    "longitude": 120.88922
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04"
+   ]
+  },
+  {
+   "id": "bicol",
+   "name": "Region V (Bicol Region)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 13.44103,
+    "longitude": 123.43978
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05"
+   ]
+  },
+  {
+   "id": "western-visayas",
+   "name": "Region VI (Western Visayas)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 11.17273,
+    "longitude": 122.55604
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06"
+   ]
+  },
+  {
+   "id": "central-visayas",
+   "name": "Region VII (Central Visayas)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 9.88064,
+    "longitude": 124.20675
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH07"
+   ]
+  },
+  {
+   "id": "eastern-visayas",
+   "name": "Region VIII (Eastern Visayas)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 11.79778,
+    "longitude": 125.16927
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08"
+   ]
+  },
+  {
+   "id": "zamboanga-peninsula",
+   "name": "Region IX (Zamboanga Peninsula)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 7.8079,
+    "longitude": 122.78502
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH09",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH09"
+   ]
+  },
+  {
+   "id": "northern-mindanao",
+   "name": "Region X (Northern Mindanao)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 8.24726,
+    "longitude": 124.7935
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10"
+   ]
+  },
+  {
+   "id": "davao-region",
+   "name": "Region XI (Davao Region)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 6.77904,
+    "longitude": 125.21978
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11"
+   ]
+  },
+  {
+   "id": "soccsksargen",
+   "name": "Region XII (Soccsksargen)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 6.60347,
+    "longitude": 124.42029
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH12"
+   ]
+  },
+  {
+   "id": "ncr",
+   "name": "National Capital Region (NCR)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 14.56855,
+    "longitude": 121.03981
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH13",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH13"
+   ]
+  },
+  {
+   "id": "car",
+   "name": "Cordillera Administrative Region (CAR)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 17.36676,
+    "longitude": 121.06353
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14"
+   ]
+  },
+  {
+   "id": "caraga",
+   "name": "Region XIII (Caraga)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 8.87179,
+    "longitude": 125.78563
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16"
+   ]
+  },
+  {
+   "id": "mimaropa",
+   "name": "Mimaropa Region",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 12.86905,
+    "longitude": 121.1342
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17"
+   ]
+  },
+  {
+   "id": "barmm",
+   "name": "Bangsamoro Autonomous Region In Muslim Mindanao (BARMM)",
+   "level": "regional",
+   "parentId": "ph",
+   "psgcCode": null,
+   "centroid": {
+    "latitude": 5.97358,
+    "longitude": 121.1563
+   },
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19"
+   ]
+  },
+  {
+   "id": "abra",
+   "name": "Abra",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 17.58041,
+    "longitude": 120.86195
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14001",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14001"
+   ],
+   "reportingUnitIds": [
+    "abra"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "ABRA"
+  },
+  {
+   "id": "agusan-del-norte",
+   "name": "Agusan del Norte",
+   "level": "provincial",
+   "parentId": "caraga",
+   "centroid": {
+    "latitude": 9.03118,
+    "longitude": 125.54167
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16002",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16002"
+   ],
+   "reportingUnitIds": [
+    "agusan-del-norte-remainder",
+    "butuan-city",
+    "cabadbaran-city"
+   ]
+  },
+  {
+   "id": "agusan-del-norte-remainder",
+   "name": "Agusan del Norte (excl. Butuan City, City of Cabadbaran)",
+   "level": "provincial",
+   "parentId": "agusan-del-norte",
+   "centroid": {
+    "latitude": 9.03118,
+    "longitude": 125.54167
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16002",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "agusan-del-norte",
+   "excludes": [
+    "butuan-city",
+    "cabadbaran-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "AGUSAN DEL NORTE"
+  },
+  {
+   "id": "agusan-del-sur",
+   "name": "Agusan del Sur",
+   "level": "provincial",
+   "parentId": "caraga",
+   "centroid": {
+    "latitude": 8.42361,
+    "longitude": 125.79655
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16003",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16003"
+   ],
+   "reportingUnitIds": [
+    "agusan-del-sur-remainder",
+    "bayugan-city"
+   ]
+  },
+  {
+   "id": "agusan-del-sur-remainder",
+   "name": "Agusan del Sur (excl. City of Bayugan)",
+   "level": "provincial",
+   "parentId": "agusan-del-sur",
+   "centroid": {
+    "latitude": 8.42361,
+    "longitude": 125.79655
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16003",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "agusan-del-sur",
+   "excludes": [
+    "bayugan-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "AGUSAN DEL SUR"
+  },
+  {
+   "id": "aklan",
+   "name": "Aklan",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 11.60431,
+    "longitude": 122.22946
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06004",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06004"
+   ],
+   "reportingUnitIds": [
+    "aklan"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "AKLAN"
+  },
+  {
+   "id": "albay",
+   "name": "Albay",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 13.17242,
+    "longitude": 123.57068
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05005",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05005"
+   ],
+   "reportingUnitIds": [
+    "albay"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "ALBAY"
+  },
+  {
+   "id": "angeles-city",
+   "name": "Angeles City",
+   "level": "municipal",
+   "parentId": "pampanga",
+   "centroid": {
+    "latitude": 15.16543,
+    "longitude": 120.54364
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0305401",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0305401"
+   ],
+   "reportingUnitIds": [
+    "angeles-city"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "ANGELES CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "antique",
+   "name": "Antique",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 11.15848,
+    "longitude": 122.09499
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06006",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06006"
+   ],
+   "reportingUnitIds": [
+    "antique"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "ANTIQUE"
+  },
+  {
+   "id": "apayao",
+   "name": "Apayao",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 18.02852,
+    "longitude": 121.13878
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14081",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14081"
+   ],
+   "reportingUnitIds": [
+    "apayao"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "APAYAO"
+  },
+  {
+   "id": "aurora",
+   "name": "Aurora",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 15.98708,
+    "longitude": 121.60005
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03077",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03077"
+   ],
+   "reportingUnitIds": [
+    "aurora"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "AURORA"
+  },
+  {
+   "id": "bacolod-city",
+   "name": "Bacolod City",
+   "level": "municipal",
+   "parentId": "negros-occidental",
+   "centroid": {
+    "latitude": 10.65016,
+    "longitude": 123.01311
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0604501",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0604501"
+   ],
+   "reportingUnitIds": [
+    "bacolod-city"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "BACOLOD CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "baguio-city",
+   "name": "Baguio City",
+   "level": "municipal",
+   "parentId": "benguet",
+   "centroid": {
+    "latitude": 16.39618,
+    "longitude": 120.602
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1401102",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1401102"
+   ],
+   "reportingUnitIds": [
+    "baguio-city"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "BAGUIO CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "basilan",
+   "name": "Basilan",
+   "level": "provincial",
+   "parentId": "barmm",
+   "centroid": {
+    "latitude": 6.5366,
+    "longitude": 122.0985
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19007",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19007"
+   ],
+   "reportingUnitIds": [
+    "basilan"
+   ],
+   "analysisRegionId": "barmm",
+   "sourceLoc": "BASILAN"
+  },
+  {
+   "id": "bataan",
+   "name": "Bataan",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 14.65353,
+    "longitude": 120.48757
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03008",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03008"
+   ],
+   "reportingUnitIds": [
+    "bataan"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "BATAAN"
+  },
+  {
+   "id": "batanes",
+   "name": "Batanes",
+   "level": "provincial",
+   "parentId": "cagayan-valley",
+   "centroid": {
+    "latitude": 20.45428,
+    "longitude": 121.99179
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02009",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02009"
+   ],
+   "reportingUnitIds": [
+    "batanes"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "BATANES"
+  },
+  {
+   "id": "batangas",
+   "name": "Batangas",
+   "level": "provincial",
+   "parentId": "calabarzon",
+   "centroid": {
+    "latitude": 13.90401,
+    "longitude": 121.05418
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04010",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04010"
+   ],
+   "reportingUnitIds": [
+    "batangas"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "BATANGAS"
+  },
+  {
+   "id": "bayugan-city",
+   "name": "City of Bayugan",
+   "level": "municipal",
+   "parentId": "agusan-del-sur",
+   "centroid": {
+    "latitude": 8.74795,
+    "longitude": 125.7772
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1600301",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1600301"
+   ],
+   "reportingUnitIds": [
+    "bayugan-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "BAYUGAN CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "benguet",
+   "name": "Benguet",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 16.58896,
+    "longitude": 120.70217
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14011",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14011"
+   ],
+   "reportingUnitIds": [
+    "baguio-city",
+    "benguet-remainder"
+   ]
+  },
+  {
+   "id": "benguet-remainder",
+   "name": "Benguet (excl. Baguio City)",
+   "level": "provincial",
+   "parentId": "benguet",
+   "centroid": {
+    "latitude": 16.58896,
+    "longitude": 120.70217
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14011",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "benguet",
+   "excludes": [
+    "baguio-city"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "BENGUET"
+  },
+  {
+   "id": "biliran",
+   "name": "Biliran",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 11.56725,
+    "longitude": 124.44293
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08078",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08078"
+   ],
+   "reportingUnitIds": [
+    "biliran"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "BILIRAN"
+  },
+  {
+   "id": "bislig-city",
+   "name": "City of Bislig",
+   "level": "municipal",
+   "parentId": "surigao-del-sur",
+   "centroid": {
+    "latitude": 8.18026,
+    "longitude": 126.29809
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1606803",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1606803"
+   ],
+   "reportingUnitIds": [
+    "bislig-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "BASILIG CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "bohol",
+   "name": "Bohol",
+   "level": "provincial",
+   "parentId": "central-visayas",
+   "centroid": {
+    "latitude": 9.82804,
+    "longitude": 124.2144
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07012",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH07012"
+   ],
+   "reportingUnitIds": [
+    "bohol"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "BOHOL"
+  },
+  {
+   "id": "bukidnon",
+   "name": "Bukidnon",
+   "level": "provincial",
+   "parentId": "northern-mindanao",
+   "centroid": {
+    "latitude": 8.08105,
+    "longitude": 124.94635
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10013",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10013"
+   ],
+   "reportingUnitIds": [
+    "bukidnon"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "BUKIDNON"
+  },
+  {
+   "id": "bulacan",
+   "name": "Bulacan",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 14.92384,
+    "longitude": 121.00977
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03014",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03014"
+   ],
+   "reportingUnitIds": [
+    "bulacan"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "BULACAN"
+  },
+  {
+   "id": "butuan-city",
+   "name": "Butuan City",
+   "level": "municipal",
+   "parentId": "agusan-del-norte",
+   "centroid": {
+    "latitude": 8.90447,
+    "longitude": 125.55322
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1600202",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1600202"
+   ],
+   "reportingUnitIds": [
+    "butuan-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "BUTUAN CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "cabadbaran-city",
+   "name": "City of Cabadbaran",
+   "level": "municipal",
+   "parentId": "agusan-del-norte",
+   "centroid": {
+    "latitude": 9.1441,
+    "longitude": 125.6625
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1600203",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1600203"
+   ],
+   "reportingUnitIds": [
+    "cabadbaran-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "CABADBARAN CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "cagayan",
+   "name": "Cagayan",
+   "level": "provincial",
+   "parentId": "cagayan-valley",
+   "centroid": {
+    "latitude": 18.03876,
+    "longitude": 121.77941
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02015",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02015"
+   ],
+   "reportingUnitIds": [
+    "cagayan"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "CAGAYAN"
+  },
+  {
+   "id": "cagayan-de-oro-city",
+   "name": "Cagayan de Oro City",
+   "level": "municipal",
+   "parentId": "misamis-oriental",
+   "centroid": {
+    "latitude": 8.34071,
+    "longitude": 124.53117
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1004305",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1004305"
+   ],
+   "reportingUnitIds": [
+    "cagayan-de-oro-city"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "CAGAYAN DE ORO CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "caloocan-city",
+   "name": "Caloocan City",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.74666,
+    "longitude": 121.04341
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307501",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307501"
+   ],
+   "reportingUnitIds": [
+    "caloocan-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "CALOOCAN CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "camarines-norte",
+   "name": "Camarines Norte",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 14.11764,
+    "longitude": 122.69766
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05016",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05016"
+   ],
+   "reportingUnitIds": [
+    "camarines-norte"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "CAMARINES NORTE"
+  },
+  {
+   "id": "camarines-sur",
+   "name": "Camarines Sur",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 13.71586,
+    "longitude": 123.23859
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05017",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05017"
+   ],
+   "reportingUnitIds": [
+    "camarines-sur-remainder",
+    "naga-city"
+   ]
+  },
+  {
+   "id": "camarines-sur-remainder",
+   "name": "Camarines Sur (excl. Naga City)",
+   "level": "provincial",
+   "parentId": "camarines-sur",
+   "centroid": {
+    "latitude": 13.71586,
+    "longitude": 123.23859
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05017",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "camarines-sur",
+   "excludes": [
+    "naga-city"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "CAMARINES SUR"
+  },
+  {
+   "id": "camiguin",
+   "name": "Camiguin",
+   "level": "provincial",
+   "parentId": "northern-mindanao",
+   "centroid": {
+    "latitude": 9.16548,
+    "longitude": 124.67904
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10018",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10018"
+   ],
+   "reportingUnitIds": [
+    "camiguin"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "CAMIGUIN"
+  },
+  {
+   "id": "capiz",
+   "name": "Capiz",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 11.37924,
+    "longitude": 122.69941
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06019",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06019"
+   ],
+   "reportingUnitIds": [
+    "capiz"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "CAPIZ"
+  },
+  {
+   "id": "catanduanes",
+   "name": "Catanduanes",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 13.70709,
+    "longitude": 124.24993
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05020",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05020"
+   ],
+   "reportingUnitIds": [
+    "catanduanes"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "CATANDUANES"
+  },
+  {
+   "id": "cavite",
+   "name": "Cavite",
+   "level": "provincial",
+   "parentId": "calabarzon",
+   "centroid": {
+    "latitude": 14.26973,
+    "longitude": 120.86571
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04021",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04021"
+   ],
+   "reportingUnitIds": [
+    "cavite"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "CAVITE"
+  },
+  {
+   "id": "cebu-city",
+   "name": "Cebu City",
+   "level": "municipal",
+   "parentId": "cebu",
+   "centroid": {
+    "latitude": 10.3763,
+    "longitude": 123.84773
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0702217",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0702217"
+   ],
+   "reportingUnitIds": [
+    "cebu-city"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "CEBU CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "cebu",
+   "name": "Cebu",
+   "level": "provincial",
+   "parentId": "central-visayas",
+   "centroid": {
+    "latitude": 10.36391,
+    "longitude": 123.69229
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07022",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH07022"
+   ],
+   "reportingUnitIds": [
+    "cebu-city",
+    "cebu-remainder",
+    "lapu-lapu-city",
+    "mandaue-city"
+   ]
+  },
+  {
+   "id": "cebu-remainder",
+   "name": "Cebu (excl. Cebu City, Lapu-Lapu City, Mandaue City)",
+   "level": "provincial",
+   "parentId": "cebu",
+   "centroid": {
+    "latitude": 10.36391,
+    "longitude": 123.69229
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07022",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "cebu",
+   "excludes": [
+    "cebu-city",
+    "lapu-lapu-city",
+    "mandaue-city"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "CEBU"
+  },
+  {
+   "id": "cotabato",
+   "name": "Cotabato (North Cotabato)",
+   "level": "provincial",
+   "parentId": "soccsksargen",
+   "centroid": {
+    "latitude": 7.2277,
+    "longitude": 124.84296
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12047+PH19099",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH12047",
+    "PH19099"
+   ],
+   "reportingUnitIds": [
+    "cotabato"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "NORTH COTABATO"
+  },
+  {
+   "id": "cotabato-city",
+   "name": "Cotabato City",
+   "level": "municipal",
+   "parentId": "maguindanao",
+   "centroid": {
+    "latitude": 7.20383,
+    "longitude": 124.21185
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1908703",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1908703"
+   ],
+   "reportingUnitIds": [
+    "cotabato-city"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "COTABATO CITY",
+   "cityClass": "ICC"
+  },
+  {
+   "id": "dagupan-city",
+   "name": "Dagupan City",
+   "level": "municipal",
+   "parentId": "pangasinan",
+   "centroid": {
+    "latitude": 16.06101,
+    "longitude": 120.33837
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0105518",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0105518"
+   ],
+   "reportingUnitIds": [
+    "dagupan-city"
+   ],
+   "analysisRegionId": "ilocos",
+   "sourceLoc": "DAGUPAN CITY",
+   "cityClass": "ICC"
+  },
+  {
+   "id": "davao-city",
+   "name": "Davao City",
+   "level": "municipal",
+   "parentId": "davao-del-sur",
+   "centroid": {
+    "latitude": 7.26312,
+    "longitude": 125.40337
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1102402",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1102402"
+   ],
+   "reportingUnitIds": [
+    "davao-city"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "davao-de-oro",
+   "name": "Davao de Oro (Compostela Valley)",
+   "level": "provincial",
+   "parentId": "davao-region",
+   "centroid": {
+    "latitude": 7.54258,
+    "longitude": 126.0247
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11082",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11082"
+   ],
+   "reportingUnitIds": [
+    "davao-de-oro"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO DE ORO"
+  },
+  {
+   "id": "davao-del-norte",
+   "name": "Davao del Norte",
+   "level": "provincial",
+   "parentId": "davao-region",
+   "centroid": {
+    "latitude": 7.51276,
+    "longitude": 125.63414
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11023",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11023"
+   ],
+   "reportingUnitIds": [
+    "davao-del-norte"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO DEL NORTE"
+  },
+  {
+   "id": "davao-del-sur",
+   "name": "Davao del Sur",
+   "level": "provincial",
+   "parentId": "davao-region",
+   "centroid": {
+    "latitude": 6.882,
+    "longitude": 125.40631
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11024",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11024"
+   ],
+   "reportingUnitIds": [
+    "davao-city",
+    "davao-del-sur-remainder"
+   ]
+  },
+  {
+   "id": "davao-del-sur-remainder",
+   "name": "Davao del Sur (excl. Davao City)",
+   "level": "provincial",
+   "parentId": "davao-del-sur",
+   "centroid": {
+    "latitude": 6.69745,
+    "longitude": 125.31079
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11024",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "davao-del-sur",
+   "excludes": [
+    "davao-city"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO DEL SUR"
+  },
+  {
+   "id": "davao-occidental",
+   "name": "Davao Occidental",
+   "level": "provincial",
+   "parentId": "davao-region",
+   "centroid": {
+    "latitude": 6.16528,
+    "longitude": 125.64987
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11086",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11086"
+   ],
+   "reportingUnitIds": [
+    "davao-occidental"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO OCCIDENTAL"
+  },
+  {
+   "id": "davao-oriental",
+   "name": "Davao Oriental",
+   "level": "provincial",
+   "parentId": "davao-region",
+   "centroid": {
+    "latitude": 7.18406,
+    "longitude": 126.41359
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH11025",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH11025"
+   ],
+   "reportingUnitIds": [
+    "davao-oriental"
+   ],
+   "analysisRegionId": "davao-region",
+   "sourceLoc": "DAVAO ORIENTAL"
+  },
+  {
+   "id": "dinagat-islands",
+   "name": "Dinagat Islands",
+   "level": "provincial",
+   "parentId": "caraga",
+   "centroid": {
+    "latitude": 10.19914,
+    "longitude": 125.59846
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16085",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16085"
+   ],
+   "reportingUnitIds": [
+    "dinagat-islands"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "DINAGAT ISLANDS"
+  },
+  {
+   "id": "eastern-samar",
+   "name": "Eastern Samar",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 11.59069,
+    "longitude": 125.31026
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08026",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08026"
+   ],
+   "reportingUnitIds": [
+    "eastern-samar"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "EASTERN SAMAR"
+  },
+  {
+   "id": "general-santos-city",
+   "name": "General Santos City",
+   "level": "municipal",
+   "parentId": "south-cotabato",
+   "centroid": {
+    "latitude": 6.1261,
+    "longitude": 125.11538
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1206303",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1206303"
+   ],
+   "reportingUnitIds": [
+    "general-santos-city"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "GENERAL SANTOS CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "guimaras",
+   "name": "Guimaras",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 10.58934,
+    "longitude": 122.67063
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06079",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06079"
+   ],
+   "reportingUnitIds": [
+    "guimaras"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "GUIMARAS"
+  },
+  {
+   "id": "ifugao",
+   "name": "Ifugao",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 16.86783,
+    "longitude": 121.2582
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14027",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14027"
+   ],
+   "reportingUnitIds": [
+    "ifugao"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "IFUGAO"
+  },
+  {
+   "id": "iligan-city",
+   "name": "Iligan City",
+   "level": "municipal",
+   "parentId": "lanao-del-norte",
+   "centroid": {
+    "latitude": 8.23026,
+    "longitude": 124.40893
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1003504",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1003504"
+   ],
+   "reportingUnitIds": [
+    "iligan-city"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "ILIGAN CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "ilocos-norte",
+   "name": "Ilocos Norte",
+   "level": "provincial",
+   "parentId": "ilocos",
+   "centroid": {
+    "latitude": 18.18825,
+    "longitude": 120.73182
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01028",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH01028"
+   ],
+   "reportingUnitIds": [
+    "ilocos-norte"
+   ],
+   "analysisRegionId": "ilocos",
+   "sourceLoc": "ILOCOS NORTE"
+  },
+  {
+   "id": "ilocos-sur",
+   "name": "Ilocos Sur",
+   "level": "provincial",
+   "parentId": "ilocos",
+   "centroid": {
+    "latitude": 17.25653,
+    "longitude": 120.53121
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01029",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH01029"
+   ],
+   "reportingUnitIds": [
+    "ilocos-sur"
+   ],
+   "analysisRegionId": "ilocos",
+   "sourceLoc": "ILOCOS SUR"
+  },
+  {
+   "id": "iloilo-city",
+   "name": "Iloilo City",
+   "level": "municipal",
+   "parentId": "iloilo",
+   "centroid": {
+    "latitude": 10.73122,
+    "longitude": 122.55745
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0603022",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0603022"
+   ],
+   "reportingUnitIds": [
+    "iloilo-city"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "ILOILO CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "iloilo",
+   "name": "Iloilo",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 11.00402,
+    "longitude": 122.6489
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06030",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06030"
+   ],
+   "reportingUnitIds": [
+    "iloilo-city",
+    "iloilo-remainder"
+   ]
+  },
+  {
+   "id": "iloilo-remainder",
+   "name": "Iloilo (excl. Iloilo City)",
+   "level": "provincial",
+   "parentId": "iloilo",
+   "centroid": {
+    "latitude": 11.05262,
+    "longitude": 122.59027
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06030",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "iloilo",
+   "excludes": [
+    "iloilo-city"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "ILOILO"
+  },
+  {
+   "id": "isabela-city",
+   "name": "City of Isabela",
+   "level": "municipal",
+   "parentId": "zamboanga-peninsula",
+   "centroid": {
+    "latitude": 6.65294,
+    "longitude": 121.97728
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0909701",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0909701"
+   ],
+   "reportingUnitIds": [
+    "isabela-city"
+   ],
+   "analysisRegionId": "zamboanga-peninsula",
+   "sourceLoc": "ISABELA CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "isabela",
+   "name": "Isabela",
+   "level": "provincial",
+   "parentId": "cagayan-valley",
+   "centroid": {
+    "latitude": 16.96411,
+    "longitude": 121.89119
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02031",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02031"
+   ],
+   "reportingUnitIds": [
+    "isabela-remainder",
+    "santiago-city"
+   ]
+  },
+  {
+   "id": "isabela-remainder",
+   "name": "Isabela (excl. City of Santiago)",
+   "level": "provincial",
+   "parentId": "isabela",
+   "centroid": {
+    "latitude": 16.96411,
+    "longitude": 121.89119
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02031",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "isabela",
+   "excludes": [
+    "santiago-city"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "ISABELA"
+  },
+  {
+   "id": "kalinga",
+   "name": "Kalinga",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 17.41044,
+    "longitude": 121.40183
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14032",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14032"
+   ],
+   "reportingUnitIds": [
+    "kalinga"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "KALINGA"
+  },
+  {
+   "id": "la-union",
+   "name": "La Union",
+   "level": "provincial",
+   "parentId": "ilocos",
+   "centroid": {
+    "latitude": 16.60792,
+    "longitude": 120.4668
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01033",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH01033"
+   ],
+   "reportingUnitIds": [
+    "la-union"
+   ],
+   "analysisRegionId": "ilocos",
+   "sourceLoc": "LA UNION"
+  },
+  {
+   "id": "laguna",
+   "name": "Laguna",
+   "level": "provincial",
+   "parentId": "calabarzon",
+   "centroid": {
+    "latitude": 14.2303,
+    "longitude": 121.3653
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04034",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04034"
+   ],
+   "reportingUnitIds": [
+    "laguna"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "LAGUNA"
+  },
+  {
+   "id": "lanao-del-norte",
+   "name": "Lanao del Norte",
+   "level": "provincial",
+   "parentId": "northern-mindanao",
+   "centroid": {
+    "latitude": 8.03353,
+    "longitude": 124.0596
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10035",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10035"
+   ],
+   "reportingUnitIds": [
+    "iligan-city",
+    "lanao-del-norte-remainder"
+   ]
+  },
+  {
+   "id": "lanao-del-norte-remainder",
+   "name": "Lanao del Norte (excl. Iligan City)",
+   "level": "provincial",
+   "parentId": "lanao-del-norte",
+   "centroid": {
+    "latitude": 8.00167,
+    "longitude": 123.95114
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10035",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "lanao-del-norte",
+   "excludes": [
+    "iligan-city"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "LANAO DEL NORTE"
+  },
+  {
+   "id": "lanao-del-sur",
+   "name": "Lanao del Sur",
+   "level": "provincial",
+   "parentId": "barmm",
+   "centroid": {
+    "latitude": 7.79583,
+    "longitude": 124.37054
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19036",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19036"
+   ],
+   "reportingUnitIds": [
+    "lanao-del-sur"
+   ],
+   "analysisRegionId": "barmm",
+   "sourceLoc": "LANAO DEL SUR"
+  },
+  {
+   "id": "lapu-lapu-city",
+   "name": "Lapu-Lapu City",
+   "level": "municipal",
+   "parentId": "cebu",
+   "centroid": {
+    "latitude": 10.29406,
+    "longitude": 123.97393
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0702226",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0702226"
+   ],
+   "reportingUnitIds": [
+    "lapu-lapu-city"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "LAPU-LAPU CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "las-pinas-city",
+   "name": "City of Las Piñas",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.43107,
+    "longitude": 121.00363
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307601",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307601"
+   ],
+   "reportingUnitIds": [
+    "las-pinas-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "LAS PINAS CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "leyte",
+   "name": "Leyte",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 10.92403,
+    "longitude": 124.71151
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08037",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08037"
+   ],
+   "reportingUnitIds": [
+    "leyte-remainder",
+    "ormoc-city",
+    "tacloban-city"
+   ]
+  },
+  {
+   "id": "leyte-remainder",
+   "name": "Leyte (excl. Ormoc City, Tacloban City)",
+   "level": "provincial",
+   "parentId": "leyte",
+   "centroid": {
+    "latitude": 10.92403,
+    "longitude": 124.71151
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08037",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "leyte",
+   "excludes": [
+    "ormoc-city",
+    "tacloban-city"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "LEYTE"
+  },
+  {
+   "id": "lucena-city",
+   "name": "Lucena City",
+   "level": "municipal",
+   "parentId": "quezon",
+   "centroid": {
+    "latitude": 13.94008,
+    "longitude": 121.61138
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0405624",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0405624"
+   ],
+   "reportingUnitIds": [
+    "lucena-city"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "LUCENA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "maguindanao",
+   "name": "Maguindanao",
+   "level": "provincial",
+   "parentId": "barmm",
+   "centroid": {
+    "latitude": 7.01611,
+    "longitude": 124.38623
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19087+PH19088",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19087",
+    "PH19088"
+   ],
+   "reportingUnitIds": [
+    "cotabato-city",
+    "maguindanao-remainder"
+   ]
+  },
+  {
+   "id": "maguindanao-remainder",
+   "name": "Maguindanao (excl. Cotabato City)",
+   "level": "provincial",
+   "parentId": "maguindanao",
+   "centroid": {
+    "latitude": 7.01611,
+    "longitude": 124.38623
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19087+PH19088",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "maguindanao",
+   "excludes": [
+    "cotabato-city"
+   ],
+   "analysisRegionId": "barmm",
+   "sourceLoc": "MAGUINDANAO"
+  },
+  {
+   "id": "makati-city",
+   "name": "City of Makati",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.55447,
+    "longitude": 121.03282
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307602",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307602"
+   ],
+   "reportingUnitIds": [
+    "makati-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MAKATI CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "malabon-city",
+   "name": "City of Malabon",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.67382,
+    "longitude": 120.96024
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307502",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307502"
+   ],
+   "reportingUnitIds": [
+    "malabon-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MALABON CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "mandaluyong-city",
+   "name": "City of Mandaluyong",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.58446,
+    "longitude": 121.03988
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307401",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307401"
+   ],
+   "reportingUnitIds": [
+    "mandaluyong-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MANDALUYONG CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "mandaue-city",
+   "name": "Mandaue City",
+   "level": "municipal",
+   "parentId": "cebu",
+   "centroid": {
+    "latitude": 10.35061,
+    "longitude": 123.94146
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0702230",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0702230"
+   ],
+   "reportingUnitIds": [
+    "mandaue-city"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "MANDAUE CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "manila-city",
+   "name": "City of Manila",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.59932,
+    "longitude": 120.98494
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1303901",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1303901"
+   ],
+   "reportingUnitIds": [
+    "manila-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MANILA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "marikina-city",
+   "name": "City of Marikina",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.64674,
+    "longitude": 121.1083
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307402",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307402"
+   ],
+   "reportingUnitIds": [
+    "marikina-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MARIKINA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "marinduque",
+   "name": "Marinduque",
+   "level": "provincial",
+   "parentId": "mimaropa",
+   "centroid": {
+    "latitude": 13.38741,
+    "longitude": 121.91584
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17040",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17040"
+   ],
+   "reportingUnitIds": [
+    "marinduque"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "MARINDUQUE"
+  },
+  {
+   "id": "masbate",
+   "name": "Masbate",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 12.35056,
+    "longitude": 123.56978
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05041",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05041"
+   ],
+   "reportingUnitIds": [
+    "masbate"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "MASBATE"
+  },
+  {
+   "id": "misamis-occidental",
+   "name": "Misamis Occidental",
+   "level": "provincial",
+   "parentId": "northern-mindanao",
+   "centroid": {
+    "latitude": 8.32837,
+    "longitude": 123.75991
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10042",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10042"
+   ],
+   "reportingUnitIds": [
+    "misamis-occidental"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "MISAMIS OCCIDENTAL"
+  },
+  {
+   "id": "misamis-oriental",
+   "name": "Misamis Oriental",
+   "level": "provincial",
+   "parentId": "northern-mindanao",
+   "centroid": {
+    "latitude": 8.6524,
+    "longitude": 124.77036
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10043",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH10043"
+   ],
+   "reportingUnitIds": [
+    "cagayan-de-oro-city",
+    "misamis-oriental-remainder"
+   ]
+  },
+  {
+   "id": "misamis-oriental-remainder",
+   "name": "Misamis Oriental (excl. Cagayan de Oro City)",
+   "level": "provincial",
+   "parentId": "misamis-oriental",
+   "centroid": {
+    "latitude": 8.6524,
+    "longitude": 124.77036
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH10043",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "misamis-oriental",
+   "excludes": [
+    "cagayan-de-oro-city"
+   ],
+   "analysisRegionId": "northern-mindanao",
+   "sourceLoc": "MISAMIS ORIENTAL"
+  },
+  {
+   "id": "mountain-province",
+   "name": "Mountain Province",
+   "level": "provincial",
+   "parentId": "car",
+   "centroid": {
+    "latitude": 17.09406,
+    "longitude": 121.13477
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH14044",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH14044"
+   ],
+   "reportingUnitIds": [
+    "mountain-province"
+   ],
+   "analysisRegionId": "car",
+   "sourceLoc": "MOUNTAIN PROVINCE"
+  },
+  {
+   "id": "muntinlupa-city",
+   "name": "City of Muntinlupa",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.40972,
+    "longitude": 121.03301
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307603",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307603"
+   ],
+   "reportingUnitIds": [
+    "muntinlupa-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "MUNTINLUPA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "naga-city",
+   "name": "Naga City",
+   "level": "municipal",
+   "parentId": "camarines-sur",
+   "centroid": {
+    "latitude": 13.63835,
+    "longitude": 123.2403
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0501724",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0501724"
+   ],
+   "reportingUnitIds": [
+    "naga-city"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "NAGA CITY",
+   "cityClass": "ICC"
+  },
+  {
+   "id": "navotas-city",
+   "name": "City of Navotas",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.67342,
+    "longitude": 120.93644
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307503",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307503"
+   ],
+   "reportingUnitIds": [
+    "navotas-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "NAVOTAS CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "negros-occidental",
+   "name": "Negros Occidental",
+   "level": "provincial",
+   "parentId": "western-visayas",
+   "centroid": {
+    "latitude": 10.26878,
+    "longitude": 122.91928
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06045",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH06045"
+   ],
+   "reportingUnitIds": [
+    "bacolod-city",
+    "negros-occidental-remainder"
+   ]
+  },
+  {
+   "id": "negros-occidental-remainder",
+   "name": "Negros Occidental (excl. Bacolod City)",
+   "level": "provincial",
+   "parentId": "negros-occidental",
+   "centroid": {
+    "latitude": 10.26878,
+    "longitude": 122.91928
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH06045",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "negros-occidental",
+   "excludes": [
+    "bacolod-city"
+   ],
+   "analysisRegionId": "western-visayas",
+   "sourceLoc": "NEGROS OCCIDENTAL"
+  },
+  {
+   "id": "negros-oriental",
+   "name": "Negros Oriental",
+   "level": "provincial",
+   "parentId": "central-visayas",
+   "centroid": {
+    "latitude": 9.6145,
+    "longitude": 123.07076
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07046",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH07046"
+   ],
+   "reportingUnitIds": [
+    "negros-oriental"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "NEGROS ORIENTAL"
+  },
+  {
+   "id": "northern-samar",
+   "name": "Northern Samar",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 12.39833,
+    "longitude": 124.7834
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08048",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08048"
+   ],
+   "reportingUnitIds": [
+    "northern-samar"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "NORTHERN SAMAR"
+  },
+  {
+   "id": "nueva-ecija",
+   "name": "Nueva Ecija",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 15.58807,
+    "longitude": 121.05704
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03049",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03049"
+   ],
+   "reportingUnitIds": [
+    "nueva-ecija"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "NUEVA ECIJA"
+  },
+  {
+   "id": "nueva-vizcaya",
+   "name": "Nueva Vizcaya",
+   "level": "provincial",
+   "parentId": "cagayan-valley",
+   "centroid": {
+    "latitude": 16.3886,
+    "longitude": 121.08588
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02050",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02050"
+   ],
+   "reportingUnitIds": [
+    "nueva-vizcaya"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "NUEVA VISCAYA"
+  },
+  {
+   "id": "occidental-mindoro",
+   "name": "Occidental Mindoro",
+   "level": "provincial",
+   "parentId": "mimaropa",
+   "centroid": {
+    "latitude": 12.92596,
+    "longitude": 121.01145
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17051",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17051"
+   ],
+   "reportingUnitIds": [
+    "occidental-mindoro"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "OCCIDENTAL MINDORO"
+  },
+  {
+   "id": "olongapo-city",
+   "name": "Olongapo City",
+   "level": "municipal",
+   "parentId": "zambales",
+   "centroid": {
+    "latitude": 14.82526,
+    "longitude": 120.30782
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0307107",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0307107"
+   ],
+   "reportingUnitIds": [
+    "olongapo-city"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "OLONGAPO CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "oriental-mindoro",
+   "name": "Oriental Mindoro",
+   "level": "provincial",
+   "parentId": "mimaropa",
+   "centroid": {
+    "latitude": 12.93234,
+    "longitude": 121.37094
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17052",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17052"
+   ],
+   "reportingUnitIds": [
+    "oriental-mindoro"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "ORIENTAL MINDORO"
+  },
+  {
+   "id": "ormoc-city",
+   "name": "Ormoc City",
+   "level": "municipal",
+   "parentId": "leyte",
+   "centroid": {
+    "latitude": 11.04832,
+    "longitude": 124.6636
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0803738",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0803738"
+   ],
+   "reportingUnitIds": [
+    "ormoc-city"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "ORMOC CITY",
+   "cityClass": "ICC"
+  },
+  {
+   "id": "palawan",
+   "name": "Palawan",
+   "level": "provincial",
+   "parentId": "mimaropa",
+   "centroid": {
+    "latitude": 9.89985,
+    "longitude": 118.67667
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17053",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17053"
+   ],
+   "reportingUnitIds": [
+    "palawan-remainder",
+    "puerto-princesa-city"
+   ]
+  },
+  {
+   "id": "palawan-remainder",
+   "name": "Palawan (excl. Puerto Princesa City)",
+   "level": "provincial",
+   "parentId": "palawan",
+   "centroid": {
+    "latitude": 9.50063,
+    "longitude": 118.45306
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17053",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "palawan",
+   "excludes": [
+    "puerto-princesa-city"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "PALAWAN"
+  },
+  {
+   "id": "pampanga",
+   "name": "Pampanga",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 15.0699,
+    "longitude": 120.65415
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03054",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03054"
+   ],
+   "reportingUnitIds": [
+    "angeles-city",
+    "pampanga-remainder"
+   ]
+  },
+  {
+   "id": "pampanga-remainder",
+   "name": "Pampanga (excl. Angeles City)",
+   "level": "provincial",
+   "parentId": "pampanga",
+   "centroid": {
+    "latitude": 15.0699,
+    "longitude": 120.65415
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03054",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "pampanga",
+   "excludes": [
+    "angeles-city"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "PAMPANGA"
+  },
+  {
+   "id": "pangasinan",
+   "name": "Pangasinan",
+   "level": "provincial",
+   "parentId": "ilocos",
+   "centroid": {
+    "latitude": 16.00833,
+    "longitude": 120.28775
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01055",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH01055"
+   ],
+   "reportingUnitIds": [
+    "dagupan-city",
+    "pangasinan-remainder"
+   ]
+  },
+  {
+   "id": "pangasinan-remainder",
+   "name": "Pangasinan (excl. Dagupan City)",
+   "level": "provincial",
+   "parentId": "pangasinan",
+   "centroid": {
+    "latitude": 16.00833,
+    "longitude": 120.28775
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH01055",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "pangasinan",
+   "excludes": [
+    "dagupan-city"
+   ],
+   "analysisRegionId": "ilocos",
+   "sourceLoc": "PANGASINAN"
+  },
+  {
+   "id": "paranaque-city",
+   "name": "City of Parañaque",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.48437,
+    "longitude": 121.01646
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307604",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307604"
+   ],
+   "reportingUnitIds": [
+    "paranaque-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "PARANAQUE CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "pasay-city",
+   "name": "Pasay City",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.53289,
+    "longitude": 121.00565
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307605",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307605"
+   ],
+   "reportingUnitIds": [
+    "pasay-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "PASAY CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "pasig-city",
+   "name": "City of Pasig",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.57809,
+    "longitude": 121.08157
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307403",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307403"
+   ],
+   "reportingUnitIds": [
+    "pasig-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "PASIG CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "pateros",
+   "name": "Pateros",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.54533,
+    "longitude": 121.07075
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307606",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307606"
+   ],
+   "reportingUnitIds": [
+    "pateros"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "PATEROS"
+  },
+  {
+   "id": "puerto-princesa-city",
+   "name": "Puerto Princesa City",
+   "level": "municipal",
+   "parentId": "palawan",
+   "centroid": {
+    "latitude": 9.89985,
+    "longitude": 118.67667
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1705316",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1705316"
+   ],
+   "reportingUnitIds": [
+    "puerto-princesa-city"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "PUERTO PRINCESA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "quezon-city",
+   "name": "Quezon City",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.6837,
+    "longitude": 121.06467
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307404",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307404"
+   ],
+   "reportingUnitIds": [
+    "quezon-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "QUEZON CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "quezon",
+   "name": "Quezon",
+   "level": "provincial",
+   "parentId": "calabarzon",
+   "centroid": {
+    "latitude": 14.17937,
+    "longitude": 121.95886
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04056",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04056"
+   ],
+   "reportingUnitIds": [
+    "lucena-city",
+    "quezon-remainder"
+   ]
+  },
+  {
+   "id": "quezon-remainder",
+   "name": "Quezon (excl. Lucena City)",
+   "level": "provincial",
+   "parentId": "quezon",
+   "centroid": {
+    "latitude": 14.17937,
+    "longitude": 121.95886
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04056",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "quezon",
+   "excludes": [
+    "lucena-city"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "QUEZON"
+  },
+  {
+   "id": "quirino",
+   "name": "Quirino",
+   "level": "provincial",
+   "parentId": "cagayan-valley",
+   "centroid": {
+    "latitude": 16.38094,
+    "longitude": 121.57803
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH02057",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH02057"
+   ],
+   "reportingUnitIds": [
+    "quirino"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "QUIRINO"
+  },
+  {
+   "id": "rizal",
+   "name": "Rizal",
+   "level": "provincial",
+   "parentId": "calabarzon",
+   "centroid": {
+    "latitude": 14.65972,
+    "longitude": 121.24875
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH04058",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH04058"
+   ],
+   "reportingUnitIds": [
+    "rizal"
+   ],
+   "analysisRegionId": "calabarzon",
+   "sourceLoc": "RIZAL"
+  },
+  {
+   "id": "romblon",
+   "name": "Romblon",
+   "level": "provincial",
+   "parentId": "mimaropa",
+   "centroid": {
+    "latitude": 12.55171,
+    "longitude": 122.28546
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH17059",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH17059"
+   ],
+   "reportingUnitIds": [
+    "romblon"
+   ],
+   "analysisRegionId": "mimaropa",
+   "sourceLoc": "ROMBLON"
+  },
+  {
+   "id": "samar",
+   "name": "Samar (Western Samar)",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 11.85399,
+    "longitude": 124.97303
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08060",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08060"
+   ],
+   "reportingUnitIds": [
+    "samar"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "SAMAR"
+  },
+  {
+   "id": "san-juan-city",
+   "name": "City of San Juan",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.60231,
+    "longitude": 121.03932
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307405",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307405"
+   ],
+   "reportingUnitIds": [
+    "san-juan-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "SAN JUAN CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "santiago-city",
+   "name": "City of Santiago",
+   "level": "municipal",
+   "parentId": "isabela",
+   "centroid": {
+    "latitude": 16.66582,
+    "longitude": 121.55789
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0203135",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0203135"
+   ],
+   "reportingUnitIds": [
+    "santiago-city"
+   ],
+   "analysisRegionId": "cagayan-valley",
+   "sourceLoc": "SANTIAGO CITY",
+   "cityClass": "ICC"
+  },
+  {
+   "id": "sarangani",
+   "name": "Sarangani",
+   "level": "provincial",
+   "parentId": "soccsksargen",
+   "centroid": {
+    "latitude": 5.94543,
+    "longitude": 124.97125
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12080",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH12080"
+   ],
+   "reportingUnitIds": [
+    "sarangani"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "SARANGANI"
+  },
+  {
+   "id": "siquijor",
+   "name": "Siquijor",
+   "level": "provincial",
+   "parentId": "central-visayas",
+   "centroid": {
+    "latitude": 9.14576,
+    "longitude": 123.61187
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH07061",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH07061"
+   ],
+   "reportingUnitIds": [
+    "siquijor"
+   ],
+   "analysisRegionId": "central-visayas",
+   "sourceLoc": "SISQUIJOR"
+  },
+  {
+   "id": "sorsogon",
+   "name": "Sorsogon",
+   "level": "provincial",
+   "parentId": "bicol",
+   "centroid": {
+    "latitude": 12.81503,
+    "longitude": 123.88579
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH05062",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH05062"
+   ],
+   "reportingUnitIds": [
+    "sorsogon"
+   ],
+   "analysisRegionId": "bicol",
+   "sourceLoc": "SORSOGON"
+  },
+  {
+   "id": "south-cotabato",
+   "name": "South Cotabato",
+   "level": "provincial",
+   "parentId": "soccsksargen",
+   "centroid": {
+    "latitude": 6.34941,
+    "longitude": 124.96918
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12063",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH12063"
+   ],
+   "reportingUnitIds": [
+    "general-santos-city",
+    "south-cotabato-remainder"
+   ]
+  },
+  {
+   "id": "south-cotabato-remainder",
+   "name": "South Cotabato (excl. General Santos City)",
+   "level": "provincial",
+   "parentId": "south-cotabato",
+   "centroid": {
+    "latitude": 6.39664,
+    "longitude": 124.77421
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12063",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "south-cotabato",
+   "excludes": [
+    "general-santos-city"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "SOUTH COTABATO"
+  },
+  {
+   "id": "southern-leyte",
+   "name": "Southern Leyte",
+   "level": "provincial",
+   "parentId": "eastern-visayas",
+   "centroid": {
+    "latitude": 10.33208,
+    "longitude": 125.06586
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH08064",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH08064"
+   ],
+   "reportingUnitIds": [
+    "southern-leyte"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "SOUTHERN LEYTE"
+  },
+  {
+   "id": "sultan-kudarat",
+   "name": "Sultan Kudarat",
+   "level": "provincial",
+   "parentId": "soccsksargen",
+   "centroid": {
+    "latitude": 6.49747,
+    "longitude": 124.49796
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH12065",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH12065"
+   ],
+   "reportingUnitIds": [
+    "sultan-kudarat"
+   ],
+   "analysisRegionId": "soccsksargen",
+   "sourceLoc": "SULTAN KUDARAT"
+  },
+  {
+   "id": "sulu",
+   "name": "Sulu",
+   "level": "provincial",
+   "parentId": "barmm",
+   "centroid": {
+    "latitude": 5.9481,
+    "longitude": 121.09572
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19066",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19066"
+   ],
+   "reportingUnitIds": [
+    "sulu"
+   ],
+   "analysisRegionId": "barmm",
+   "sourceLoc": "SULU"
+  },
+  {
+   "id": "surigao-city",
+   "name": "Surigao City",
+   "level": "municipal",
+   "parentId": "surigao-del-norte",
+   "centroid": {
+    "latitude": 9.74499,
+    "longitude": 125.50182
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1606724",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1606724"
+   ],
+   "reportingUnitIds": [
+    "surigao-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "SURIGAO CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "surigao-del-norte",
+   "name": "Surigao del Norte",
+   "level": "provincial",
+   "parentId": "caraga",
+   "centroid": {
+    "latitude": 9.56316,
+    "longitude": 125.62156
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16067",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16067"
+   ],
+   "reportingUnitIds": [
+    "surigao-city",
+    "surigao-del-norte-remainder"
+   ]
+  },
+  {
+   "id": "surigao-del-norte-remainder",
+   "name": "Surigao del Norte (excl. Surigao City)",
+   "level": "provincial",
+   "parentId": "surigao-del-norte",
+   "centroid": {
+    "latitude": 9.50445,
+    "longitude": 125.68001
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16067",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "surigao-del-norte",
+   "excludes": [
+    "surigao-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "SURIGAO DEL NORTE"
+  },
+  {
+   "id": "surigao-del-sur",
+   "name": "Surigao del Sur",
+   "level": "provincial",
+   "parentId": "caraga",
+   "centroid": {
+    "latitude": 8.74667,
+    "longitude": 126.19861
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16068",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH16068"
+   ],
+   "reportingUnitIds": [
+    "bislig-city",
+    "surigao-del-sur-remainder",
+    "tandag-city"
+   ]
+  },
+  {
+   "id": "surigao-del-sur-remainder",
+   "name": "Surigao del Sur (excl. City of Bislig, City of Tandag)",
+   "level": "provincial",
+   "parentId": "surigao-del-sur",
+   "centroid": {
+    "latitude": 8.818,
+    "longitude": 126.20532
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH16068",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "surigao-del-sur",
+   "excludes": [
+    "bislig-city",
+    "tandag-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "SURIGAO DEL SUR"
+  },
+  {
+   "id": "tacloban-city",
+   "name": "Tacloban City",
+   "level": "municipal",
+   "parentId": "leyte",
+   "centroid": {
+    "latitude": 11.26999,
+    "longitude": 124.93989
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0803747",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0803747"
+   ],
+   "reportingUnitIds": [
+    "tacloban-city"
+   ],
+   "analysisRegionId": "eastern-visayas",
+   "sourceLoc": "TACLOBAN",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "taguig-city",
+   "name": "Taguig City",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.5071,
+    "longitude": 121.06106
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307607",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307607"
+   ],
+   "reportingUnitIds": [
+    "taguig-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "TAGUIG CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "tandag-city",
+   "name": "City of Tandag",
+   "level": "municipal",
+   "parentId": "surigao-del-sur",
+   "centroid": {
+    "latitude": 9.06828,
+    "longitude": 126.13644
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1606819",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1606819"
+   ],
+   "reportingUnitIds": [
+    "tandag-city"
+   ],
+   "analysisRegionId": "caraga",
+   "sourceLoc": "TANDAG CITY",
+   "cityClass": "CC"
+  },
+  {
+   "id": "tarlac",
+   "name": "Tarlac",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 15.58155,
+    "longitude": 120.45023
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03069",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03069"
+   ],
+   "reportingUnitIds": [
+    "tarlac"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "TARLAC"
+  },
+  {
+   "id": "tawi-tawi",
+   "name": "Tawi-Tawi",
+   "level": "provincial",
+   "parentId": "barmm",
+   "centroid": {
+    "latitude": 5.16144,
+    "longitude": 119.99313
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH19070",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH19070"
+   ],
+   "reportingUnitIds": [
+    "tawi-tawi"
+   ],
+   "analysisRegionId": "barmm",
+   "sourceLoc": "TAWI-TAWI"
+  },
+  {
+   "id": "valenzuela-city",
+   "name": "City of Valenzuela",
+   "level": "municipal",
+   "parentId": "ncr",
+   "centroid": {
+    "latitude": 14.71345,
+    "longitude": 120.96968
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH1307504",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH1307504"
+   ],
+   "reportingUnitIds": [
+    "valenzuela-city"
+   ],
+   "analysisRegionId": "ncr",
+   "sourceLoc": "VALENZUELA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "zambales",
+   "name": "Zambales",
+   "level": "provincial",
+   "parentId": "central-luzon",
+   "centroid": {
+    "latitude": 15.23182,
+    "longitude": 120.21588
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03071",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH03071"
+   ],
+   "reportingUnitIds": [
+    "olongapo-city",
+    "zambales-remainder"
+   ]
+  },
+  {
+   "id": "zambales-remainder",
+   "name": "Zambales (excl. Olongapo City)",
+   "level": "provincial",
+   "parentId": "zambales",
+   "centroid": {
+    "latitude": 15.23182,
+    "longitude": 120.21588
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH03071",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "zambales",
+   "excludes": [
+    "olongapo-city"
+   ],
+   "analysisRegionId": "central-luzon",
+   "sourceLoc": "ZAMBALES"
+  },
+  {
+   "id": "zamboanga-city",
+   "name": "Zamboanga City",
+   "level": "municipal",
+   "parentId": "zamboanga-del-sur",
+   "centroid": {
+    "latitude": 7.201,
+    "longitude": 122.18289
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH0907332",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH0907332"
+   ],
+   "reportingUnitIds": [
+    "zamboanga-city"
+   ],
+   "analysisRegionId": "zamboanga-peninsula",
+   "sourceLoc": "ZAMBOANGA CITY",
+   "cityClass": "HUC"
+  },
+  {
+   "id": "zamboanga-del-norte",
+   "name": "Zamboanga del Norte",
+   "level": "provincial",
+   "parentId": "zamboanga-peninsula",
+   "centroid": {
+    "latitude": 8.0598,
+    "longitude": 122.80949
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH09072",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH09072"
+   ],
+   "reportingUnitIds": [
+    "zamboanga-del-norte"
+   ],
+   "analysisRegionId": "zamboanga-peninsula",
+   "sourceLoc": "ZAMBOANGA DEL NORTE"
+  },
+  {
+   "id": "zamboanga-del-sur",
+   "name": "Zamboanga del Sur",
+   "level": "provincial",
+   "parentId": "zamboanga-peninsula",
+   "centroid": {
+    "latitude": 7.76699,
+    "longitude": 123.15286
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH09073",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH09073"
+   ],
+   "reportingUnitIds": [
+    "zamboanga-city",
+    "zamboanga-del-sur-remainder"
+   ]
+  },
+  {
+   "id": "zamboanga-del-sur-remainder",
+   "name": "Zamboanga del Sur (excl. Zamboanga City)",
+   "level": "provincial",
+   "parentId": "zamboanga-del-sur",
+   "centroid": {
+    "latitude": 7.87471,
+    "longitude": 123.36899
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH09073",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "reporting_unit",
+   "partialOf": "zamboanga-del-sur",
+   "excludes": [
+    "zamboanga-city"
+   ],
+   "analysisRegionId": "zamboanga-peninsula",
+   "sourceLoc": "ZAMBOANGA DEL SUR"
+  },
+  {
+   "id": "zamboanga-sibugay",
+   "name": "Zamboanga Sibugay",
+   "level": "provincial",
+   "parentId": "zamboanga-peninsula",
+   "centroid": {
+    "latitude": 7.73354,
+    "longitude": 122.87689
+   },
+   "psgcCode": null,
+   "provenance": {
+    "sourceIds": [
+     "cod-ab-phl",
+     "hdx-doh-epi-dengue"
+    ],
+    "method": "derived",
+    "pipeline": "scripts/geo/build-geo.mjs@geo-1.0.0",
+    "upstreamId": "PH09083",
+    "upstreamUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+    "upstreamVersion": "COD-AB PHL v03",
+    "retrievedAt": "2026-10-17T01:19:00+08:00",
+    "recordedAt": "2026-10-17T01:19:00+08:00",
+    "isSample": false
+   },
+   "kind": "admin",
+   "codAbPcodes": [
+    "PH09083"
+   ],
+   "reportingUnitIds": [
+    "zamboanga-sibugay"
+   ],
+   "analysisRegionId": "zamboanga-peninsula",
+   "sourceLoc": "ZAMBOANGA SIBUGAY"
+  }
+ ],
+ "aggregation": {
+  "province": {
+   "abra": [
+    "abra"
+   ],
+   "agusan-del-norte": [
+    "agusan-del-norte-remainder",
+    "butuan-city",
+    "cabadbaran-city"
+   ],
+   "agusan-del-sur": [
+    "agusan-del-sur-remainder",
+    "bayugan-city"
+   ],
+   "aklan": [
+    "aklan"
+   ],
+   "albay": [
+    "albay"
+   ],
+   "antique": [
+    "antique"
+   ],
+   "apayao": [
+    "apayao"
+   ],
+   "aurora": [
+    "aurora"
+   ],
+   "basilan": [
+    "basilan"
+   ],
+   "bataan": [
+    "bataan"
+   ],
+   "batanes": [
+    "batanes"
+   ],
+   "batangas": [
+    "batangas"
+   ],
+   "benguet": [
+    "baguio-city",
+    "benguet-remainder"
+   ],
+   "biliran": [
+    "biliran"
+   ],
+   "bohol": [
+    "bohol"
+   ],
+   "bukidnon": [
+    "bukidnon"
+   ],
+   "bulacan": [
+    "bulacan"
+   ],
+   "cagayan": [
+    "cagayan"
+   ],
+   "camarines-norte": [
+    "camarines-norte"
+   ],
+   "camarines-sur": [
+    "camarines-sur-remainder",
+    "naga-city"
+   ],
+   "camiguin": [
+    "camiguin"
+   ],
+   "capiz": [
+    "capiz"
+   ],
+   "catanduanes": [
+    "catanduanes"
+   ],
+   "cavite": [
+    "cavite"
+   ],
+   "cebu": [
+    "cebu-city",
+    "cebu-remainder",
+    "lapu-lapu-city",
+    "mandaue-city"
+   ],
+   "davao-de-oro": [
+    "davao-de-oro"
+   ],
+   "davao-del-norte": [
+    "davao-del-norte"
+   ],
+   "davao-del-sur": [
+    "davao-city",
+    "davao-del-sur-remainder"
+   ],
+   "davao-occidental": [
+    "davao-occidental"
+   ],
+   "davao-oriental": [
+    "davao-oriental"
+   ],
+   "dinagat-islands": [
+    "dinagat-islands"
+   ],
+   "eastern-samar": [
+    "eastern-samar"
+   ],
+   "guimaras": [
+    "guimaras"
+   ],
+   "ifugao": [
+    "ifugao"
+   ],
+   "ilocos-norte": [
+    "ilocos-norte"
+   ],
+   "ilocos-sur": [
+    "ilocos-sur"
+   ],
+   "iloilo": [
+    "iloilo-city",
+    "iloilo-remainder"
+   ],
+   "isabela": [
+    "isabela-remainder",
+    "santiago-city"
+   ],
+   "kalinga": [
+    "kalinga"
+   ],
+   "la-union": [
+    "la-union"
+   ],
+   "laguna": [
+    "laguna"
+   ],
+   "lanao-del-norte": [
+    "iligan-city",
+    "lanao-del-norte-remainder"
+   ],
+   "lanao-del-sur": [
+    "lanao-del-sur"
+   ],
+   "leyte": [
+    "leyte-remainder",
+    "ormoc-city",
+    "tacloban-city"
+   ],
+   "maguindanao": [
+    "cotabato-city",
+    "maguindanao-remainder"
+   ],
+   "marinduque": [
+    "marinduque"
+   ],
+   "masbate": [
+    "masbate"
+   ],
+   "misamis-occidental": [
+    "misamis-occidental"
+   ],
+   "misamis-oriental": [
+    "cagayan-de-oro-city",
+    "misamis-oriental-remainder"
+   ],
+   "mountain-province": [
+    "mountain-province"
+   ],
+   "negros-occidental": [
+    "bacolod-city",
+    "negros-occidental-remainder"
+   ],
+   "negros-oriental": [
+    "negros-oriental"
+   ],
+   "cotabato": [
+    "cotabato"
+   ],
+   "northern-samar": [
+    "northern-samar"
+   ],
+   "nueva-ecija": [
+    "nueva-ecija"
+   ],
+   "nueva-vizcaya": [
+    "nueva-vizcaya"
+   ],
+   "occidental-mindoro": [
+    "occidental-mindoro"
+   ],
+   "oriental-mindoro": [
+    "oriental-mindoro"
+   ],
+   "palawan": [
+    "palawan-remainder",
+    "puerto-princesa-city"
+   ],
+   "pampanga": [
+    "angeles-city",
+    "pampanga-remainder"
+   ],
+   "pangasinan": [
+    "dagupan-city",
+    "pangasinan-remainder"
+   ],
+   "quezon": [
+    "lucena-city",
+    "quezon-remainder"
+   ],
+   "quirino": [
+    "quirino"
+   ],
+   "rizal": [
+    "rizal"
+   ],
+   "romblon": [
+    "romblon"
+   ],
+   "samar": [
+    "samar"
+   ],
+   "sarangani": [
+    "sarangani"
+   ],
+   "siquijor": [
+    "siquijor"
+   ],
+   "sorsogon": [
+    "sorsogon"
+   ],
+   "south-cotabato": [
+    "general-santos-city",
+    "south-cotabato-remainder"
+   ],
+   "southern-leyte": [
+    "southern-leyte"
+   ],
+   "sultan-kudarat": [
+    "sultan-kudarat"
+   ],
+   "sulu": [
+    "sulu"
+   ],
+   "surigao-del-norte": [
+    "surigao-city",
+    "surigao-del-norte-remainder"
+   ],
+   "surigao-del-sur": [
+    "bislig-city",
+    "surigao-del-sur-remainder",
+    "tandag-city"
+   ],
+   "tarlac": [
+    "tarlac"
+   ],
+   "tawi-tawi": [
+    "tawi-tawi"
+   ],
+   "zambales": [
+    "olongapo-city",
+    "zambales-remainder"
+   ],
+   "zamboanga-del-norte": [
+    "zamboanga-del-norte"
+   ],
+   "zamboanga-del-sur": [
+    "zamboanga-city",
+    "zamboanga-del-sur-remainder"
+   ],
+   "zamboanga-sibugay": [
+    "zamboanga-sibugay"
+   ]
+  },
+  "region": {
+   "car": [
+    "abra",
+    "apayao",
+    "baguio-city",
+    "benguet-remainder",
+    "ifugao",
+    "kalinga",
+    "mountain-province"
+   ],
+   "caraga": [
+    "agusan-del-norte-remainder",
+    "agusan-del-sur-remainder",
+    "bayugan-city",
+    "bislig-city",
+    "butuan-city",
+    "cabadbaran-city",
+    "dinagat-islands",
+    "surigao-city",
+    "surigao-del-norte-remainder",
+    "surigao-del-sur-remainder",
+    "tandag-city"
+   ],
+   "western-visayas": [
+    "aklan",
+    "antique",
+    "bacolod-city",
+    "capiz",
+    "guimaras",
+    "iloilo-city",
+    "iloilo-remainder",
+    "negros-occidental-remainder"
+   ],
+   "bicol": [
+    "albay",
+    "camarines-norte",
+    "camarines-sur-remainder",
+    "catanduanes",
+    "masbate",
+    "naga-city",
+    "sorsogon"
+   ],
+   "central-luzon": [
+    "angeles-city",
+    "aurora",
+    "bataan",
+    "bulacan",
+    "nueva-ecija",
+    "olongapo-city",
+    "pampanga-remainder",
+    "tarlac",
+    "zambales-remainder"
+   ],
+   "barmm": [
+    "basilan",
+    "lanao-del-sur",
+    "maguindanao-remainder",
+    "sulu",
+    "tawi-tawi"
+   ],
+   "cagayan-valley": [
+    "batanes",
+    "cagayan",
+    "isabela-remainder",
+    "nueva-vizcaya",
+    "quirino",
+    "santiago-city"
+   ],
+   "calabarzon": [
+    "batangas",
+    "cavite",
+    "laguna",
+    "lucena-city",
+    "quezon-remainder",
+    "rizal"
+   ],
+   "eastern-visayas": [
+    "biliran",
+    "eastern-samar",
+    "leyte-remainder",
+    "northern-samar",
+    "ormoc-city",
+    "samar",
+    "southern-leyte",
+    "tacloban-city"
+   ],
+   "central-visayas": [
+    "bohol",
+    "cebu-city",
+    "cebu-remainder",
+    "lapu-lapu-city",
+    "mandaue-city",
+    "negros-oriental",
+    "siquijor"
+   ],
+   "northern-mindanao": [
+    "bukidnon",
+    "cagayan-de-oro-city",
+    "camiguin",
+    "iligan-city",
+    "lanao-del-norte-remainder",
+    "misamis-occidental",
+    "misamis-oriental-remainder"
+   ],
+   "ncr": [
+    "caloocan-city",
+    "las-pinas-city",
+    "makati-city",
+    "malabon-city",
+    "mandaluyong-city",
+    "manila-city",
+    "marikina-city",
+    "muntinlupa-city",
+    "navotas-city",
+    "paranaque-city",
+    "pasay-city",
+    "pasig-city",
+    "pateros",
+    "quezon-city",
+    "san-juan-city",
+    "taguig-city",
+    "valenzuela-city"
+   ],
+   "soccsksargen": [
+    "cotabato",
+    "cotabato-city",
+    "general-santos-city",
+    "sarangani",
+    "south-cotabato-remainder",
+    "sultan-kudarat"
+   ],
+   "ilocos": [
+    "dagupan-city",
+    "ilocos-norte",
+    "ilocos-sur",
+    "la-union",
+    "pangasinan-remainder"
+   ],
+   "davao-region": [
+    "davao-city",
+    "davao-de-oro",
+    "davao-del-norte",
+    "davao-del-sur-remainder",
+    "davao-occidental",
+    "davao-oriental"
+   ],
+   "zamboanga-peninsula": [
+    "isabela-city",
+    "zamboanga-city",
+    "zamboanga-del-norte",
+    "zamboanga-del-sur-remainder",
+    "zamboanga-sibugay"
+   ],
+   "mimaropa": [
+    "marinduque",
+    "occidental-mindoro",
+    "oriental-mindoro",
+    "palawan-remainder",
+    "puerto-princesa-city",
+    "romblon"
+   ]
+  },
+  "national": {
+   "ph": [
+    "abra",
+    "agusan-del-norte-remainder",
+    "agusan-del-sur-remainder",
+    "aklan",
+    "albay",
+    "angeles-city",
+    "antique",
+    "apayao",
+    "aurora",
+    "bacolod-city",
+    "baguio-city",
+    "basilan",
+    "bataan",
+    "batanes",
+    "batangas",
+    "bayugan-city",
+    "benguet-remainder",
+    "biliran",
+    "bislig-city",
+    "bohol",
+    "bukidnon",
+    "bulacan",
+    "butuan-city",
+    "cabadbaran-city",
+    "cagayan",
+    "cagayan-de-oro-city",
+    "caloocan-city",
+    "camarines-norte",
+    "camarines-sur-remainder",
+    "camiguin",
+    "capiz",
+    "catanduanes",
+    "cavite",
+    "cebu-city",
+    "cebu-remainder",
+    "cotabato",
+    "cotabato-city",
+    "dagupan-city",
+    "davao-city",
+    "davao-de-oro",
+    "davao-del-norte",
+    "davao-del-sur-remainder",
+    "davao-occidental",
+    "davao-oriental",
+    "dinagat-islands",
+    "eastern-samar",
+    "general-santos-city",
+    "guimaras",
+    "ifugao",
+    "iligan-city",
+    "ilocos-norte",
+    "ilocos-sur",
+    "iloilo-city",
+    "iloilo-remainder",
+    "isabela-city",
+    "isabela-remainder",
+    "kalinga",
+    "la-union",
+    "laguna",
+    "lanao-del-norte-remainder",
+    "lanao-del-sur",
+    "lapu-lapu-city",
+    "las-pinas-city",
+    "leyte-remainder",
+    "lucena-city",
+    "maguindanao-remainder",
+    "makati-city",
+    "malabon-city",
+    "mandaluyong-city",
+    "mandaue-city",
+    "manila-city",
+    "marikina-city",
+    "marinduque",
+    "masbate",
+    "misamis-occidental",
+    "misamis-oriental-remainder",
+    "mountain-province",
+    "muntinlupa-city",
+    "naga-city",
+    "navotas-city",
+    "negros-occidental-remainder",
+    "negros-oriental",
+    "northern-samar",
+    "nueva-ecija",
+    "nueva-vizcaya",
+    "occidental-mindoro",
+    "olongapo-city",
+    "oriental-mindoro",
+    "ormoc-city",
+    "palawan-remainder",
+    "pampanga-remainder",
+    "pangasinan-remainder",
+    "paranaque-city",
+    "pasay-city",
+    "pasig-city",
+    "pateros",
+    "puerto-princesa-city",
+    "quezon-city",
+    "quezon-remainder",
+    "quirino",
+    "rizal",
+    "romblon",
+    "samar",
+    "san-juan-city",
+    "santiago-city",
+    "sarangani",
+    "siquijor",
+    "sorsogon",
+    "south-cotabato-remainder",
+    "southern-leyte",
+    "sultan-kudarat",
+    "sulu",
+    "surigao-city",
+    "surigao-del-norte-remainder",
+    "surigao-del-sur-remainder",
+    "tacloban-city",
+    "taguig-city",
+    "tandag-city",
+    "tarlac",
+    "tawi-tawi",
+    "valenzuela-city",
+    "zambales-remainder",
+    "zamboanga-city",
+    "zamboanga-del-norte",
+    "zamboanga-del-sur-remainder",
+    "zamboanga-sibugay"
+   ]
+  }
+ },
+ "coverage": {
+  "abra": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "agusan-del-norte-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "agusan-del-sur-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "aklan": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "albay": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "angeles-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "antique": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "apayao": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "aurora": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "bacolod-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "baguio-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "basilan": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "bataan": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "batanes": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "batangas": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "bayugan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "benguet-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "biliran": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "bislig-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "bohol": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "bukidnon": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "bulacan": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "butuan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "cabadbaran-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "cagayan": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "cagayan-de-oro-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "caloocan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "camarines-norte": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "camarines-sur-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "camiguin": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "capiz": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "catanduanes": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "cavite": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "cebu-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "cebu-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "cotabato": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "cotabato-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "dagupan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "davao-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "davao-de-oro": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "davao-del-norte": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "davao-del-sur-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "davao-occidental": {
+   "firstWeek": "2017-01-08",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 208,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "davao-oriental": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "dinagat-islands": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "eastern-samar": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "general-santos-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "guimaras": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "ifugao": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "iligan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "ilocos-norte": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "ilocos-sur": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "iloilo-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "iloilo-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "isabela-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "isabela-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "kalinga": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "la-union": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "laguna": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "lanao-del-norte-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "lanao-del-sur": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "lapu-lapu-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "las-pinas-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "leyte-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "lucena-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "maguindanao-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "makati-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "malabon-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "mandaluyong-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "mandaue-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "manila-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "marikina-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "marinduque": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "masbate": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "misamis-occidental": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "misamis-oriental-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "mountain-province": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "muntinlupa-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "naga-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "navotas-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "negros-occidental-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "negros-oriental": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "northern-samar": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "nueva-ecija": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "nueva-vizcaya": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "occidental-mindoro": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "olongapo-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "oriental-mindoro": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "ormoc-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "palawan-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "pampanga-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "pangasinan-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "paranaque-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "pasay-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "pasig-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "pateros": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "puerto-princesa-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "quezon-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "quezon-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "quirino": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "rizal": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "romblon": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "samar": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "san-juan-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "santiago-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "sarangani": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "siquijor": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "sorsogon": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "south-cotabato-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "southern-leyte": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "sultan-kudarat": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "sulu": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "surigao-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "surigao-del-norte-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "surigao-del-sur-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "tacloban-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "taguig-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "tandag-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "tarlac": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "tawi-tawi": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "valenzuela-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 259,
+   "weeksExpected": 262,
+   "gapCount": 3,
+   "longestGapDays": 14
+  },
+  "zambales-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 261,
+   "weeksExpected": 262,
+   "gapCount": 1,
+   "longestGapDays": 14
+  },
+  "zamboanga-city": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "zamboanga-del-norte": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "zamboanga-del-sur-remainder": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  },
+  "zamboanga-sibugay": {
+   "firstWeek": "2016-01-10",
+   "lastWeek": "2021-01-10",
+   "weeksReported": 260,
+   "weeksExpected": 262,
+   "gapCount": 2,
+   "longestGapDays": 14
+  }
+ }
+}

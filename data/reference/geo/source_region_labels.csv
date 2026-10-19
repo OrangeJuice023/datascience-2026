@@ -1,0 +1,18 @@
+source_region_label,region_pcode,region_id,decision,reason
+Region I-ILOCOS REGION,PH01,ilocos,exact,Name matches COD-AB PH01; mixed casing only.
+Region II-CAGAYAN VALLEY,PH02,cagayan-valley,exact,Name matches COD-AB PH02; mixed casing only.
+REGION III-CENTRAL LUZON,PH03,central-luzon,exact,Matches COD-AB PH03.
+REGION IV-A-CALABARZON,PH04,calabarzon,exact,Matches COD-AB PH04.
+REGION IVB-MIMAROPA,PH17,mimaropa,normalized,"Source writes IVB (no hyphen); MIMAROPA is coded PH17 in COD-AB, not PH04."
+REGION V-BICOL REGION,PH05,bicol,exact,Matches COD-AB PH05.
+REGION VI-WESTERN VISAYAS,PH06,western-visayas,exact,Matches COD-AB PH06. Includes Negros Occidental and Bacolod City for all years although the Negros Island Region (NIR) legally existed 2015-05-29 to 2017-08-09.
+REGION VII-CENTRAL VISAYAS,PH07,central-visayas,exact,Matches COD-AB PH07. Includes Negros Oriental for all years (see NIR note).
+REGION VII-EASTERN VISAYAS,PH08,eastern-visayas,manual_mislabel,"Source numeral is VII but every member (Biliran, Leyte, Samar, Southern Leyte, Eastern/Northern Samar, Ormoc, Tacloban) is in Region VIII (PH08). Mapped by membership, not by numeral."
+REGION IX-ZAMBOANGA PENINSULA,PH09,zamboanga-peninsula,exact,Matches COD-AB PH09. Includes Isabela City (administratively Region IX; geographically on Basilan).
+REGION X-NORTHERN MINDANAO,PH10,northern-mindanao,exact,Matches COD-AB PH10.
+REGION XI-DAVAO REGION,PH11,davao-region,exact,Matches COD-AB PH11.
+REGION XII-SOCCSKSARGEN,PH12,soccsksargen,exact,"Matches COD-AB PH12. Source keeps Cotabato City here for all years; COD-AB v03 places it in BARMM (PH19) after the 2019 plebiscite."
+NATIONAL CAPITAL REGION,PH13,ncr,exact,Matches COD-AB PH13.
+CAR,PH14,car,exact,Abbreviation of Cordillera Administrative Region (PH14).
+CARAGA,PH16,caraga,exact,Region XIII (Caraga) is PH16 in COD-AB.
+BARMM,PH19,barmm,normalized,"Source uses the BARMM label for 2016-2018, when the region was ARMM (BARMM created 2019). Treated as the same regional unit; COD-AB codes it PH19 (older PSGC/COD-PS used PH15)."
