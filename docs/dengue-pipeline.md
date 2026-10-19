@@ -28,12 +28,12 @@ from any working directory.
 
 | Decision | Detail |
 |---|---|
-| Common range | 10/01/2016 – 03/01/2021 (261 weeks). This is the local data's span minus its last week, which was extracted before most reports arrived. |
+| Common range | 10/01/2016 – 03/01/2021, DD/MM/YYYY, i.e. 2016-01-10 to 2021-01-03 (261 weeks). This is the local data's span minus its last week, which was extracted before most reports arrived. |
 | Complete calendar | Every series has every week. Missing weeks are **null rows**: never deleted, zero-filled or interpolated, because EARS baselines must cover consecutive weeks. |
 | Columns kept | National: `geographic_level`, `period_start`, `value`. Local: everything except `deaths`. |
-| Name fixes | BASILIG CITY → BISLIG CITY, NUEVA VISCAYA → NUEVA VIZCAYA, SISQUIJOR → SIQUIJOR; REGION VII-EASTERN VISAYAS → REGION VIII-EASTERN VISAYAS; casing and whitespace normalised. |
+| Name fixes | BASILIG CITY → BISLIG CITY, NUEVA VISCAYA → NUEVA VIZCAYA, SISQUIJOR → SIQUIJOR; REGION VII-EASTERN VISAYAS → REGION VIII-EASTERN VISAYAS; REGION IVB-MIMAROPA → REGION IV-B-MIMAROPA; casing and whitespace normalised. |
 | `data_quality` | `ok` / `missing` everywhere. National also has `incomplete` (fade-out before each year-end reporting cut-off) and `backlog` (early-January catch-up). Only `ok` weeks are used in calculations. |
-| `data_flag` (local) | `possible non-reporting`: 4+ consecutive zero weeks where the place normally reports 10+. `one-week spike`: over 8× the 9-week median and at least 4× both neighbouring weeks. Values are kept as published; the true counts are not recoverable from the data. |
+| `data_flag` (local) | `possible non-reporting`: 4+ consecutive zero weeks where the place normally reports 10+. `one-week spike`: over 8× the 9-week median, at least 30 cases, and at least 4× both neighbouring weeks. Values are kept as published; the true counts are not recoverable from the data. |
 
 ### DOH alert and epidemic thresholds
 
@@ -80,6 +80,19 @@ and [dengue_ears_qa_report.pdf](reports/dengue_ears_qa_report.pdf).
 `data/raw/` and `data/processed/` are git-ignored by design. To reproduce, place
 the two raw files above in `data/raw/` and run the pipeline.
 
+Source identity (added by the 2026-10-19 documentation audit; full
+provenance is backlog item P0-4 in [next-steps.md](next-steps.md)):
+
+- **National:** a SIGMA "HEALTH OBSERVATIONS" export of OpenDengue v1.3
+  (title row of the workbook). Its 544 weekly values match
+  `web/src/data/opendengue-ph.json` exactly.
+- **Local:** HDX "Philippine Dengue Cases and Deaths", file
+  `DOH-Epi Dengue Data 2016-2021.csv`, published by Cirrolytix from DOH-EB
+  data, CC BY. SHA-256 begins `4e993553f10081b4`. Counts are total reported
+  cases (suspect + probable + confirmed), not confirmed only. The 126
+  locations are DOH reporting units, 22 of them province remainders, not
+  whole provinces (see the geography track in open PR #3).
+
 ## Known limitations
 
 - Zeros cannot be distinguished from "no report" in the local source; reporting
@@ -87,3 +100,15 @@ the two raw files above in `data/raw/` and run the pipeline.
 - National OpenDengue data has year-end reporting artefacts every year.
 - The calculated DOH threshold runs hotter than the official system, which uses
   3–5 years and regional thresholds.
+- **Suspected cases↔deaths swap rows are not handled.** The local file has
+  586 rows with deaths > cases, part of 665 suspect rows in Sep–Oct 2016,
+  2017 and 2020 (identified by the geography track, open PR #3).
+  `clean_local()` drops `deaths` before any check, so these rows are used as
+  ordinary `ok` weeks. PR #3 estimates that treating them as missing changes
+  the EARS result on 120 and the DOH status on 86 other unit-weeks, and does
+  not affect the 2019 national findings. Local results for those periods
+  should not be relied on until this is fixed
+  ([next-steps.md](next-steps.md) P0-1).
+- The meaning of the local `date` column (report vs onset week) is
+  undocumented; local lead times may be off by 1–2 weeks (P1-2).
+- Province-remainder units are labelled with the province name only (P0-2).

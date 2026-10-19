@@ -60,7 +60,7 @@ npm run dev
 
 Then open [http://localhost:3000](http://localhost:3000).
 
-Routes: `/`, `/explore`, `/lab`, `/simulate`.
+Routes: `/`, `/explore`, `/lab`, `/access`, `/simulate`, `/policy`.
 
 ### Python / ML environment
 
@@ -75,8 +75,14 @@ pip install -r requirements.txt
 
 Copy `.env.example` files to `.env.local` (frontend) / `.env` (ml) and fill in
 values as needed. No real credentials are included in this repository.
+Only `ml/.env.example` exists today; the frontend's optional map variables
+are listed in [docs/architecture.md](docs/architecture.md#environment-and-runtime-requirements).
 
 ## Documentation
+
+Start at the documentation index, [docs/README.md](docs/README.md): what each
+document covers, what is real versus demo, and the backlog in
+[docs/next-steps.md](docs/next-steps.md).
 
 See [docs/architecture.md](docs/architecture.md) for the high-level system
 architecture, and [docs/dengue-pipeline.md](docs/dengue-pipeline.md) for the
