@@ -1,0 +1,53 @@
+{
+  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Licences were checked on the HDX dataset pages on 2026-10-17.",
+  "sources": [
+    {
+      "id": "hdx-doh-epi-dengue",
+      "title": "Philippine Dengue Cases and Deaths — DOH-Epi Dengue Data 2016-2021.csv",
+      "publisher": "Cirrolytix (HDX organisation); data attributed to DOH Epidemiology Bureau",
+      "datasetUrl": "https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths",
+      "url": "https://data.humdata.org/dataset/ac63a95e-7296-42fb-802b-7f7541c73e45/resource/9e839677-3ff0-44b3-992c-1a99e68df515/download/doh-epi-dengue-data-2016-2021.csv",
+      "dir": "hdx_dengue",
+      "file": "doh-epi-dengue-data-2016-2021.csv",
+      "license": "CC BY (Creative Commons Attribution International)",
+      "upstreamModified": "2022-05-02",
+      "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c"
+    },
+    {
+      "id": "cod-ab-phl",
+      "title": "Philippines - Subnational Administrative Boundaries (COD-AB v03), tabular attributes",
+      "publisher": "OCHA FISS; source NAMRIA and PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+      "url": "https://data.humdata.org/dataset/caf116df-f984-4deb-85ca-41b349d3f313/resource/159ffd3d-679f-431c-812f-b6d6f957045e/download/phl_admin_boundaries.xlsx",
+      "dir": "cod_ab_phl",
+      "file": "phl_admin_boundaries.xlsx",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2026-05-28",
+      "sha256": "3fbaa5f9aab058960ec48e8c8c490b8c7e1257db911913f967d70a7497091f49"
+    },
+    {
+      "id": "cod-ps-phl-adm1-2022",
+      "title": "Philippines - Subnational Population Statistics, admin 1, 2022 projection",
+      "publisher": "UNFPA; source PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ps-phl",
+      "url": "https://data.humdata.org/dataset/5a466c38-32a2-47de-ba36-70530505df98/resource/f80291eb-3e22-4716-bc1a-b046de27d067/download/phl_admpop_adm1_2022.csv",
+      "dir": "cod_ps_phl",
+      "file": "phl_admpop_adm1_2022.csv",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2021-10-25",
+      "sha256": "40ac6ef448da123185e32ea48e4ba9b3dd7e9e0f1ddd325076a379a45c4b19a3"
+    },
+    {
+      "id": "cod-ps-phl-adm2-2022",
+      "title": "Philippines - Subnational Population Statistics, admin 2, 2022 projection (v2)",
+      "publisher": "UNFPA; source PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ps-phl",
+      "url": "https://data.humdata.org/dataset/5a466c38-32a2-47de-ba36-70530505df98/resource/04cad68c-f7fb-43b0-94bf-af78eea7f982/download/phl_admpop_adm2_2022_v2.csv",
+      "dir": "cod_ps_phl",
+      "file": "phl_admpop_adm2_2022_v2.csv",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2022-07-28",
+      "sha256": "dd06a7d799371900580c93e2ee8d1d63e6c0ee4ca2899d4e8a8a68a33a3eb063"
+    }
+  ]
+}
