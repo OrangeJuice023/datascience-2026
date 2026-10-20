@@ -67,7 +67,7 @@ export function PolicyCopilot({
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/policy-chat", {
+      const res = await fetch("/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,19 +78,20 @@ export function PolicyCopilot({
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const errMsg = data.error || "Failed to generate response. Please try again.";
+        const errMsg =
+          body?.error?.message ||
+          body?.error ||
+          "Failed to generate response. Please try again.";
         setError(errMsg);
         return;
       }
 
-      if (data.reply) {
-        setMessages([
-          ...nextHistory,
-          { role: "assistant", content: data.reply },
-        ]);
+      const reply = body?.data?.reply || body?.reply;
+      if (reply) {
+        setMessages([...nextHistory, { role: "assistant", content: reply }]);
       } else {
         setError("Received empty response from server.");
       }
@@ -106,11 +107,6 @@ export function PolicyCopilot({
     setError(null);
   }
 
-  /**
-   * Sigi mirrors what the copilot is doing, not what it found. A failure
-   * shows the concerned pose and a request in flight shows the working pose;
-   * nothing here implies that a condition was detected.
-   */
   const sigiState = isLoading
     ? "thinking"
     : error
@@ -141,7 +137,7 @@ export function PolicyCopilot({
         </div>
         <div className="flex items-center gap-2">
           <Sigi state={sigiState} size={40} />
-          <Button variant="ghost"  onClick={clearConversation} disabled={messages.length === 0 && !error}>
+          <Button variant="ghost" onClick={clearConversation} disabled={messages.length === 0 && !error}>
             New conversation
           </Button>
         </div>
@@ -183,7 +179,7 @@ export function PolicyCopilot({
               </p>
             )}
           </div>
-          <Button variant="ghost"  onClick={() => setError(null)} className="h-7 px-2 text-xs">
+          <Button variant="ghost" onClick={() => setError(null)} className="h-7 px-2 text-xs">
             Dismiss
           </Button>
         </div>
@@ -201,8 +197,7 @@ export function PolicyCopilot({
                 key={idx}
                 type="button"
                 onClick={() => sendMessage(p)}
-                disabled={isLoading}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-sm transition hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+                className="rounded-full border border-slate-300 px-3 py-1 text-left text-xs text-slate-600 transition hover:border-accent hover:text-accent"
               >
                 {p}
               </button>
@@ -211,30 +206,27 @@ export function PolicyCopilot({
         </div>
       )}
 
-      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-        <label htmlFor="policy-copilot-input" className="sr-only">
-          Ask the Policy Copilot
-        </label>
+      <div className="flex flex-col gap-2">
         <textarea
-          id="policy-copilot-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask the Policy Copilot about this signal, LGU response, or evidence gaps..."
+          className="min-h-[80px] w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               sendMessage();
             }
           }}
-          placeholder="Ask about this context... (Ctrl/Cmd+Enter to send)"
-          rows={2}
-          className="flex-1 resize-none rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          disabled={isLoading}
         />
-        <Button type="submit" disabled={!input.trim() || isLoading}>
-          <Send className="mr-2 h-4 w-4" />
-          Send
-        </Button>
-      </form>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-500">Responses are AI-generated over demo evidence; verify before use.</p>
+          <Button onClick={() => sendMessage()} disabled={isLoading || !input.trim()}>
+            <Send className="mr-1.5 h-4 w-4" />
+            Send
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 }
