@@ -2,6 +2,7 @@ import { withErrors } from "@/lib/api/route";
 import { ApiError } from "@/lib/api/envelope";
 import { assertKnownParams, parseQuery } from "@/lib/api/query";
 import { getAllPolicyEvidence, POLICY_RESEARCH_PACK } from "@/data/policy-evidence";
+import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
 import type { VerificationStatus } from "@/lib/policy-evidence/types";
 
 const KNOWN_PARAMS = ["locationId", "topic", "verificationStatus"] as const;
@@ -23,11 +24,11 @@ export const GET = withErrors(async (request: Request) => {
   const query = parseQuery(url);
   assertKnownParams(query, KNOWN_PARAMS);
 
-  let records = getAllPolicyEvidence();
+  let records: PolicyEvidenceRecord[] = getAllPolicyEvidence();
 
   const locationId = query.get("locationId");
   if (locationId !== undefined) {
-    records = records.filter((r: any) => r.locationId === locationId || r.locationId === null);
+    records = records.filter((r: PolicyEvidenceRecord) => r.locationId === locationId || r.locationId === null);
   }
 
   const topic = query.get("topic");
@@ -37,7 +38,7 @@ export const GET = withErrors(async (request: Request) => {
         topic: [`expected one of ${ALLOWED_TOPICS.join(", ")}`],
       });
     }
-    records = records.filter((r: any) => r.topic === topic);
+    records = records.filter((r: PolicyEvidenceRecord) => r.topic === (topic as PolicyEvidenceRecord["topic"]));
   }
 
   const verificationStatus = query.get("verificationStatus");
@@ -48,12 +49,18 @@ export const GET = withErrors(async (request: Request) => {
         { verificationStatus: [`expected one of ${ALLOWED_VERIFICATION.join(", ")}`] },
       );
     }
-    records = records.filter((r: any) => r.verificationStatus === verificationStatus);
+    records = records.filter((r: PolicyEvidenceRecord) => r.verificationStatus === (verificationStatus as VerificationStatus));
   }
 
   return {
     data: {
-      researchPack: POLICY_RESEARCH_PACK,
+      researchPack: {
+        id: POLICY_RESEARCH_PACK.id,
+        version: POLICY_RESEARCH_PACK.version,
+        name: POLICY_RESEARCH_PACK.name,
+        ingestedOn: POLICY_RESEARCH_PACK.ingestedOn,
+        sources: POLICY_RESEARCH_PACK.sources,
+      },
       records,
       limitations: POLICY_RESEARCH_PACK.limitations,
     },
