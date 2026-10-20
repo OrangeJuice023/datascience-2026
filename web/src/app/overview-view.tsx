@@ -10,6 +10,7 @@ import { MapPanel } from "@/components/maps/map-panel";
 import { MapLegend } from "@/components/maps/map-legend";
 import { SignalTable } from "@/components/dashboard/signal-table";
 import { ProcessStrip } from "@/components/dashboard/process-strip";
+import { Sigi, sigiStateForData } from "@/components/mascot/sigi";
 import { DEMO_SIGNALS } from "@/data/demo-signals";
 import { getLguById } from "@/data/demo-lgus";
 import { signalsToMapMarkers } from "@/lib/map-markers";
@@ -53,6 +54,18 @@ export function OverviewView({ formal }: { formal: FormalSummary | null }) {
       />
 
       <ProcessStrip />
+
+      <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white/60 p-3 sm:p-4">
+        <Sigi state={sigiStateForData({ connected: formal !== null, hasResult: formal !== null })} size={72} />
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-semibold text-slate-900">Sigi, the SIGMA companion</p>
+          <p className="text-xs text-slate-500">
+            {formal
+              ? "The historical national record is loaded. The signals on this page are demo data, and the anomaly model is not fitted."
+              : "The formal record could not be read. Nothing on this page describes current conditions."}
+          </p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {formal ? (

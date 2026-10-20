@@ -5,6 +5,7 @@ import { Send, MessageCircle, AlertTriangle, RefreshCw, Sparkles } from "lucide-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Sigi } from "@/components/mascot/sigi";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
@@ -105,6 +106,21 @@ export function PolicyCopilot({
     setError(null);
   }
 
+  /**
+   * Sigi mirrors what the copilot is doing, not what it found. A failure
+   * shows the concerned pose and a request in flight shows the working pose;
+   * nothing here implies that a condition was detected.
+   */
+  const sigiState = isLoading
+    ? "thinking"
+    : error
+      ? "error"
+      : input.trim().length > 0
+        ? "listening"
+        : messages.length > 0
+          ? "responding"
+          : "idle";
+
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -124,6 +140,7 @@ export function PolicyCopilot({
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Sigi state={sigiState} size={40} />
           <Button variant="ghost"  onClick={clearConversation} disabled={messages.length === 0 && !error}>
             New conversation
           </Button>
