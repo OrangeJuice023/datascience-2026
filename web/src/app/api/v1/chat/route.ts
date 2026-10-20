@@ -12,7 +12,14 @@ import { methodNotAllowed, withErrors } from "@/lib/api/route";
  * model provider is configured the request is refused rather than answered
  * with a placeholder reply.
  */
+import { rateLimited } from "@/lib/api/chat";
+
 export const POST = withErrors(async (request: NextRequest) => {
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+  const retryAfter = rateLimited(ip);
+  if (retryAfter !== null) {
+    throw ApiError.rateLimited('Too many requests. Please try again later.', retryAfter);
+  }
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (contentLength > LIMITS.maxBodyBytes) {
     throw ApiError.payloadTooLarge("The request body is too large.");
@@ -39,3 +46,6 @@ export const POST = withErrors(async (request: NextRequest) => {
 });
 
 export const GET = methodNotAllowed(["POST"]);
+
+
+
