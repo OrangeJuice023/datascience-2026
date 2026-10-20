@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { XCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { PolicyCopilot } from "@/components/policy/policy-copilot";
 import { Card } from "@/components/ui/card";
 import { SelectFilter } from "@/components/ui/select-filter";
 import { SignalBadge } from "@/components/ui/signal-badge";
@@ -158,6 +159,13 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
               <p className="mt-3 text-sm text-slate-500">No access indicators need review.</p>
             )}
           </Card>
+
+          <PolicyCopilot
+            disease={disease}
+            locationId={effectiveLocationId}
+            locationName={lgu?.name}
+            hasSignal={!!signal}
+          />
 
           <Card className="p-5">
             <div className="flex items-center gap-2">
