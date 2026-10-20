@@ -26,16 +26,17 @@ export function getComparison(): ComparisonRow[] {
       if (!byTopic[r.topic]) byTopic[r.topic] = [];
       byTopic[r.topic].push(`${r.verificationStatus}: ${r.claim} (${r.sourceRef || r.sourceTitle})`);
     }
+    const gaps = recs.flatMap((r) => (r.unresolvedQuestions || []).map((q) => `${q} (${r.sourceRef || r.evidenceId})`));
     return {
       city: c.city,
       locationId: c.locationId,
       policyAdoption: (byTopic["policy_adoption_mandate"] || []).join(" | ") || "Not established in reviewed sources.",
       implementation: (byTopic["implementation_organizational"] || []).join(" | ") || "Not established in reviewed sources.",
-      alertToResponse: "Not established in reviewed sources.",
+      alertToResponse: recs.some((r) => r.topic === "governance_accountability" || (r.claim && r.claim.toLowerCase().includes("alert-to-response"))) ? ((byTopic["governance_accountability"] || []).join(" | ")) : "Not established in reviewed sources.",
       surveillanceReporting: (byTopic["surveillance_reporting"] || []).join(" | ") || "Not established in reviewed sources.",
       financial: (byTopic["budget_procurement_fiscal"] || []).join(" | ") || "Not established in reviewed sources.",
       outcomes: (byTopic["reported_outcomes"] || []).join(" | ") || "Not established in reviewed sources.",
-      gaps: (byTopic["evidence_gaps_unresolved"] || []).flatMap((x) => (POLICY_EVIDENCE_RECORDS.filter((r) => r.locationId === c.locationId).flatMap((r2) => r2.unresolvedQuestions))).join(" | ") || "See gaps listed in registry.",
+      gaps: gaps.length > 0 ? gaps.join(" | ") : "None documented.",
     };
   });
 }
