@@ -192,3 +192,24 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
     limitations: [...CHAT_LIMITATIONS],
   };
 }
+
+const rateLimitMap = new Map<string, { count: number; reset: number }>();
+
+function checkRateLimit(ip: string, limit = 30, windowMs = 60000) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || entry.reset < now) {
+    rateLimitMap.set(ip, { count: 1, reset: now + windowMs });
+    return null;
+  }
+  if (entry.count >= limit) {
+    return Math.ceil((entry.reset - now) / 1000);
+  }
+  entry.count++;
+  return null;
+}
+
+export function rateLimited(ip: string | null | undefined) {
+  if (!ip) return null;
+  return checkRateLimit(ip, 30, 60000);
+}
