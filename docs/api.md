@@ -195,5 +195,5 @@ error mapping; see [mobile.md](mobile.md).
 
 There is none. The API is read-only and serves public or simulated data.
 `POST /api/v1/chat` does reach a paid model provider, so it inherits the
-same exposure profile as the existing `/api/policy-chat` route: it is
+is the only intended chat endpoint (the legacy `/api/policy-chat` route has been removed). It is
 intended for a prototype deployment, not for public exposure.

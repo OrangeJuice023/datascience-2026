@@ -54,7 +54,7 @@ export const EARS_ENGINE = {
   name: "CDC EARS C1/C2/C3",
   location: "ml/ears.py (Python), ml/clean_dengue.py, ml/qa/",
   method: "C1: 7-week baseline, C2: 7-week baseline with 2-week lag, C3: sum of max(0, C2-1) over three weeks. Thresholds 3.0 (C1/C2) and 2.0 (C3); minimum 5 of 7 usable baseline weeks; standard deviation floored at 1; minimum 5 cases to alarm.",
-  dataWindow: "2016-10-01 to 2021-03-01 (261 weeks)",
+  dataWindow: "2016-01-10 to 2021-01-03 (261 weeks)",
   geographicScope: "National plus 126 provinces and cities",
 } as const;
 

@@ -28,7 +28,7 @@ from any working directory.
 
 | Decision | Detail |
 |---|---|
-| Common range | 10/01/2016 – 03/01/2021 (261 weeks). This is the local data's span minus its last week, which was extracted before most reports arrived. |
+| Common range | 2016-01-10 to 2021-01-03 (261 weeks). This is the local data's span minus its last week, which was extracted before most reports arrived. |
 | Complete calendar | Every series has every week. Missing weeks are **null rows**: never deleted, zero-filled or interpolated, because EARS baselines must cover consecutive weeks. |
 | Columns kept | National: `geographic_level`, `period_start`, `value`. Local: everything except `deaths`. |
 | Name fixes | BASILIG CITY → BISLIG CITY, NUEVA VISCAYA → NUEVA VIZCAYA, SISQUIJOR → SIQUIJOR; REGION VII-EASTERN VISAYAS → REGION VIII-EASTERN VISAYAS; casing and whitespace normalised. |
