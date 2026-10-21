@@ -12,6 +12,7 @@ export const EVIDENCE_KIND: Record<ModeEvidence, EvidenceKind> = {
 import { ACCESS_MODE } from "./access";
 import { ANOMALY_MODE } from "./anomaly";
 import { DISEASE_MODE } from "./disease";
+import { SIGMA_MODE } from "./sigma";
 import { SIGNALS_MODE } from "./signals";
 import { SIMULATION_MODE } from "./simulation";
 
@@ -34,6 +35,7 @@ export const MAP_MODES: MapModeDefinition[] = [
   SIGNALS_MODE,
   DISEASE_MODE,
   ANOMALY_MODE,
+  SIGMA_MODE,
   ENVIRONMENT_MODE,
   ACCESS_MODE,
   SIMULATION_MODE,
