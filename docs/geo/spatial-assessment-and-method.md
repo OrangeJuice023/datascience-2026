@@ -198,7 +198,7 @@ PR #2 (`ml/clean_dengue.py`, `ml/ears.py`, [docs/dengue-pipeline.md](../dengue-p
 | Missing weeks (2019-01-06; Davao Occidental 2016) | Complete weekly grid, null rows, never zero-filled | Agrees |
 | Name typos (Basilig, Viscaya, Sisquijor) | Fixed in `LOC_FIXES` | Agrees. Join `geography_name` to the new crosswalk column `ml_geography_name`; all 126 match. |
 | Province rows exclude cities (A1) | National ≈ 0.93 × sum of local | Agrees with the 1.02–1.15× ratio here; still unproven |
-| Swap rows (A4) | Not handled; `deaths` is dropped, so the swap cannot be seen | **Open.** 611 of the 665 rows hold 0 cases and are kept as `ok`. Only 13 get a `data_flag` (the blocks alternate weeks, so the 4-zero-week rule rarely fires). |
+| Swap rows (A4) | Not handled; `deaths` is dropped, so the swap cannot be seen | **Open; tracked as a separate fix to `clean_dengue.py`** (agreed in review of the geography PR, 2026-10-21). 611 of the 665 rows hold 0 cases and are kept as `ok`. Only 13 get a `data_flag` (the blocks alternate weeks, so the 4-zero-week rule rarely fires). |
 | Date semantics (A5) | `date` taken as the week start | Open. National lead times use OpenDengue and are not affected; local timing may shift by 1–2 weeks. |
 | Davao del Sur + Occidental merge | Davao Occidental 2016 is null | Acceptable; merge still needed for any 2016 map |
 
@@ -207,3 +207,12 @@ PR #2 (`ml/clean_dengue.py`, `ml/ears.py`, [docs/dengue-pipeline.md](../dengue-p
 - changes the DOH status of 86 other unit-weeks, through the 2016–2017 baseline years.
 
 The 2019 national findings are not affected. Proposed fix for `clean_dengue.py`: mark the rows as `data_quality = "suspect swap"` before `deaths` is dropped. Use the rule in `scripts/geo/build-geo.mjs`: a row out of date order in a week where at least 10 units have one.
+
+**Until that fix lands, do not rely on local (reporting-unit) EARS results for 2016, 2017, 2020 and
+January 2021, or on any local DOH-threshold result** (these start in 2019, and their 3-year
+baselines include 2016, 2017 or 2020; report §5.1). National results are not affected.
+
+**Why not "deaths > cases"?** The documentation audit on `docs/documentation-pack` counts 586 rows
+with deaths > cases. 581 of them are swap rows; the other 5 are isolated rows outside the blocks.
+That rule would miss 84 of the 665 swap rows (those with deaths ≤ cases), so the fix should use the
+swap-block rule above.
