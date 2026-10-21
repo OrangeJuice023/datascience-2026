@@ -67,6 +67,20 @@
       "pinnedRetrievedAt": "2026-10-21T16:00:00+08:00"
     },
     {
+      "id": "geoboundaries-phl-adm3",
+      "title": "geoBoundaries gbOpen PHL ADM3 (2020), simplified GeoJSON",
+      "publisher": "William & Mary geoLab (geoBoundaries); source NAMRIA, PSA, OCHA Philippines",
+      "datasetUrl": "https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM3/",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/PHL/ADM3/geoBoundaries-PHL-ADM3_simplified.geojson",
+      "dir": "geoboundaries_phl",
+      "file": "geoBoundaries-PHL-ADM3_simplified.geojson",
+      "license": "CC BY 3.0 IGO",
+      "attribution": "geoBoundaries (Runfola et al. 2020), CC BY 3.0 IGO; boundaries from NAMRIA, PSA and OCHA Philippines",
+      "upstreamModified": "2023-12-12",
+      "sha256": "2ece3d44a5c6a2afb385ffbf3a6b88d83e4d3a3e7eed9a52cb3be1bc59e289fc",
+      "pinnedRetrievedAt": "2026-10-21T17:45:00+08:00"
+    },
+    {
       "id": "psa-psgc",
       "title": "Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile",
       "publisher": "Philippine Statistics Authority (PSA)",
