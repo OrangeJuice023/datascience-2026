@@ -121,6 +121,7 @@ def episodes(df, keys):
 # ---------------- regions (aggregated from local) ----------------
 def regional():
     src = SRC["LOCAL"]
+    src = src.assign(value=src.value.where(src.data_quality == "ok"))  # suspect swap rows count as missing
     g = (src.groupby(["region", "period_start"])
             .agg(value=("value", lambda v: v.sum() if v.notna().all() else np.nan),
                  flagged=("data_flag", lambda f: f.notna().any()))
