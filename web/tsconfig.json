@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@sigma/contracts": ["../packages/sigma-contracts/src/index.ts"]
     }
   },
   "include": [
