@@ -3,4 +3,9 @@
 # modules are actually implemented.
 numpy
 pandas
-openpyxl  # environment.export --hub writes the team workbook
+# Dengue pipeline: Excel input/output (ml/clean_dengue.py, ml/ears.py);
+# environment.export --hub writes the team workbook
+openpyxl
+# QA reports (ml/qa/): charts and PDF output
+matplotlib
+reportlab
