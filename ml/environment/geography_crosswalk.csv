@@ -1,0 +1,13 @@
+geography_id,geography_name,hdx_doh_epi_loc,hdx_doh_epi_province,latitude,longitude,coordinate_source,notes
+PH015518000,Dagupan City,DAGUPAN CITY,,,,,
+PH034919000,Palayan City,,,,,,No separate HDX DOH-Epi series
+PH050506000,Legazpi City,,,,,,No separate HDX DOH-Epi series
+PH063022000,Iloilo City,ILOILO CITY,ILOILO,,,,CCHAIN PIDSR series matches HDX Iloilo province; see build.SPATIAL_MISMATCH
+PH072230000,Mandaue City,MANDAUE CITY,,,,,
+PH083747000,Tacloban City,TACLOBAN,LEYTE,,,,
+PH097332000,Zamboanga City,ZAMBOANGA CITY,,,,,
+PH104305000,Cagayan de Oro City,CAGAYAN DE ORO CITY,,,,,
+PH112402000,Davao City,DAVAO CITY,,,,,
+PH137401000,City of Mandaluyong,MANDALUYONG CITY,,,,,
+PH137503000,City of Navotas,NAVOTAS CITY,,,,,
+PH137603000,City of Muntinlupa,MUNTINLUPA CITY,,,,,

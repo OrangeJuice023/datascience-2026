@@ -3,3 +3,4 @@
 # modules are actually implemented.
 numpy
 pandas
+openpyxl  # environment.export --hub writes the team workbook

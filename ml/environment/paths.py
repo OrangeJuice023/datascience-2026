@@ -53,6 +53,6 @@ def verified_inputs(source: str, names: list[str]) -> dict:
             raise SystemExit(f"{source}/{name} does not match its manifest sha256; "
                              "run `python -m environment.fetch --force`")
         inputs[f"{source}/{name}"] = {
-            k: entry[k] for k in ("sha256", "retrieved_at", "upstream_last_modified", "url")
+            k: entry.get(k) for k in ("sha256", "retrieved_at", "upstream_last_modified", "url")
         }
     return inputs
