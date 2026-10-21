@@ -8,23 +8,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 import errorGif from '@/assets/mascot/sigi/error.gif';
-import errorPng from '@/assets/mascot/sigi/error.png';
 import greetingGif from '@/assets/mascot/sigi/greeting.gif';
-import greetingPng from '@/assets/mascot/sigi/greeting.png';
 import idleGif from '@/assets/mascot/sigi/idle.gif';
-import idlePng from '@/assets/mascot/sigi/idle.png';
 import insightGif from '@/assets/mascot/sigi/insight.gif';
-import insightPng from '@/assets/mascot/sigi/insight.png';
 import listeningGif from '@/assets/mascot/sigi/listening.gif';
-import listeningPng from '@/assets/mascot/sigi/listening.png';
 import respondingGif from '@/assets/mascot/sigi/responding.gif';
-import respondingPng from '@/assets/mascot/sigi/responding.png';
 import successGif from '@/assets/mascot/sigi/success.gif';
-import successPng from '@/assets/mascot/sigi/success.png';
 import thinkingGif from '@/assets/mascot/sigi/thinking.gif';
-import thinkingPng from '@/assets/mascot/sigi/thinking.png';
 import unavailableGif from '@/assets/mascot/sigi/unavailable.gif';
-import unavailablePng from '@/assets/mascot/sigi/unavailable.png';
 
 /**
  * Sigi, the SIGMA companion.
@@ -40,15 +31,15 @@ import unavailablePng from '@/assets/mascot/sigi/unavailable.png';
  */
 
 const SOURCES: Record<SigiState, { animated: number; still: number }> = {
-  idle: { animated: idleGif, still: idlePng },
-  greeting: { animated: greetingGif, still: greetingPng },
-  listening: { animated: listeningGif, still: listeningPng },
-  thinking: { animated: thinkingGif, still: thinkingPng },
-  responding: { animated: respondingGif, still: respondingPng },
-  insight: { animated: insightGif, still: insightPng },
-  unavailable: { animated: unavailableGif, still: unavailablePng },
-  error: { animated: errorGif, still: errorPng },
-  success: { animated: successGif, still: successPng },
+  idle: { animated: idleGif, still: idleGif },
+  greeting: { animated: greetingGif, still: greetingGif },
+  listening: { animated: listeningGif, still: listeningGif },
+  thinking: { animated: thinkingGif, still: thinkingGif },
+  responding: { animated: respondingGif, still: respondingGif },
+  insight: { animated: insightGif, still: insightGif },
+  unavailable: { animated: unavailableGif, still: unavailableGif },
+  error: { animated: errorGif, still: errorGif },
+  success: { animated: successGif, still: successGif },
 };
 
 const STATE_PURPOSE: Record<SigiState, string> = {
