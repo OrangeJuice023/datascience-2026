@@ -5,7 +5,16 @@ Node ≥ 20, no npm dependencies.
 ```bash
 node scripts/geo/fetch-sources.mjs   # download HDX dengue, COD-AB, COD-PS, CCHAIN location.csv into data/raw/ and verify SHA-256 of all inputs
 node scripts/geo/build-geo.mjs       # rebuild every geography output (deterministic)
+node scripts/geo/build-boundaries.mjs  # map polygons for the 126 units (needs build-geo.mjs output)
 ```
+
+`build-boundaries.mjs` gives each geoBoundaries ADM3 polygon (2020, names only) the COD-AB admin-3
+units whose centre falls inside it, dissolves the polygons into the 126 reporting units, and
+simplifies shared borders arc by arc so neighbours keep one common line. Last run: 1,647 polygons,
+1,642 / 1,642 COD-AB centres placed, 13 polygons with no centre took the nearest one, no polygon
+shared by two units; unit areas are 0.97–1.04× COD-AB. A few slivers between geoBoundaries
+polygons show as tiny holes (one in Bulacan). The polygons are for display only (signal-state
+fills and selection), never for case values.
 
 Before `fetch-sources.mjs`, put the PSA PSGC file in `data/raw/psa_psgc/` by hand (see the table
 below). Every other input is downloaded and hash-checked.
@@ -35,6 +44,7 @@ Last checked on 2026-10-21 from a fresh clone of `feat/geography-track` with onl
 | `data/reference/geo/cchain_city_crosswalk.csv` | Project CCHAIN city codes → COD-AB / PSA code / HDX reporting unit (environment track) | Generated |
 | `docs/geo/geo-data-quality-report.md` | Data-quality report | Generated |
 | `web/src/data/geo/hdx-reporting-units.json` | Frontend fixture: entities, aggregation map, coverage | Generated |
+| `web/public/geo/hdx-reporting-units.geojson` | Display polygons for the 126 units (geoBoundaries, CC BY 3.0 IGO), built by `build-boundaries.mjs` | Generated |
 | `data/processed/geo/*.csv` | Admin reference and coverage tables (not committed) | Generated |
 
 Interpretation, supported resolutions and the spatial method:
