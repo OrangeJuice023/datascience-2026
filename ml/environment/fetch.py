@@ -39,7 +39,11 @@ def fetch(force: bool = False) -> None:
                 urllib.request.urlretrieve(res["url"], path)
                 retrieved = datetime.now(timezone.utc).isoformat(timespec="seconds")
             else:
-                retrieved = manifest.get(name, {}).get("retrieved_at")
+                entry = manifest.get(name)
+                if entry and entry["sha256"] != sha256(path):
+                    raise SystemExit(f"{key}/{name} changed since it was fetched; "
+                                     "use --force to re-download")
+                retrieved = entry["retrieved_at"] if entry else None
             manifest[name] = {
                 "dataset": spec["dataset"],
                 "url": res["url"],

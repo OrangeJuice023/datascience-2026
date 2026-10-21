@@ -17,6 +17,18 @@
 > crosscheck (best offset −13 d, 9 modeling cities). Only the `inputs`
 > provenance block changed format.
 >
+> **Update, 2026-10-20. Two weather sources, one week, one geography key.**
+> CCHAIN is the primary weather source for modeling; Open-Meteo (ERA5) extends
+> it past 2022 and to LGUs outside CCHAIN. Decided: Sunday–Saturday MMWR weeks
+> (§4.2) and COD-AB pcodes as `geography_id` (§4.6). Both sources are built on
+> the same city-week grid (`city_weekly_weather.csv`, one row per city × week
+> × source) and compared on their 2008–2022 overlap (§4.7). Temperature and
+> humidity agree; **rainfall does not** (CHIRPS vs ERA5), so rainfall is never
+> substituted across sources (§4.8). The hub ENVIRONMENT tab and the web
+> `EnvironmentalObservation` contract now carry this table (§9).
+> `python -m environment.validate` passes all 34 checks, and a full rebuild
+> reproduces every output byte for byte. Still no model fitted.
+>
 > Nothing here establishes that weather causes dengue. Every relationship this
 > track estimates is a conditional association in observational data.
 
@@ -52,7 +64,7 @@
 | **HDX DOH-Epi Dengue 2016–2021** (Cirrolytix) | DOH-EB weekly cases and deaths | Province / HUC (126 locations) | Weekly (Sunday dates), 2016-01-10 → 2021-01 | CC BY 4.0 | **Cross-check only** for this track (no climate attached); primary for the EARS track |
 | CHIRPS (UCSB CHC), direct | Rainfall | 0.05° | Daily, 1981 → near present, 50°S–50°N | Public domain ("waived all copyright", CHC). **v2 production ends after Dec 2026; v3 now available** | Needed only to extend beyond 2022 or the 12 cities |
 | ERA5 single levels (Copernicus CDS), direct | Temperature, humidity, etc. | 0.25° | Hourly, 1940 → present; ERA5T latency ~5 days, final ~2–3 months | CC BY (CDS page); needs CDS account | Same as above |
-| Open-Meteo historical API | ERA5-based reanalysis served as point time series | Point (interpolated grid) | Hourly/daily | Data CC BY 4.0; **free tier non-commercial only**, < 10 000 calls/day | **Not recommended as primary.** Same upstream as CCHAIN's ERA5, but point values, not area/population-weighted. Fallback for non-CCHAIN areas |
+| Open-Meteo historical API | ERA5 reanalysis served as point time series | One 0.25° ERA5 cell (`models=era5`, `elevation=nan`) | Daily (PHT), 1940 → ~6 days ago | Data CC BY 4.0; **free tier non-commercial only**, < 10 000 calls/day | **Extension source** (decided 2026-10-20): after 2022 and for LGUs outside CCHAIN. Fetched 2007-12-30 → 2026-10-10 for the 12 CCHAIN cities. Pinned to ERA5 only (the default `best_match` blends ERA5-Land and IFS from 2017). Rainfall is ERA5, not CHIRPS (§4.7) |
 | NASA POWER daily API | Rain (PRECTOTCORR), T2M, etc. | MERRA-2 native grid (API header: source MERRA2) | Daily; tested 2022 call returns data | Licence not stated on the API page checked; **unverified** | Optional sensitivity check (independent reanalysis) |
 | PAGASA station data | Station rainfall, temperature, RH | Station points | Daily | By request: letter + signed CADS-07 terms of use; free for non-commercial/academic at PAGASA's discretion; **use limited to the stated purpose** | Gold standard for validation, but slow to obtain and not redistributable by default. Request only if the gate in §7 is passed |
 | NOAA CPC ONI (ENSO) | Niño-3.4 SST anomaly, 3-month running mean | Basin-wide | Monthly-seasonal, 1950 → JAS 2026 (latest JAS 2026 = **+2.16**) | US Gov public data | **Context only.** One national series, cannot explain city differences |
@@ -78,10 +90,21 @@ static hazard area, not events).
 Reproduce from `ml/`:
 
 ```
-python -m environment.fetch       # data/raw/<source>/ + data/raw/<source>/manifest.json
-python -m environment.build       # city-week tables + quality_report.json
-python -m environment.crosscheck  # crosscheck.json
+python -m environment.fetch       # HDX files -> data/raw/<source>/ + manifest.json
+python -m environment.geography   # geography.csv (ids, centroids, HDX names)
+python -m environment.open_meteo  # ERA5 per city-year -> data/raw/open_meteo/ + manifest.json
+python -m environment.build       # city_weekly_dengue.csv, city_weekly_weather.csv, quality_report.json
+python -m environment.crosscheck  # crosscheck.json (HDX vs CCHAIN, checks the HDX week offset)
+python -m environment.compare     # weather_comparability.{json,csv}
+python -m environment.export --hub ../DATASCIENCE_MASTER_DATA_HUB.xlsx
+                                  # hub_environment.csv, hub ENVIRONMENT tab, web JSON
+python -m environment.validate    # 34 checks; non-zero exit on failure
 ```
+
+The first Open-Meteo fetch is 240 requests (12 cities × 20 years) and took
+about 6 minutes on 2026-10-20 without hitting the rate limit. Cached chunks are
+reused; a chunk is re-fetched only if its city's coordinates or the pinned
+date range change.
 
 `build` and `crosscheck` stop before writing anything if a manifest is missing
 or a raw file no longer matches its manifest SHA-256. Each output records the
@@ -90,18 +113,39 @@ Outputs land in `data/processed/environment/`.
 
 ### 4.1 Grid
 
-- Dengue: complete Monday-week grid per city. Weeks absent upstream stay
-  absent (`status = absent_upstream`). Two weeks are absent in every city:
-  **2012-12-31 and 2018-01-01**, both year-boundary weeks.
-- Climate: daily barangay values → population-weighted city mean (WorldPop
-  2020 weights) → Monday-week. Weekly rainfall is the 7-day sum and is left
-  empty unless all 7 days are present. Weeks with fewer than 7 days are dropped.
+- Dengue: complete Sunday-week grid per city (§4.2). Weeks absent upstream
+  stay absent (`status = absent_upstream`). Two weeks are absent in every
+  city: **2012-12-30 and 2017-12-31** (CCHAIN labels 2012-12-31 and
+  2018-01-01), both year-boundary weeks.
+- Weather, CCHAIN: daily barangay values → population-weighted city mean
+  (WorldPop 2020 weights) → Sunday-week.
+- Weather, Open-Meteo: daily values at one ERA5 cell → Sunday-week.
+- Both: weekly rainfall is the 7-day sum, the other variables are 7-day means
+  of the daily mean/min/max. A weekly value needs all 7 days; otherwise it is
+  left empty and the row is flagged `incomplete_week`. Only weeks fully inside
+  a source's date range are emitted.
 
-### 4.2 Week label (unresolved, about ±1 week)
+### 4.2 Week convention (decided 2026-10-20)
 
-CCHAIN dates are Mondays; HDX DOH-Epi dates are Sundays. Matching the 10
-shared cities over 2016–2020, the best alignment is **HDX date − 13 days =
-CCHAIN Monday** (mean r = 0.83; −6 days gives 0.81). Exact count matches are
+**Canonical week: Sunday–Saturday, keyed by `period_start` (Sunday) and
+`period_end` (Saturday), numbered by the MMWR rule** (epi year = calendar year
+of the week's Wednesday; `environment/weeks.py`). This is what the hub already
+uses (HEALTH_OBSERVATIONS 2012-12-30 → 2013-01-05; DATA_DICTIONARY example)
+and what HDX DOH-Epi dates fall on, so the environment track now matches the
+rest of SIGMA instead of the other way round.
+
+- Weather is daily, so it is aggregated straight onto these weeks. No offset.
+- Weekly dengue labels move by a fixed offset per source
+  (`weeks.SOURCE_WEEK_OFFSET_DAYS`): **CCHAIN Monday − 1 day** (the Sun–Sat week
+  sharing 6 of its 7 days), **HDX Sunday − 14 days** (empirical, below). The
+  original CCHAIN label is kept in `source_week_label`.
+- `crosscheck` re-derives the HDX offset on canonical weeks every run and
+  fails if it no longer matches the configured one.
+
+The remaining uncertainty is about the *meaning* of a label, not the
+convention. Matching the 10 shared cities over 2016–2020, the best alignment
+is **HDX date − 14 days = canonical week** (mean r = 0.83; −7 days gives
+0.81). This is the same as the earlier result of HDX − 13 d = CCHAIN Monday. Exact count matches are
 only 2–32% at any offset, so these are different extracts or reporting
 vintages, not copies. Whether CCHAIN's Monday means week start, and whether it
 refers to onset, consultation or report week, is **not documented**.
@@ -129,12 +173,88 @@ from 2016-01-04, also zero in DOH-Epi, so the gap is upstream at DOH) and
 Muntinlupa/Navotas in 2020 (18 and 22 weeks, COVID period). These weeks are
 excluded from fitting and scoring, never imputed.
 
-### 4.5 Usable cities
+### 4.5 Usable cities (unchanged)
 
 Dagupan, Mandaue, Tacloban, Zamboanga, Cagayan de Oro, Davao, Mandaluyong,
 Navotas, Muntinlupa. Fit window: 2008-01 → 2020-03-15. The 2020-03-16 →
 2022 period is tagged `covid_disruption` and is reported separately, not
 pooled.
+
+### 4.6 Geography key (decided 2026-10-20)
+
+**`geography_id` = OCHA COD-AB pcode** ("PH" + 9-digit PSGC, 2016 COD-AB
+release), e.g. `PH112402000` Davao City. CCHAIN uses these codes, so they need
+no translation. Every cross-source join lives in one tracked file,
+`ml/environment/geography_crosswalk.csv` (pcode ↔ HDX DOH-Epi location and
+province names). `environment.geography` builds `geography.csv` from it, with
+province/region, barangay count, WorldPop 2020 population and the
+**population-weighted centroid of barangay polygons** (CCHAIN
+`brgy_geography`). Open-Meteo is queried at that centroid.
+
+To add an LGU outside CCHAIN, add a crosswalk row with its pcode, name, a
+centroid and `coordinate_source` (a named, verified source). Nothing is
+geocoded from a name. Mapping these pcodes to the current 10-digit PSA PSGC
+and to SIGMA's web ids is for Physics 2. `geography.csv` is ready to seed the
+hub GEOGRAPHY tab, which I have left untouched.
+
+### 4.7 Are CCHAIN and Open-Meteo comparable? (2026-10-20)
+
+`environment.compare`, 12 cities, canonical weeks 2007-12-30 → 2022-12-31
+(~780 weeks per city). Figures are for the 9 modeling cities.
+"Window r" is the correlation of 0–3-week window means of standardised
+anomalies, which is what the model will see. "Disagreement SD" is the SD of
+the difference in those windows, in SD units.
+
+| Variable | Raw weekly | Window r (median / min) | Disagreement SD | Verdict |
+| --- | --- | --- | --- | --- |
+| Mean temperature | bias −0.31 … +0.26 °C, r ≥ 0.985 | 0.994 / 0.979 | 0.08 | raw interchangeable |
+| Min temperature | bias −0.77 … +0.22 °C, r ≥ 0.976 | 0.996 / 0.965 | 0.07 | anomaly interchangeable |
+| Max temperature | bias +0.03 … +0.58 °C, r ≥ 0.977 | 0.992 / 0.980 | 0.09 | anomaly interchangeable |
+| Relative humidity | bias +0.1 … +3.0 pp, r 0.92–0.98 | 0.947 / 0.918 | 0.24 | anomaly interchangeable |
+| **Rainfall** | **ratio 0.67–1.74, r 0.51–0.85** | **0.707 / 0.644** | **0.46** | **not interchangeable** |
+
+Why:
+- **Temperature/humidity are the same product.** Both are ERA5. The residual
+  bias is spatial: one grid cell vs a population-weighted barangay average.
+  It is largest in the big, hilly cities (Cagayan de Oro tmin −0.77 °C,
+  Davao tmax +0.58 °C).
+- **Rainfall is a different product.** CCHAIN uses CHIRPS (0.05°,
+  satellite + gauge); Open-Meteo uses ERA5 (0.25°, model). ERA5 drizzles: at
+  Tacloban it has rain >1 mm on 75% of days vs CHIRPS 50%. Its totals are
+  −33% to +74% off by city. Daily correlation peaks at lag 0 (Davao 0.36,
+  Mandaluyong 0.49, Tacloban 0.54), so this is not a day-boundary artifact.
+  No per-city rescaling can repair a weekly r of 0.5–0.85.
+- Thresholds (`compare.GATE`) are project choices, not published standards:
+  raw needs |bias| ≤ 0.5 °C / 3 pp (rain ratio 0.9–1.1) and r ≥ 0.95 in
+  every modeling city. Anomaly needs window r ≥ 0.8 in every city and median
+  ≥ 0.9.
+
+What a disagreement SD means for model output: a term β per SD of a window
+moves log expected cases by about β × SD just from switching source. For
+rainfall at 0.46, a β of 0.1 is about ±5% in expected cases from the source
+alone. For temperature it is under 1%.
+
+### 4.8 Source policy (enforced in `environment/features.py`)
+
+1. **Rows, not columns.** ENVIRONMENT keeps one row per city × week × source.
+   No row or column mixes sources.
+2. **Anomalies within source.** Model inputs are standardised anomalies
+   against the *same source's* week-of-year climatology, fitted on the
+   training window only (validated: removing later data does not change
+   earlier anomalies). Level and variance differences cancel.
+3. **Primary first.** `model_inputs` takes CCHAIN wherever it has data and
+   Open-Meteo only where CCHAIN does not (after 2022, or non-CCHAIN LGUs).
+   Every row keeps `source_id`, and windows that straddle the 2022/23 splice
+   are flagged `mixed_source_window`.
+4. **No rainfall substitution.** In a spliced series, variables with verdict
+   `not_interchangeable` (rainfall) are left empty on Open-Meteo rows. Rainfall
+   past 2022 or outside CCHAIN therefore needs CHIRPS itself (UCSB CHC,
+   public domain; v2 ends Dec 2026, v3 available), which is **not yet
+   ingested**. A single-source run (`sources=["open_meteo"]`, ERA5 rain
+   everywhere) is internally consistent and allowed, but it is a different
+   model from the CCHAIN one and must be labelled as such.
+5. **Recent weeks are provisional.** Open-Meteo weeks within 92 days of
+   retrieval are ERA5T and flagged `provisional_era5t` (confidence LOW).
 
 ## 5. Proposed modeling approach
 
@@ -214,6 +334,7 @@ are recomputed from training data at each origin, with no look-ahead.
 | Permutation check | M2 beats M2-perm. Otherwise the gain is fit to noise |
 | Coefficient stability | Sign of each lag-window effect is stable across ≥ 80 % of origins |
 | Out-of-period check (descriptive) | Same scores on 2020-03 → 2022, reported separately, not used for the gate |
+| **Source-swap check** | Refit M2 on the same cities and weeks with `sources=["open_meteo"]`. Temperature/humidity coefficients must keep sign and overlap 90 % CIs with the CCHAIN fit. If the log-score gain differs between the two, the difference is attributed to the source, not reported as a climate effect. Any Open-Meteo-only city or period is reported separately from CCHAIN results |
 
 Reported regardless of outcome: per-city scores, coefficient tables with CIs,
 flagged-week counts, and the list of excluded cities with reasons.
@@ -230,38 +351,63 @@ flagged-week counts, and the list of excluded cities with reasons.
 | Model structure | M0/M1/M2 comparison; mechanistic index as alternative |
 | Non-stationarity | COVID excluded; 2019 epidemic sensitivity run |
 | Generalisation | 9 cities only; not transferable |
+| Weather source | Temperature/RH: window disagreement 0.07–0.24 SD. Rainfall: 0.46 SD, so it is not substituted (§4.7–4.8). Open-Meteo is one ERA5 cell, not an area mean |
 
-## 9. PROPOSED input schema and output contract — needs team sign-off
+## 9. Input schema and output contract
 
-### 9.1 Differences from the current hub ENVIRONMENT tab
+### 9.1 Hub ENVIRONMENT tab (implemented 2026-10-20)
 
-The current tab is `date, geography_id, latitude, longitude, temperature_c,
-precipitation_mm, humidity_pct, weather_source, source_url, retrieved_at,
-as_of_date, feature_status, notes`. This assumes daily point weather
-(Open-Meteo style). Proposed changes:
+The old tab (`date, latitude, longitude, temperature_c, …`) assumed daily point
+weather from one source. It is replaced by one row per **geography × week ×
+source**, written by `python -m environment.export --hub` (24 276 rows: CCHAIN
+12 516, Open-Meteo 11 760). Do not hand-edit it; rebuild it.
 
-1. Replace `date` with `period_start` / `period_end` + `temporal_resolution`
-   (matches DATA_DICTIONARY).
-2. Replace `latitude` / `longitude` with `geographic_level` + `aggregation_method`
-   (`population_weighted_mean_of_barangays`). Values are area aggregates, not points.
-3. Add `upstream_product` (ERA5 / CHIRPS), `coverage_days` (0–7), `evidence_type = FORMAL_OBSERVATION`
-   for raw values and `DERIVED` for anomalies/lags, `confidence`, `is_sample`.
-4. Keep anomalies and lags out of ENVIRONMENT. They belong in TRAINING_DATA,
-   rebuilt from source per hub rules.
+`geography_id, geography_name, geographic_level, period_start, period_end,
+epi_year, epi_week, temporal_resolution, source_id, upstream_product,
+aggregation_method, precipitation_mm, temperature_mean_c, temperature_min_c,
+temperature_max_c, humidity_mean_pct, days_observed, qc_flag, confidence,
+coverage_start, coverage_end, grid_cell, source_url, retrieved_at, as_of_date,
+evidence_type, is_sample, notes`
 
-### 9.2 Processed tables (already produced, local, gitignored)
+- **Coverage:** `coverage_start` / `coverage_end` per geography × source
+  (CCHAIN 2003-01-05 → 2022-12-31; Open-Meteo 2007-12-30 → 2026-10-10).
+- **Quality:** `days_observed` (0–7), `qc_flag` (`ok`, `incomplete_week`,
+  `range_check_failed`, `rain_partial_area` (all of Zamboanga: one coastal
+  barangay has no CHIRPS rain), `provisional_era5t`), and `confidence`. CCHAIN
+  ok rows are HIGH. Open-Meteo rows are MEDIUM, because they are a single cell
+  and rainfall is not comparable. Provisional or incomplete rows are LOW.
+- **Long-by-source, wide-by-variable.** One row per source keeps sources
+  apart and makes the overlap directly comparable. Variables as columns keep
+  the tab readable and join cleanly to TRAINING_DATA. New variables are new
+  columns in `sources.WEATHER_VARIABLES`.
+- Anomalies and lags stay out of ENVIRONMENT (hub rule: TRAINING_DATA is
+  rebuilt from source tabs). The 15 new columns are defined in DATA_DICTIONARY.
 
-`data/processed/environment/city_weekly_dengue.csv`:
-`city_pcode, city_name, week_start, week_end, cases, status, period, upstream_id`
-(`status` ∈ reported / absent_upstream / suspected_reporting_gap; `cases` empty when absent)
+### 9.2 Processed tables (local, gitignored)
 
-`data/processed/environment/city_weekly_climate.csv`:
-`city_pcode, week_start, pr_mm, tave_c, tmin_c, tmax_c, rh_pct, min_brgy_with_pr, brgy`
+`data/processed/environment/`:
+- `geography.csv`: §4.6.
+- `city_weekly_dengue.csv`: `geography_id, geography_name, period_start,
+  period_end, epi_year, epi_week, source_week_label, cases, status, period,
+  upstream_id` (`status` ∈ reported / absent_upstream /
+  suspected_reporting_gap; `cases` empty when absent).
+- `city_weekly_weather.csv`: the ENVIRONMENT columns above, without
+  `as_of_date`/`notes`. It replaces `city_weekly_climate.csv`.
+- `weather_comparability.{json,csv}`: §4.7.
+- `hub_environment.csv`: the ENVIRONMENT tab as CSV.
 
-### 9.3 Proposed outputs to the app (not implemented)
+### 9.3 Outputs to the app
 
-- `EnvironmentalCovariate` (evidence category C, badge CONTEXT): one row per
-  geography × week × variable, with `Provenance` (`method: "ingested"`).
+- **Implemented:** `EnvironmentalObservation` and `WeatherCoverage`
+  (`web/src/types/data.ts`), served by
+  `DataProvider.getEnvironmentalObservations(geographyId, {sourceId, from, to})`
+  and `getWeatherCoverage()`. The data comes from
+  `web/src/data/environment-weekly.json` (0.9 MB, columnar, generated by
+  `environment.export`). Evidence category C, badge CONTEXT, `Provenance.method
+  = "ingested"`. Sources are separate records, and every coverage record
+  carries the comparability verdicts so a chart can warn before overlaying
+  rainfall from two sources. No UI uses it yet; the Environment map mode is
+  still "planned".
 - `CovariateAssociation` (category E, MODEL): `runId, geographyId, variable,
   lagWindow, rateRatioPerUnit, lower, upper, intervalLevel, nWeeks,
   evaluation: {logScoreGain, maeRatio, coverage, passedGate}`.
@@ -271,17 +417,21 @@ as_of_date, feature_status, notes`. This assumes daily point weather
 
 ## 10. Open questions for the team
 
-1. **Week convention.** SIGMA's national series uses MMWR (Sunday-start) weeks;
-   CCHAIN uses Monday dates. Which one is canonical, and who owns conversion?
-   (Software Eng / Physics 1)
-2. **Geography IDs.** CCHAIN codes look like 2016-era 9-digit PSGC with a `PH`
-   prefix (`PH112402000`). Does the geography track's canonical ID map to
-   these? (Physics 2)
+1. ~~Week convention~~ **Decided 2026-10-20:** Sun–Sat MMWR (§4.2).
+   Conversion lives in `ml/environment/weeks.py`. Physics 1 / Software Eng
+   should use it for any new weekly source.
+2. **Geography IDs.** *Partly decided 2026-10-20:* COD-AB pcodes for the
+   environment track (§4.6). Still open: how Physics 2's canonical IDs and
+   the web ids map to them, and who seeds the GEOGRAPHY tab. (Physics 2)
 3. **Model output typing.** `ModelOutputBase` requires a health-observation
    `Measure` (cases); a relative change is not one. Extend the type, or add a
    separate scenario type? (Software Eng)
-4. **Open-Meteo.** Do we drop it as the planned source in favour of CCHAIN for
-   the 12 cities? (Whole team)
+4. ~~Open-Meteo~~ **Decided 2026-10-20:** CCHAIN primary, Open-Meteo for
+   extension (§4.8). New: **should we ingest CHIRPS directly** so rainfall can
+   extend past 2022 and outside CCHAIN on the same product? (Physics 3)
+7. **Which LGUs outside CCHAIN?** The pipeline accepts them (§4.6), but none
+   are listed yet. They need pcodes and verified centroids. (Physics 2 /
+   whole team)
 5. **ACT wording.** How should "illustrative, not causal" appear to LGU users?
    (Public Admin)
 6. **Track overlap.** The EARS track uses HDX DOH-Epi provinces; this track uses

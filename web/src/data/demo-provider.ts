@@ -4,7 +4,7 @@ import { DEMO_LGUS, getLguById } from "./demo-lgus";
 import { getTrendSeries } from "./demo-trends";
 import { DISEASES } from "./sample/reference";
 import { getNeighborSummaries } from "@/lib/neighbors";
-import type { AnomalyResult, HealthObservation } from "@/types/data";
+import type { AnomalyResult, EnvironmentalObservation, HealthObservation, WeatherCoverage } from "@/types/data";
 import type { Signal, LGU, TrendPoint, NeighborSummary } from "@/types";
 
 export function filterSignals(signals: Signal[], query?: SignalQuery): Signal[] {
@@ -46,6 +46,14 @@ export class DemoDataProvider implements DataProvider {
   }
 
   async getAnomalyResults(): Promise<AnomalyResult[]> {
+    return [];
+  }
+
+  async getEnvironmentalObservations(): Promise<EnvironmentalObservation[]> {
+    return [];
+  }
+
+  async getWeatherCoverage(): Promise<WeatherCoverage[]> {
     return [];
   }
 }
