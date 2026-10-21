@@ -1,5 +1,5 @@
 {
-  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Entries with `manual: true` cannot be scripted (psa.gov.ph returns HTTP 403); download them by hand from `datasetUrl` into the same place. Licences were checked on the HDX dataset pages on 2026-10-17.",
+  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Entries with `manual: true` cannot be scripted (psa.gov.ph returns HTTP 403); download them by hand from `datasetUrl` into the same place. `pinnedRetrievedAt` is when the pinned file (`sha256`) was first retrieved; the committed outputs cite it rather than the local fetch time in data/raw/geo-sources-manifest.json, so a fresh checkout rebuilds them byte for byte. Update it together with `sha256`. Licences were checked on the HDX dataset pages on 2026-10-17.",
   "sources": [
     {
       "id": "hdx-doh-epi-dengue",
@@ -11,7 +11,8 @@
       "file": "doh-epi-dengue-data-2016-2021.csv",
       "license": "CC BY (Creative Commons Attribution International)",
       "upstreamModified": "2022-05-02",
-      "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c"
+      "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
     },
     {
       "id": "cod-ab-phl",
@@ -23,7 +24,8 @@
       "file": "phl_admin_boundaries.xlsx",
       "license": "CC BY-IGO",
       "upstreamModified": "2026-05-28",
-      "sha256": "3fbaa5f9aab058960ec48e8c8c490b8c7e1257db911913f967d70a7497091f49"
+      "sha256": "3fbaa5f9aab058960ec48e8c8c490b8c7e1257db911913f967d70a7497091f49",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
     },
     {
       "id": "cod-ps-phl-adm1-2022",
@@ -35,7 +37,8 @@
       "file": "phl_admpop_adm1_2022.csv",
       "license": "CC BY-IGO",
       "upstreamModified": "2021-10-25",
-      "sha256": "40ac6ef448da123185e32ea48e4ba9b3dd7e9e0f1ddd325076a379a45c4b19a3"
+      "sha256": "40ac6ef448da123185e32ea48e4ba9b3dd7e9e0f1ddd325076a379a45c4b19a3",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
     },
     {
       "id": "cod-ps-phl-adm2-2022",
@@ -47,7 +50,8 @@
       "file": "phl_admpop_adm2_2022_v2.csv",
       "license": "CC BY-IGO",
       "upstreamModified": "2022-07-28",
-      "sha256": "dd06a7d799371900580c93e2ee8d1d63e6c0ee4ca2899d4e8a8a68a33a3eb063"
+      "sha256": "dd06a7d799371900580c93e2ee8d1d63e6c0ee4ca2899d4e8a8a68a33a3eb063",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
     },
     {
       "id": "psa-psgc",
@@ -60,7 +64,8 @@
       "file": "PSGC-3Q-2026-Publication-Datafile.xlsx",
       "license": "PSA terms of use; kept in git-ignored data/raw, not redistributed",
       "upstreamModified": "2026-09-30",
-      "sha256": "8aad47f84e4f6317dc4222b9fe35d36b5d71f2b74ad8f0c7622289c131dc9a59"
+      "sha256": "8aad47f84e4f6317dc4222b9fe35d36b5d71f2b74ad8f0c7622289c131dc9a59",
+      "pinnedRetrievedAt": "2026-10-19T01:26:12.571Z"
     }
   ]
 }
