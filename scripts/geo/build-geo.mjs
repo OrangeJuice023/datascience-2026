@@ -77,6 +77,7 @@ const CODAB_FILE = p("data/raw/cod_ab_phl/phl_admin_boundaries.xlsx");
 const CODPS_ADM2_FILE = p("data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv");
 const PSGC_FILE = p("data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx");
 const PSGC_EDITION = "PSA PSGC 3Q 2026";
+const CCHAIN_LOCATION_FILE = p("data/raw/cchain/location.csv");
 
 const regionLabels = readCsvRecords(p("data/reference/geo/source_region_labels.csv"));
 const overrides = new Map(readCsvRecords(p("data/reference/geo/name_overrides.csv")).map((r) => [r.source_loc, r]));
@@ -115,7 +116,7 @@ const baseName = (name) => name.replace(/\s*\((?:Capital|not a province)\)/gi, "
 // COD-AB reference
 // ---------------------------------------------------------------------------
 
-const wb = readWorkbook(CODAB_FILE, { sheets: ["phl_admin0", "phl_admin1", "phl_admin2", "phl_admin3"] });
+const wb = readWorkbook(CODAB_FILE, { sheets: ["phl_admin0", "phl_admin1", "phl_admin2", "phl_admin3", "phl_admin4"] });
 const adm0 = toRecords(wb.get("phl_admin0"))[0];
 const adm1 = toRecords(wb.get("phl_admin1"));
 const adm2 = toRecords(wb.get("phl_admin2"));
@@ -717,6 +718,58 @@ writeCsv(
   })),
 );
 
+// 1b. Project CCHAIN cities → canonical geography, for the environment track (PR #1). CCHAIN keys
+//     cities by 2016-era 9-digit PSGC-style codes (PH + RR PP MM BBB); COD-AB v03 inserts a 0
+//     after the region (PH + RR 0PP MM). The rule is checked by name and barangay count, not assumed.
+const unitByAdm3 = new Map(resolved.flatMap((m) => m.adm3.map((r) => [r.adm3_pcode, m])));
+const adm4CountByAdm3 = new Map();
+for (const r of toRecords(wb.get("phl_admin4"))) adm4CountByAdm3.set(r.adm3_pcode, (adm4CountByAdm3.get(r.adm3_pcode) ?? 0) + 1);
+const cchainBrgys = new Map();
+for (const r of readCsvRecords(CCHAIN_LOCATION_FILE)) {
+  if (!cchainBrgys.has(r.adm3_pcode)) cchainBrgys.set(r.adm3_pcode, { name: r.adm3_en, n: 0, area: 0 });
+  cchainBrgys.get(r.adm3_pcode).n++;
+  cchainBrgys.get(r.adm3_pcode).area += Number(r.brgy_total_area);
+}
+const cchainCities = [...cchainBrgys].sort(([a], [b]) => a.localeCompare(b)).map(([code, c]) => {
+  const codab = `PH${code.slice(2, 4)}0${code.slice(4, 8)}`;
+  const rec = adm3ByPcode.get(codab);
+  if (!/^PH\d{9}$/.test(code) || code.slice(8) !== "000") fail(`CCHAIN city code ${code} is not a 9-digit city code`);
+  if (!rec) fail(`CCHAIN ${code} (${c.name}) → ${codab} is not a COD-AB ${CODAB_VERSION} admin-3 unit`);
+  else if (!nameKeys(rec.adm3_name).some(({ key }) => nameKeys(c.name).some((k) => k.key === key))) fail(`CCHAIN ${code} (${c.name}) ≠ COD-AB ${codab} (${rec.adm3_name})`);
+  const unit = unitByAdm3.get(codab);
+  if (rec && !unit) fail(`CCHAIN ${c.name}: ${codab} is in no reporting unit`);
+  // CCHAIN climate is a population-weighted mean over its barangays, so they must cover the whole city.
+  const areaRatio = rec ? c.area / Number(rec.area_sqkm) : NaN;
+  if (rec && Math.abs(areaRatio - 1) > 0.02) fail(`CCHAIN ${c.name}: barangays cover ${(100 * areaRatio).toFixed(1)}% of the COD-AB city area`);
+  return { code, c, codab, rec, unit, areaRatio, psa: rec ? psaFor(codab) : null, codabBrgys: adm4CountByAdm3.get(codab) ?? 0 };
+});
+writeCsv(
+  p("data/reference/geo/cchain_city_crosswalk.csv"),
+  [
+    "cchain_adm3_pcode", "cchain_city_name", "cchain_barangays", "cod_ab_adm3_pcode", "cod_ab_city_name", "cod_ab_barangays",
+    "cchain_area_sqkm", "cod_ab_area_sqkm", "area_ratio", "psa_psgc_code", "hdx_unit_id", "hdx_unit_name", "hdx_unit_type", "relation", "analysis_region_id", "notes",
+  ],
+  cchainCities.map((x) => ({
+    cchain_adm3_pcode: x.code,
+    cchain_city_name: x.c.name,
+    cchain_barangays: x.c.n,
+    cod_ab_adm3_pcode: x.codab,
+    cod_ab_city_name: x.rec?.adm3_name ?? "",
+    cod_ab_barangays: x.codabBrgys,
+    cchain_area_sqkm: round(x.c.area, 2),
+    cod_ab_area_sqkm: x.rec ? round(Number(x.rec.area_sqkm), 2) : "",
+    area_ratio: round(x.areaRatio, 3),
+    psa_psgc_code: psaCode(x.psa),
+    hdx_unit_id: x.unit?.unitId ?? "",
+    hdx_unit_name: x.unit?.unitName ?? "",
+    hdx_unit_type: x.unit?.unitType ?? "",
+    // same_area: the HDX unit is exactly this city. inside_unit: the city is one part of a larger HDX unit.
+    relation: x.unit ? (x.unit.kind === "province" ? "inside_unit" : "same_area") : "",
+    analysis_region_id: x.unit ? regionIdByPcode(x.unit.sourceRegionPcode) : "",
+    notes: x.c.n !== x.codabBrgys ? `Barangay count differs (CCHAIN ${x.c.n}, COD-AB ${CODAB_VERSION} ${x.codabBrgys}).` : "",
+  })),
+);
+
 // 2. Rows for the master data hub GEOGRAPHY tab (its exact column order).
 const hubRows = [];
 const asOf = CODAB_VALID_ON;
@@ -1020,6 +1073,16 @@ Reading:
 - COD-PS has ${codpsNcrRows} NCR row(s) and no city-level rows. It cannot give denominators for the 44 separately reported cities, and so it cannot give denominators for the province remainders either.
 - The projections are for 2022–2025. The dengue data covers 2016–2021.
 - **Result: no valid population denominator exists today at reporting-unit level.** Incidence rates are not supported. See the assessment document.
+
+## 8. Project CCHAIN cities (environment track)
+
+Output: \`data/reference/geo/cchain_city_crosswalk.csv\`. CCHAIN codes are 2016-era 9-digit PSGC-style codes; the COD-AB ${CODAB_VERSION} code is formed by inserting a 0 after the region digits, and each match is checked by name and by area (the CCHAIN barangays must cover 98–102% of the COD-AB city area).
+
+${t(["CCHAIN code", "City", "COD-AB", "Barangays CCHAIN / COD-AB", "Area ratio", "HDX reporting unit", "Relation"], cchainCities.map((x) => [x.code, x.c.name, x.codab, `${x.c.n} / ${x.codabBrgys}`, x.areaRatio.toFixed(3), x.unit ? `${x.unit.unitName} (\`${x.unit.unitId}\`)` : "—", x.unit ? (x.unit.kind === "province" ? "inside a larger unit" : "same area") : "—"]))}
+
+- ${cchainCities.filter((x) => x.unit && x.unit.kind !== "province").length} of the ${cchainCities.length} CCHAIN cities are separately reported HDX units, so CCHAIN and HDX counts describe the same area. The others sit inside a whole-province HDX unit; their HDX counts include the rest of the province and must not be compared with the city directly.
+- Barangay counts differ for ${cchainCities.filter((x) => x.c.n !== x.codabBrgys).map((x) => `${x.c.name} (${x.c.n} vs ${x.codabBrgys})`).join(", ") || "none"}. The CCHAIN barangays still cover the whole city (area ratio above), so the difference is in how the city is subdivided, not in its extent; city-level joins are unaffected.
+- This table matches **areas only**. Whether the case counts describe that area is a data question: the environment track found that CCHAIN's Iloilo City series tracks HDX Iloilo *province* (docs/environmental-covariates.md §4.3, PR #1).
 `;
   fs.mkdirSync(p("docs/geo"), { recursive: true });
   fs.writeFileSync(p("docs/geo/geo-data-quality-report.md"), md);

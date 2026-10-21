@@ -1,0 +1,13 @@
+cchain_adm3_pcode,cchain_city_name,cchain_barangays,cod_ab_adm3_pcode,cod_ab_city_name,cod_ab_barangays,cchain_area_sqkm,cod_ab_area_sqkm,area_ratio,psa_psgc_code,hdx_unit_id,hdx_unit_name,hdx_unit_type,relation,analysis_region_id,notes
+PH015518000,Dagupan City,31,PH0105518,Dagupan City,31,43.24,43.19,1.001,0105518000,dagupan-city,Dagupan City,city_icc,same_area,ilocos,
+PH034919000,Palayan City,19,PH0304919,Palayan City (Capital),19,131.25,131.23,1,0304919000,nueva-ecija,Nueva Ecija,province_full,inside_unit,central-luzon,
+PH050506000,Legazpi City,70,PH0500506,Legazpi City (Capital),70,157.73,157.83,0.999,0500506000,albay,Albay,province_full,inside_unit,bicol,
+PH063022000,Iloilo City,180,PH0603022,Iloilo City (Capital),180,72.63,72.68,0.999,0631000000,iloilo-city,Iloilo City,city_huc,same_area,western-visayas,
+PH072230000,Mandaue City,27,PH0702230,Mandaue City,27,31.1,31.13,0.999,0731300000,mandaue-city,Mandaue City,city_huc,same_area,central-visayas,
+PH083747000,Tacloban City,138,PH0803747,Tacloban City (Capital),138,106.02,105.98,1,0831600000,tacloban-city,Tacloban City,city_huc,same_area,eastern-visayas,
+PH097332000,Zamboanga City,101,PH0907332,Zamboanga City,101,1496.29,1497.15,0.999,0931700000,zamboanga-city,Zamboanga City,city_huc,same_area,zamboanga-peninsula,
+PH104305000,Cagayan de Oro City,80,PH1004305,Cagayan de Oro City (Capital),80,506.62,506.63,1,1030500000,cagayan-de-oro-city,Cagayan de Oro City,city_huc,same_area,northern-mindanao,
+PH112402000,Davao City,183,PH1102402,Davao City,183,2343.7,2341.43,1.001,1130700000,davao-city,Davao City,city_huc,same_area,davao-region,
+PH137401000,City of Mandaluyong,27,PH1307401,City of Mandaluyong,27,11.32,11.31,1,1380500000,mandaluyong-city,City of Mandaluyong,city_huc,same_area,ncr,
+PH137503000,City of Navotas,14,PH1307503,City of Navotas,18,10.54,10.54,1,1380900000,navotas-city,City of Navotas,city_huc,same_area,ncr,"Barangay count differs (CCHAIN 14, COD-AB v03 18)."
+PH137603000,City of Muntinlupa,9,PH1307603,City of Muntinlupa,9,39.18,39.17,1,1380800000,muntinlupa-city,City of Muntinlupa,city_huc,same_area,ncr,

@@ -12,7 +12,7 @@ results. Everything here is a hackathon prototype, not a validated public-health
 
 | Document | Audience | Covers | Update when |
 | --- | --- | --- | --- |
-| [spatial-assessment-and-method.md](spatial-assessment-and-method.md) | Everyone; Physics 1/2 in depth | What the units are, supported levels, prohibited operations, sources and licences, assumptions A1–A5, spatial method, hand-offs, status against the EARS pipeline | An assumption is confirmed or refuted, or the cleaning pipeline changes |
+| [spatial-assessment-and-method.md](spatial-assessment-and-method.md) | Everyone; Physics 1/2/3 in depth | What the units are, supported levels, prohibited operations, sources and licences, assumptions A1–A5, spatial method, hand-offs, status against the EARS pipeline, geography rules for weather–dengue joins (§7) | An assumption is confirmed or refuted, or the cleaning pipeline changes |
 | [geo-data-quality-report.md](geo-data-quality-report.md) | Reviewers, Physics 1/2 | **Generated.** Every number: inputs and hashes, matching, partition test, coverage, missing weeks, swap rows | Never by hand; rerun `build-geo.mjs` |
 | [geographic-schema-proposal.md](geographic-schema-proposal.md) | Software Eng | Proposed `GeographicEntity` additions (`kind`, `partialOf`, `excludes`, `analysisRegionId`, `codAbPcodes`) and display rules | Software Eng decides the contract |
 | [../../scripts/geo/README.md](../../scripts/geo/README.md) | Anyone rebuilding | Commands, manual PSA input, clean-checkout check, invariants, file table | A script, input or output changes |
@@ -34,6 +34,7 @@ the documentation pack (`docs/README.md`, `docs/architecture.md`, `docs/next-ste
 | Upward aggregation map (unit → province → region → national) | Implemented in the fixture (`aggregation.province/region/national`) | `web/src/data/geo/hdx-reporting-units.json` |
 | Fixture used by the app | **Not connected.** No app code imports it | `grep -r hdx-reporting-units web/src` finds nothing |
 | Geography contract in `web/src/types/data.ts` | Proposed only; every `psgcCode` on `main` is `null` | Schema proposal; `web/src/data/sample/geographies.ts` |
+| CCHAIN cities → canonical geography (environment track) | Implemented: 12 / 12 matched by code, name and area; 10 are their own HDX unit | `data/reference/geo/cchain_city_crosswalk.csv`; report §8; method §7 |
 | Swap-row handling in `ml/clean_dengue.py` | **Not started**, tracked separately (backlog P0-1) | Method §6.1 |
 | Polygons for the map | Planned. geoBoundaries gbOpen (CC BY 3.0 IGO) recommended; not downloaded | Method §3 |
 | Population denominators / incidence | Not possible with current sources | Method §2 |
@@ -86,6 +87,7 @@ the backlog are referenced, not repeated.
 | GEO-3 | Simplified unit polygons for the map | P2 | P1-1 | geoBoundaries ADM2/ADM3 dissolved to the 126 units, licence and hash recorded, size suitable for the browser | NOT STARTED |
 | P2-5 | Remove GADM from the source catalog | P2 | — | See backlog (`source-catalog.ts`, `sample/reference.ts`, `lib/api/sources.ts`) | NOT STARTED |
 | P2-6 | Davao del Sur + Occidental 2016 | P2 | — | See backlog | NOT STARTED |
+| GEO-5 | Compare CCHAIN and Open-Meteo weather on the 12 CCHAIN cities before mixing them | P2 | PR #1 | Weekly CCHAIN vs Open-Meteo per city and variable over shared years; differences reported; decision recorded | NOT STARTED |
 | GEO-4 | Confirm assumptions A1, A2, A5 with DOH-EB or Cirrolytix | P2 | Whole team | Answers recorded in method §4 | BLOCKED (external) |
 
 ## Geography cross-reference checklist
@@ -94,6 +96,7 @@ the backlog are referenced, not repeated.
 - [x] Every source has URL, licence and SHA-256 (`scripts/geo/sources.json`).
 - [x] Method document links to the report for every number.
 - [x] Join key to `ml/` output is documented and tested (126 / 126).
+- [x] CCHAIN city codes map to canonical ids (method §7).
 - [ ] App code uses the fixture (GEO-2).
 - [ ] `ml/` output carries unit ids instead of province names (P0-2).
 - [ ] One geography id scheme across modules (GEO-1).
