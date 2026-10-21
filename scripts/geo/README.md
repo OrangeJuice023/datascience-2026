@@ -3,7 +3,7 @@
 Node ≥ 20, no npm dependencies.
 
 ```bash
-node scripts/geo/fetch-sources.mjs   # download HDX dengue, COD-AB, COD-PS into data/raw/ and verify SHA-256 of all inputs
+node scripts/geo/fetch-sources.mjs   # download HDX dengue, COD-AB, COD-PS, CCHAIN location.csv into data/raw/ and verify SHA-256 of all inputs
 node scripts/geo/build-geo.mjs       # rebuild every geography output (deterministic)
 ```
 
@@ -32,6 +32,7 @@ Last checked on 2026-10-21 from a fresh clone of `feat/geography-track` with onl
 | `data/reference/geo/city_classes.csv` | HUC/ICC/CC per city; checked against PSA PSGC on every build | Hand |
 | `data/reference/geo/hdx_dengue_crosswalk.csv` | **Source identifier → canonical unit mapping** | Generated |
 | `data/reference/geo/geography_hub_rows.csv` | Rows for the hub GEOGRAPHY tab | Generated |
+| `data/reference/geo/cchain_city_crosswalk.csv` | Project CCHAIN city codes → COD-AB / PSA code / HDX reporting unit (environment track) | Generated |
 | `docs/geo/geo-data-quality-report.md` | Data-quality report | Generated |
 | `web/src/data/geo/hdx-reporting-units.json` | Frontend fixture: entities, aggregation map, coverage | Generated |
 | `data/processed/geo/*.csv` | Admin reference and coverage tables (not committed) | Generated |

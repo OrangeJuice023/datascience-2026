@@ -216,3 +216,43 @@ baselines include 2016, 2017 or 2020; report §5.1). National results are not af
 with deaths > cases. 581 of them are swap rows; the other 5 are isolated rows outside the blocks.
 That rule would miss 84 of the 665 swap rows (those with deaths ≤ cases), so the fix should use the
 swap-block rule above.
+
+## 7. Geography for the environment track (PR #1, CCHAIN)
+
+Added 2026-10-21. Answers PR #1 open question 2 ("Does the geography track's canonical ID map to
+CCHAIN's codes?"): **yes, for all 12 cities.**
+
+| What | Result | Evidence |
+| --- | --- | --- |
+| CCHAIN code → canonical geography | All 12 cities match a COD-AB v03 city by code rule (`PH` + region + `0` + province + city), name and area (CCHAIN barangays cover 99.9–100.1% of each city) | `data/reference/geo/cchain_city_crosswalk.csv`; report §8 |
+| CCHAIN city → HDX reporting unit | 10 cities are their own HDX unit (`same_area`). Palayan sits inside Nueva Ecija and Legazpi inside Albay (`inside_unit`) | same |
+| Current PSA code | Filled for all 12 (`psa_psgc_code`, PSA PSGC 3Q 2026) | same |
+| Barangay lists | Same count for 11 cities. Navotas: 14 in CCHAIN, 18 in COD-AB v03, same total area | report §8 |
+
+This matches the environment track's own finding of "10 shared cities". The crosswalk matches
+**areas only**. CCHAIN's Iloilo City case series behaves like Iloilo *province* (PR #1 §4.3), which is a
+data problem that a code mapping cannot fix.
+
+**Rules for weather–dengue joins (proposed):**
+- Join on the canonical id (`hdx_unit_id` / `geographic_entity_id`), never on names or on the prefix of
+  a PSGC code.
+- A weather value must describe the **same area** as the case count. For `same_area` cities, CCHAIN
+  city weather and HDX city counts can be joined. For `inside_unit` cities (Palayan, Legazpi), city
+  weather must not be joined to the province's HDX counts.
+- For units outside CCHAIN (the planned Open-Meteo fallback), a single point is not area weather. A
+  province or province remainder needs an area or population-weighted mean over the municipalities
+  it contains (its province's `codAbPcodes` minus the cities in `excludes`), not the value at
+  `rep_lat`/`rep_lon`. The
+  representative point is for map labels only.
+- Before CCHAIN and Open-Meteo feed the same model, compare them on the 12 CCHAIN cities over
+  their shared years, using the same weekly aggregation. Both use ERA5 for temperature, but
+  CCHAIN rainfall is CHIRPS, so rainfall is the likelier source of disagreement. Open-Meteo's free
+  tier is non-commercial only (PR #1 §2).
+- **ENVIRONMENT tab:** one row per canonical geography × week, with `geography_id` set to the canonical
+  id, `geographic_level`, an `aggregation_method` (for example population-weighted barangay mean),
+  source, coverage days and quality flags, as PR #1 §9.1 proposes.
+
+**Week convention (owned by Physics 1, not decided here).** Two independent checks agree that HDX
+dates sit about 1–2 weeks **after** the week they describe: report §6 (best fit with OpenDengue at
+HDX − 7 days) and PR #1 §4.2 (best fit with CCHAIN Mondays at HDX − 13 days). Climate lags should
+therefore be reported for lag windows, as PR #1 proposes, until the `date` meaning is confirmed (A5).

@@ -54,6 +54,19 @@
       "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
     },
     {
+      "id": "cchain-location",
+      "title": "Project CCHAIN — location.csv (barangays of the 12 CCHAIN cities)",
+      "publisher": "Thinking Machines Data Science (Project CCHAIN)",
+      "datasetUrl": "https://data.humdata.org/dataset/project-cchain",
+      "url": "https://data.humdata.org/dataset/5b580664-365e-4d7e-b5e5-2990df8f12a5/resource/31a3dddb-decc-4fd7-a0f7-acff922a7a76/download/location.csv",
+      "dir": "cchain",
+      "file": "location.csv",
+      "license": "CC BY (Creative Commons Attribution International)",
+      "upstreamModified": "2024-05-01",
+      "sha256": "32347494bc6cdc9d2052af4e087edc25f9e7a9af438c1a69b415ef1844b8b293",
+      "pinnedRetrievedAt": "2026-10-21T16:00:00+08:00"
+    },
+    {
       "id": "psa-psgc",
       "title": "Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile",
       "publisher": "Philippine Statistics Authority (PSA)",

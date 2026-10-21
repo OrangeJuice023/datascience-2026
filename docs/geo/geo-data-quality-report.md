@@ -12,6 +12,7 @@
 | Philippines - Subnational Administrative Boundaries (COD-AB v03), tabular attributes | `data/raw/cod_ab_phl/phl_admin_boundaries.xlsx` | `3fbaa5f9aab05896…` | CC BY-IGO | 2026-10-17 |
 | Philippines - Subnational Population Statistics, admin 1, 2022 projection | `data/raw/cod_ps_phl/phl_admpop_adm1_2022.csv` | `40ac6ef448da1231…` | CC BY-IGO | 2026-10-17 |
 | Philippines - Subnational Population Statistics, admin 2, 2022 projection (v2) | `data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv` | `dd06a7d799371900…` | CC BY-IGO | 2026-10-17 |
+| Project CCHAIN — location.csv (barangays of the 12 CCHAIN cities) | `data/raw/cchain/location.csv` | `32347494bc6cdc9d…` | CC BY (Creative Commons Attribution International) | 2026-10-21 |
 | Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile | `data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx` | `8aad47f84e4f6317…` | PSA terms of use; kept in git-ignored data/raw, not redistributed | 2026-10-19 |
 
 - Boundary reference: OCHA COD-AB PHL **v03**, valid on 2025-02-13: 17 regions, 88 admin-2, 1,642 admin-3 units.
@@ -237,3 +238,26 @@ Reading:
 - COD-PS has 1 NCR row(s) and no city-level rows. It cannot give denominators for the 44 separately reported cities, and so it cannot give denominators for the province remainders either.
 - The projections are for 2022–2025. The dengue data covers 2016–2021.
 - **Result: no valid population denominator exists today at reporting-unit level.** Incidence rates are not supported. See the assessment document.
+
+## 8. Project CCHAIN cities (environment track)
+
+Output: `data/reference/geo/cchain_city_crosswalk.csv`. CCHAIN codes are 2016-era 9-digit PSGC-style codes; the COD-AB v03 code is formed by inserting a 0 after the region digits, and each match is checked by name and by area (the CCHAIN barangays must cover 98–102% of the COD-AB city area).
+
+| CCHAIN code | City | COD-AB | Barangays CCHAIN / COD-AB | Area ratio | HDX reporting unit | Relation |
+| --- | --- | --- | --- | --- | --- | --- |
+| PH015518000 | Dagupan City | PH0105518 | 31 / 31 | 1.001 | Dagupan City (`dagupan-city`) | same area |
+| PH034919000 | Palayan City | PH0304919 | 19 / 19 | 1.000 | Nueva Ecija (`nueva-ecija`) | inside a larger unit |
+| PH050506000 | Legazpi City | PH0500506 | 70 / 70 | 0.999 | Albay (`albay`) | inside a larger unit |
+| PH063022000 | Iloilo City | PH0603022 | 180 / 180 | 0.999 | Iloilo City (`iloilo-city`) | same area |
+| PH072230000 | Mandaue City | PH0702230 | 27 / 27 | 0.999 | Mandaue City (`mandaue-city`) | same area |
+| PH083747000 | Tacloban City | PH0803747 | 138 / 138 | 1.000 | Tacloban City (`tacloban-city`) | same area |
+| PH097332000 | Zamboanga City | PH0907332 | 101 / 101 | 0.999 | Zamboanga City (`zamboanga-city`) | same area |
+| PH104305000 | Cagayan de Oro City | PH1004305 | 80 / 80 | 1.000 | Cagayan de Oro City (`cagayan-de-oro-city`) | same area |
+| PH112402000 | Davao City | PH1102402 | 183 / 183 | 1.001 | Davao City (`davao-city`) | same area |
+| PH137401000 | City of Mandaluyong | PH1307401 | 27 / 27 | 1.000 | City of Mandaluyong (`mandaluyong-city`) | same area |
+| PH137503000 | City of Navotas | PH1307503 | 14 / 18 | 1.000 | City of Navotas (`navotas-city`) | same area |
+| PH137603000 | City of Muntinlupa | PH1307603 | 9 / 9 | 1.000 | City of Muntinlupa (`muntinlupa-city`) | same area |
+
+- 10 of the 12 CCHAIN cities are separately reported HDX units, so CCHAIN and HDX counts describe the same area. The others sit inside a whole-province HDX unit; their HDX counts include the rest of the province and must not be compared with the city directly.
+- Barangay counts differ for City of Navotas (14 vs 18). The CCHAIN barangays still cover the whole city (area ratio above), so the difference is in how the city is subdivided, not in its extent; city-level joins are unaffected.
+- This table matches **areas only**. Whether the case counts describe that area is a data question: the environment track found that CCHAIN's Iloilo City series tracks HDX Iloilo *province* (docs/environmental-covariates.md §4.3, PR #1).
