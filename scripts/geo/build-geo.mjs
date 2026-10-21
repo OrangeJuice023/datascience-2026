@@ -10,7 +10,8 @@
  *   data/raw/cod_ab_phl/phl_admin_boundaries.xlsx          (COD-AB v03, admin 1–3)
  *   data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv        (pcode-compatibility check only)
  *   data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx (PSA codes and city classes; manual download)
- *   data/raw/geo-sources-manifest.json                     (hashes, retrieval dates)
+ *   data/raw/geo-sources-manifest.json                     (local file paths and hashes)
+ *   scripts/geo/sources.json                               (expected hashes, pinned retrieval dates)
  *   data/reference/geo/{source_region_labels,name_overrides,city_classes}.csv  (curated, logged decisions)
  *   web/src/data/opendengue-ph.json                        (national cross-check only; never merged)
  *
@@ -64,7 +65,11 @@ for (const src of sources) {
   }
   const hash = sha256(file);
   if (src.sha256 && hash !== src.sha256) fail(`${src.id}: SHA-256 ${hash} ≠ sources.json ${src.sha256}`);
+  if (!src.pinnedRetrievedAt) fail(`${src.id}: no pinnedRetrievedAt in sources.json`);
 }
+// Outputs cite the pinned retrieval date, not the local fetch time, so a fresh checkout
+// rebuilds the committed files unchanged.
+const pinnedRetrievedAt = Object.fromEntries(sources.map((s) => [s.id, s.pinnedRetrievedAt]));
 if (errors.length) finish();
 
 const DENGUE_FILE = p("data/raw/hdx_dengue/doh-epi-dengue-data-2016-2021.csv");
@@ -748,7 +753,7 @@ writeCsv(
 
 // 3. Frontend fixture. Entities follow GeographicEntity (web/src/types/data.ts) plus
 //    reporting-unit fields proposed in docs/geo/geographic-schema-proposal.md.
-const recordedAt = prov("cod-ab-phl").retrievedAt;
+const recordedAt = pinnedRetrievedAt["cod-ab-phl"];
 const provenanceFor = (upstreamId) => ({
   sourceIds: ["cod-ab-phl", "hdx-doh-epi-dengue"],
   method: "derived",
@@ -859,7 +864,7 @@ function writeReport() {
 
 | Input | File | SHA-256 | Licence | Retrieved |
 | --- | --- | --- | --- | --- |
-${sources.map((s) => `| ${s.title} | \`${manifest[s.id].file}\` | \`${manifest[s.id].sha256.slice(0, 16)}…\` | ${s.license} | ${manifest[s.id].retrievedAt.slice(0, 10)} |`).join("\n")}
+${sources.map((s) => `| ${s.title} | \`${manifest[s.id].file}\` | \`${manifest[s.id].sha256.slice(0, 16)}…\` | ${s.license} | ${pinnedRetrievedAt[s.id].slice(0, 10)} |`).join("\n")}
 
 - Boundary reference: OCHA COD-AB PHL **${CODAB_VERSION}**, valid on ${CODAB_VALID_ON}: ${adm1.length} regions, ${adm2.length} admin-2, ${fmt(adm3.length)} admin-3 units.
 - The dengue file is published on HDX by **Cirrolytix** (a third party), attributed to DOH-EB. Its description calls the counts "confirmed", then says they include suspect, probable and confirmed cases. Treat the case definition as **total reported (suspect + probable + confirmed)**.
@@ -968,7 +973,7 @@ Missing weeks are absent rows. They are **never** zero. Full per-unit, per-year 
 - **Swap blocks** are the ${shiftBlockWeeks.size} weeks in which ≥ ${SHIFT_BLOCK_MIN_UNITS} units have an appended row. ${fmt(suspectRows.length)} rows fall in them. In those rows \`cases\` is 0 in ${suspectRows.filter((r) => r.cases === "0").length}, 1 in ${suspectRows.filter((r) => r.cases === "1").length}, and higher in ${suspectRows.filter((r) => Number(r.cases) > 1).length}.
 - The other ${fmt(orderingOnly.length)} out-of-order rows belong to ${orderingOnlyUnits.length} units (${orderingOnlyUnits.join(", ")}). They are ordering anomalies only. Sort by date; the values are kept.
 - In those ${fmt(suspectRows.length)} rows, the \`deaths\` value tracks the unit's adjacent-week case counts: Pearson r = **${shiftCorr.toFixed(3)}** on log(1+x), n = ${shiftPairs.length}. The median of deaths ÷ adjacent cases is ${shiftMedianRatio.toFixed(2)}.
-- The pattern is very likely **cases and deaths swapped**. The case count sits in \`deaths\`, and a death count (usually 0 or 1) sits in \`cases\`. This explains why ${fmt(recordIssues.deathsExceedCases.length)} rows have deaths > cases, and why annual death totals are inflated.
+- The pattern is very likely **cases and deaths swapped**. The case count sits in \`deaths\`, and a death count (usually 0 or 1) sits in \`cases\`. This explains why annual death totals are inflated, and why ${fmt(recordIssues.deathsExceedCases.filter((r) => r.suspectShift).length)} of the ${fmt(recordIssues.deathsExceedCases.length)} rows with deaths > cases fall in the swap blocks. The other ${fmt(recordIssues.deathsExceedCases.filter((r) => !r.suspectShift).length)} are isolated rows (${recordIssues.deathsExceedCases.filter((r) => !r.suspectShift).map((r) => `${r.loc.trim()} ${r.date}`).join("; ")}). A "deaths > cases" rule is therefore **not** a substitute for the swap-block rule: it misses the ${fmt(suspectRows.filter((r) => !(Number(r.deaths) > Number(r.cases))).length)} swap rows where deaths ≤ cases.
 - **It is regional.** Whole regions are affected in specific alternating weeks:
 
 ${t(["Source region", "Year", "Units", "Weeks", "Rows"], Object.values(suspectByRegionYear).sort((a, b) => a.year.localeCompare(b.year) || a.region.localeCompare(b.region)).map((s) => [s.region, s.year, s.units.size, [...s.weeks].sort().join(" "), s.rows]))}

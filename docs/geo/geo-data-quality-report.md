@@ -144,7 +144,7 @@ Missing weeks are absent rows. They are **never** zero. Full per-unit, per-year 
 - **Swap blocks** are the 15 weeks in which ≥ 10 units have an appended row. 665 rows fall in them. In those rows `cases` is 0 in 611, 1 in 46, and higher in 8.
 - The other 136 out-of-order rows belong to 4 units (ANGELES CITY, GENERAL SANTOS CITY, PATEROS, PUERTO PRINCESA CITY). They are ordering anomalies only. Sort by date; the values are kept.
 - In those 665 rows, the `deaths` value tracks the unit's adjacent-week case counts: Pearson r = **0.917** on log(1+x), n = 665. The median of deaths ÷ adjacent cases is 0.86.
-- The pattern is very likely **cases and deaths swapped**. The case count sits in `deaths`, and a death count (usually 0 or 1) sits in `cases`. This explains why 586 rows have deaths > cases, and why annual death totals are inflated.
+- The pattern is very likely **cases and deaths swapped**. The case count sits in `deaths`, and a death count (usually 0 or 1) sits in `cases`. This explains why annual death totals are inflated, and why 581 of the 586 rows with deaths > cases fall in the swap blocks. The other 5 are isolated rows (BATANES 11/19/2017; QUIRINO 10/15/2017; DAVAO DEL SUR 5/13/2018; PATEROS 5/20/2018; AURORA 9/15/2019). A "deaths > cases" rule is therefore **not** a substitute for the swap-block rule: it misses the 84 swap rows where deaths ≤ cases.
 - **It is regional.** Whole regions are affected in specific alternating weeks:
 
 | Source region | Year | Units | Weeks | Rows |
