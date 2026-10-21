@@ -6,12 +6,11 @@ import { getTrendSeries } from "@/data/demo-trends";
 import { getNeighborSummaries } from "@/lib/neighbors";
 import { OPENDENGUE_META, dataProvider } from "@/data/opendengue-provider";
 import { SOURCE_CATALOG } from "@/data/source-catalog";
+import { getPolicyEvidenceByLocation } from "@/data/policy-evidence";
 import type { Signal, LGU } from "@/types";
 
-/** Supported disease display names, derived from the real demo dataset. */
 export const SUPPORTED_DISEASES = DEMO_DISEASES;
 
-/** Supported LGU identifiers for a given disease, matching the UI selector. */
 export function getSupportedLguIdsForDisease(disease: string): string[] {
   return getLocationIdsForDisease(disease);
 }
@@ -33,15 +32,24 @@ export interface PolicyChatContext {
   neighbors: { name: string; status: string; changePercent: number }[];
   formalSource: { name: string; version: string; period: string } | null;
   sources: { name: string; status: string; purpose: string }[];
+  policyEvidence: Array<{
+    id: string;
+    claim: string;
+    sourceTitle: string;
+    issuingOrganization: string;
+    sourceUrl: string | null;
+    publicationDate: string | null;
+    referencePeriod: string | null;
+    verificationStatus: string;
+    caveats: string[];
+    unresolvedQuestions: string[];
+    topic: string;
+  }>;
   isSample: boolean;
   hasAnomalyResults: boolean;
   limitations: string[];
 }
 
-/**
- * Builds the evidence context the server injects into the system prompt.
- * Only verified project data is included; nothing is invented.
- */
 export async function buildPolicyChatContext(
   disease: string,
   locationId: string,
@@ -70,7 +78,7 @@ export async function buildPolicyChatContext(
       };
     }
   } catch {
-    // Formal source unavailable; context reflects that honestly.
+    // ignore
   }
 
   const sources = SOURCE_CATALOG.map((s) => ({
@@ -78,6 +86,22 @@ export async function buildPolicyChatContext(
     status: s.status,
     purpose: s.purpose,
   }));
+
+  const policyEvidence = getPolicyEvidenceByLocation(locationId)
+    .filter((r) => r.locationId === locationId)
+    .map((r) => ({
+      id: r.evidenceId,
+      claim: r.claim,
+      sourceTitle: r.sourceTitle,
+      issuingOrganization: r.issuingOrganization,
+      sourceUrl: r.sourceUrl,
+      publicationDate: r.publicationDate,
+      referencePeriod: r.referencePeriod,
+      verificationStatus: r.verificationStatus,
+      caveats: r.caveats,
+      unresolvedQuestions: r.unresolvedQuestions,
+      topic: r.topic,
+    }));
 
   const limitations: string[] = [];
   if (signal) {
@@ -115,6 +139,7 @@ export async function buildPolicyChatContext(
     neighbors,
     formalSource,
     sources,
+    policyEvidence,
     isSample: true,
     hasAnomalyResults,
     limitations,
