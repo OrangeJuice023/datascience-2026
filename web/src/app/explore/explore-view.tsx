@@ -9,6 +9,8 @@ import { SelectFilter } from "@/components/ui/select-filter";
 import { Button } from "@/components/ui/button";
 import { AnalyticalMap } from "@/components/maps/analytical/analytical-map";
 import { LocationDetailPanel } from "@/components/maps/location-detail-panel";
+import { SigmaDetailPanel } from "@/components/maps/sigma-detail-panel";
+import { SIGMA_DATA_URL, type SigmaData } from "@/lib/sigma/data";
 import { AccessDetailPanel } from "@/components/access/access-detail-panel";
 import { ACCESS_METRIC_LABEL, type AccessMetricView } from "@/lib/access/bundle";
 import { MAP_MODES, getMapMode } from "@/lib/map/modes";
@@ -35,10 +37,11 @@ const DEFAULT_FILTERS: MapFilters = {
   window: "7",
   medicine: "oral-rehydration-salts",
   accessMetric: "gap",
+  sigmaLayer: "ears",
 };
 
 const EMPTY_FRAME: ModeFrame = { features: [], links: [] };
-const BASE_TOGGLES: MapLayerToggles = { links: false, columns: true };
+const BASE_TOGGLES: MapLayerToggles = { links: false, columns: true, areas: false };
 
 function rgb(feature: MapFeature) {
   return `rgb(${feature.color[0]} ${feature.color[1]} ${feature.color[2]})`;
@@ -61,13 +64,34 @@ export function ExploreView({
   const [playing, setPlaying] = useState(false);
   // The timeline position belongs to one mode; switching modes starts at that mode's latest slice.
   const [time, setTime] = useState<{ modeId: MapModeId; index: number } | null>(null);
+  // SIGMA results (~1 MB) are fetched only when the mode is first opened.
+  const [sigma, setSigma] = useState<{ data?: SigmaData; error?: string; requested: boolean }>({ requested: false });
+
+  function loadSigma() {
+    if (sigma.requested) return;
+    setSigma({ requested: true });
+    fetch(SIGMA_DATA_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<SigmaData>;
+      })
+      .then((data) => setSigma({ data, requested: true }))
+      .catch((error: unknown) =>
+        setSigma({ error: error instanceof Error ? error.message : "unknown error", requested: true }),
+      );
+  }
+
+  const modeBundle = useMemo(
+    () => (sigma.data || sigma.error ? { ...bundle, sigma: sigma.data, sigmaError: sigma.error } : bundle),
+    [bundle, sigma.data, sigma.error],
+  );
 
   const mode = getMapMode(modeId);
   const toggles = useMemo(
     () => toggleOverrides[modeId] ?? { ...BASE_TOGGLES, ...mode.defaultToggles },
     [toggleOverrides, modeId, mode],
   );
-  const prepared = useMemo(() => mode.prepare?.(bundle, filters) ?? null, [mode, bundle, filters]);
+  const prepared = useMemo(() => mode.prepare?.(modeBundle, filters) ?? null, [mode, modeBundle, filters]);
   const latest = Math.max(0, (prepared?.timeline.slices.length ?? 1) - 1);
   const index = time?.modeId === modeId ? Math.min(time.index, latest) : latest;
   const frame = useMemo(
@@ -115,6 +139,7 @@ export function ExploreView({
   );
 
   function changeMode(next: MapModeId) {
+    if (next === "sigma") loadSigma();
     setPlaying(false);
     setModeId(next);
   }
@@ -189,6 +214,19 @@ export function ExploreView({
           value: k,
           label: ACCESS_METRIC_LABEL[k],
         }))}
+      />
+    ),
+    sigmaLayer: (
+      <SelectFilter
+        key="sigmaLayer"
+        label="SIGMA layer"
+        value={filters.sigmaLayer}
+        onChange={(v) => updateFilter("sigmaLayer", v)}
+        options={[
+          { value: "ears", label: "EARS signal" },
+          { value: "doh", label: "DOH threshold" },
+          { value: "cases", label: "Reported cases" },
+        ]}
       />
     ),
     window: (
@@ -334,6 +372,15 @@ export function ExploreView({
                   View full national record in Lab
                 </Button>
               </Link>
+            </Card>
+          ) : mode.id === "sigma" && selectedId && sigma.data?.units.some((u) => u.id === selectedId) ? (
+            <Card className="overflow-hidden">
+              <SigmaDetailPanel
+                data={sigma.data}
+                unitId={selectedId}
+                week={slice?.key}
+                onClose={() => setSelectedId(undefined)}
+              />
             </Card>
           ) : selectedLgu && selectedSignal && bundle.trends[selectedLgu.id] ? (
             <Card className="overflow-hidden">

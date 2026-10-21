@@ -67,3 +67,18 @@ export const GAP_HEX = {
   elevated: "#d03b3b",
   insufficient_data: "#e2e8f0",
 } as const;
+
+/**
+ * SIGMA: EARS and DOH-threshold states. "No data" (missing or suspect week)
+ * is a pale neutral that is never the lowest class; "not computed" / "no
+ * baseline" are a separate neutral, because the week has data but no result.
+ */
+export const SIGMA_HEX = {
+  alarm: "#d03b3b",
+  epidemic: "#d03b3b",
+  alert: "#eda100",
+  quiet: "#86b6ef",
+  notEvaluated: "#a8a29e",
+  noData: "#e2e8f0",
+  cases: OBSERVED_HEX,
+} as const;
