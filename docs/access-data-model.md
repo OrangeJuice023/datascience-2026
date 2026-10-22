@@ -160,3 +160,51 @@ Every snapshot and event carries `source` and `is_sample`. Metrics carry
 
 Real pharmacy APIs, scraping, inventory feeds, patient data, user accounts,
 payments, shortage claims and medical recommendations are out of scope.
+
+## Implementation status and open decisions
+
+Audit of the current code, 2026-10-23.
+
+**Wired end to end, on demo data:** `DemoAccessProvider` → `facilityStates` /
+`computeAccessMetrics` → `packAccessBundle` → the `/access` page (map, detail
+panel, areas for assessment), `GET /api/v1/access/metrics` (`status: "demo"`,
+with a `scope` block), the mobile ACCESS screen (reads the API) and the
+`/policy` page (shows the same areas for assessment, labelled as ACCESS demo
+data). Tests: `web/src/lib/access/access.test.ts` pins the gap rule, the
+assessment prompts and the API payload; the registry tests check the endpoint
+against its documented example.
+
+**Fixed in this audit**
+
+- `psgcCode` was dropped when metrics were packed into the bundle, so the API
+  always returned `null`. The API now recovers it from the area's facilities.
+  Demo facilities have no PSGC code, so the demo response is unchanged; real
+  codes will now survive once a real provider supplies them.
+- The ACCESS page called the Policy page "ACT"; it now uses the navigation
+  name ("Policy").
+
+**Decisions for the module owner**
+
+1. **"Too few searches" is classed `low`.** Under 8 searches a week the rule
+   returns `low`, which the UI shows as a "Low" access gap, while the reason
+   says "Too few searches to assess an access gap". Keeping it out of
+   `insufficient_data` is deliberate (that class means thin *facility*
+   coverage), but a reader may take "Low" as "no gap found". Options: a
+   separate class, or a different label. Not changed here because it alters
+   the rule's definition.
+2. **Sample flags are hard-coded.** `computeAccessMetrics` sets
+   `isSample: true` on every metric and the API always returns
+   `status: "demo"`. That is the safe direction today. A real provider must
+   switch both to `provider.isSample` (and `status: "live"`), or real data
+   would be mislabelled as demo.
+3. **Provenance fields are planned, not present.** The `access_metrics`
+   table above lists `method`, `method_version` and `computed_at`; the
+   current `AccessMetric` type has none of them.
+
+**Blockers before real use**
+
+- No real inventory or search-event source exists, and `SupabaseAccessProvider`
+  is not written. This needs a data owner (participating facilities), a
+  licence, and the privacy review noted above.
+- The gap thresholds are illustrative. They would need validation against
+  real access outcomes before any operational use.
