@@ -53,6 +53,12 @@ export function buildAccessMetrics(input: BuildAccessMetricsInput): AccessMetric
   const { bundle } = input;
   const nameById = new Map(input.lgus.map((lgu) => [lgu.id, lgu]));
   const areaName = (id: string) => nameById.get(id)?.name ?? id;
+  // The bundle drops psgcCode from each metric point (it is constant per
+  // area), so recover it from the area's facilities rather than reporting null.
+  const psgcByArea = new Map<string, string>();
+  for (const f of bundle.facilities) {
+    if (f.psgcCode && !psgcByArea.has(f.areaId)) psgcByArea.set(f.areaId, f.psgcCode);
+  }
 
   const areas: AccessArea[] = areaIds(bundle).map((id) => {
     const lgu = nameById.get(id);
@@ -80,7 +86,7 @@ export function buildAccessMetrics(input: BuildAccessMetricsInput): AccessMetric
           medicineName: medicine.name,
           areaId,
           areaName: areaName(areaId),
-          psgcCode: null,
+          psgcCode: psgcByArea.get(areaId) ?? null,
           periodStart: week.periodStart,
           periodEnd: week.periodEnd,
           searchDemand: point.searchDemand,
