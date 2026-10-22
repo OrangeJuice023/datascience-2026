@@ -85,12 +85,73 @@ function Section({ id, title, children }: { id?: string; title: string; children
   );
 }
 
+/** The in-page anchor for an endpoint, shared by its card and the page index. */
+function endpointAnchor(endpoint: ApiEndpoint): string {
+  return `endpoint-${endpoint.method.toLowerCase()}-${endpoint.path.replace(/\//g, "-")}`;
+}
+
+const PAGE_SECTIONS_BEFORE = [
+  { id: "overview", label: "Overview" },
+  { id: "quick-start", label: "Quick start" },
+  { id: "endpoints", label: "Endpoints" },
+];
+const PAGE_SECTIONS_AFTER = [
+  { id: "data-status", label: "Data status" },
+  { id: "errors", label: "Errors" },
+  { id: "limits", label: "Limits" },
+  { id: "access", label: "Access and authentication" },
+  { id: "limitations", label: "Limitations" },
+];
+
+/** The page index, generated from the registry so it cannot drift from it. */
+function PageIndex() {
+  const link = "block rounded px-2 py-1 text-[13px] text-slate-600 hover:bg-slate-100 hover:text-slate-900";
+  return (
+    <ul className="space-y-0.5">
+      {PAGE_SECTIONS_BEFORE.map((s) => (
+        <li key={s.id}>
+          <a href={`#${s.id}`} className={link}>
+            {s.label}
+          </a>
+        </li>
+      ))}
+      {ENDPOINT_GROUPS.map((group) => {
+        const endpoints = API_ENDPOINTS.filter((e) => e.group === group);
+        if (endpoints.length === 0) return null;
+        return (
+          <li key={group}>
+            <a href={`#group-${group.toLowerCase()}`} className={link}>
+              {group}
+            </a>
+            <ul className="ml-2 border-l border-slate-200 pl-1">
+              {endpoints.map((e) => (
+                <li key={endpointAnchor(e)}>
+                  <a href={`#${endpointAnchor(e)}`} className={`${link} font-mono text-xs`}>
+                    {e.method} {e.path === "/" ? "/" : e.path}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        );
+      })}
+      {PAGE_SECTIONS_AFTER.map((s) => (
+        <li key={s.id}>
+          <a href={`#${s.id}`} className={link}>
+            {s.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function EndpointCard({ endpoint }: { endpoint: ApiEndpoint }) {
   const response = JSON.stringify(endpoint.exampleResponse, null, 2);
 
   return (
     <article
-      id={`endpoint-${endpoint.method.toLowerCase()}-${endpoint.path.replace(/\//g, "-")}`}
+      id={endpointAnchor(endpoint)}
       className="scroll-mt-20 rounded-lg border border-slate-200 bg-white"
     >
       <header className="border-b border-slate-200 px-4 py-3 sm:px-5">
@@ -236,14 +297,29 @@ export function DocumentationView() {
   const quickStart = findEndpoint("GET", "/dengue/summary");
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-6xl">
       <PageHeader
         eyebrow="Developers"
         title="API documentation"
         subtitle="SIGMA serves a versioned, read-only JSON API. Every response states what kind of data it carries, so a client never has to guess whether a number is an observation, a simulation, or nothing at all."
       />
 
-      <div className="space-y-8">
+      <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+      <nav aria-label="On this page" className="hidden lg:block">
+        <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+          <p className="mb-2 px-2 text-xs font-semibold text-slate-500">On this page</p>
+          <PageIndex />
+        </div>
+      </nav>
+
+      <details className="mb-6 rounded-lg border border-slate-200 bg-white lg:hidden">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">On this page</summary>
+        <nav aria-label="On this page" className="border-t border-slate-100 px-2 py-2">
+          <PageIndex />
+        </nav>
+      </details>
+
+      <div className="min-w-0 space-y-8">
         <Section id="overview" title="Overview">
           <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-600 sm:p-5">
             <p>
@@ -498,6 +574,7 @@ export function DocumentationView() {
             ))}
           </ul>
         </Section>
+      </div>
       </div>
     </div>
   );
