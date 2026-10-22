@@ -193,9 +193,9 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
   };
 }
 
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
+export const rateLimitMap = new Map<string, { count: number; reset: number }>();
 
-function checkRateLimit(ip: string, limit = 30, windowMs = 60000) {
+export function checkRateLimit(ip: string, limit = 30, windowMs = 60000) {
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
   if (!entry || entry.reset < now) {
