@@ -32,11 +32,12 @@ the documentation pack (`docs/README.md`, `docs/architecture.md`, `docs/next-ste
 | Reproducible build from a clean checkout | **Verified 2026-10-21**: fresh clone + PSA file → `fetch-sources.mjs` → `build-geo.mjs` → `git diff` empty | `scripts/geo/README.md` |
 | Join key to `ml/` output | Implemented: `ml_geography_name`, 126 / 126 match | Crosswalk; method §6.1 |
 | Upward aggregation map (unit → province → region → national) | Implemented in the fixture (`aggregation.province/region/national`) | `web/src/data/geo/hdx-reporting-units.json` |
-| Fixture used by the app | **Not connected.** No app code imports it | `grep -r hdx-reporting-units web/src` finds nothing |
+| Fixture used by the app | **Not connected.** No app code imports it. The SIGMA map mode uses its own export instead (next rows) | `grep -r hdx-reporting-units web/src` finds nothing |
+| SIGMA map mode (Explore → SIGMA) | Implemented on `feat/sigma-map`: EARS, DOH-threshold and reported-case layers per reporting unit, optional area fills, unit detail panel | `web/src/lib/map/modes/sigma.ts`; `ml/export_sigma_web.py` |
 | Geography contract in `web/src/types/data.ts` | Proposed only; every `psgcCode` on `main` is `null` | Schema proposal; `web/src/data/sample/geographies.ts` |
 | CCHAIN cities → canonical geography (environment track) | Implemented: 12 / 12 matched by code, name and area; 10 are their own HDX unit | `data/reference/geo/cchain_city_crosswalk.csv`; report §8; method §7 |
-| Swap-row handling in `ml/clean_dengue.py` | **Not started**, tracked separately (backlog P0-1) | Method §6.1 |
-| Polygons for the map | Planned. geoBoundaries gbOpen (CC BY 3.0 IGO) recommended; not downloaded | Method §3 |
+| Swap-row handling in `ml/clean_dengue.py` | **Fix drafted** on `fix/hdx-swap-rows` (`data_quality = "suspect swap"`), awaiting the module owner's review | Method §6.1 |
+| Polygons for the map | Implemented: geoBoundaries gbOpen ADM3 (CC BY 3.0 IGO) dissolved to the 126 units | `scripts/geo/build-boundaries.mjs`; `web/public/geo/hdx-reporting-units.geojson` |
 | Population denominators / incidence | Not possible with current sources | Method §2 |
 
 The fixture contains 1 national, 17 regional, 81 provincial and 45 city/municipal admin entities,

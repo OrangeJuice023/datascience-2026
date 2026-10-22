@@ -10,7 +10,7 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { ArcLayer, ColumnLayer, ScatterplotLayer } from "@deck.gl/layers";
+import { ArcLayer, ColumnLayer, GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import type { PickingInfo } from "@deck.gl/core";
 import { FALLBACK_BASEMAP, type ResolvedBasemap } from "@/lib/map/basemap";
@@ -89,8 +89,27 @@ function buildLayers(
   const focused = frame.features.filter((f) => f.id === selectedId || f.id === hoveredId);
 
   type HeatPoint = NonNullable<ModeFrame["heat"]>[number];
+  const areas = frame.areas;
 
   return [
+    // Categorical area fills (never counts); drawn under every point layer.
+    areas &&
+      new GeoJsonLayer({
+        id: "areas",
+        data: areas.url,
+        pickable: true,
+        stroked: true,
+        filled: true,
+        lineWidthUnits: "pixels",
+        getLineWidth: (f) => (f.id === selectedId ? 2 : 0.5),
+        getLineColor: (f) => (f.id === selectedId ? [15, 23, 42, 255] : [255, 255, 255, 200]),
+        getFillColor: (f) => areas.fills[String(f.id)] ?? [0, 0, 0, 0],
+        updateTriggers: {
+          getFillColor: areas.fills,
+          getLineWidth: selectedId,
+          getLineColor: selectedId,
+        },
+      }),
     // Screen-space density; not drawn on the globe, where aggregation is unreliable.
     frame.heat &&
       frame.heat.length > 0 &&
@@ -219,14 +238,14 @@ export function MapCanvas({
     const overlay = new MapboxOverlay({
       interleaved: false,
       layers: [],
-      onHover: (info: PickingInfo<MapFeature>) => {
+      onHover: (info: PickingInfo<Pick<MapFeature, "id">>) => {
         map.getCanvas().style.cursor = info.object ? "pointer" : "";
         callbacksRef.current.onHover(
-          info.object ? { id: info.object.id, x: info.x, y: info.y } : null,
+          info.object ? { id: String(info.object.id), x: info.x, y: info.y } : null,
         );
       },
-      onClick: (info: PickingInfo<MapFeature>) => {
-        callbacksRef.current.onSelect(info.object?.id ?? null);
+      onClick: (info: PickingInfo<Pick<MapFeature, "id">>) => {
+        callbacksRef.current.onSelect(info.object ? String(info.object.id) : null);
       },
       onError: () => {
         callbacksRef.current.onStatus?.(basemap, "Analytical layers could not render.");

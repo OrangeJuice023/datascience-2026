@@ -93,8 +93,8 @@ End PR descriptions with the attribution line your tool requires, if any.
 | Path | What | Run / check |
 | --- | --- | --- |
 | `web/` | Next.js + TypeScript + Tailwind frontend (MapLibre, deck.gl, Recharts). Read `web/AGENTS.md`. | `cd web && npm ci && npm run lint && npx tsc --noEmit && npm run build` |
-| `ml/` | Python dengue pipeline: `clean_dengue.py` → `ears.py`, QA reports in `ml/qa/` → `docs/reports/`. Docs: `docs/dengue-pipeline.md`. | `pip install -r ml/requirements.txt`, `python -m compileall -q ml` |
-| `scripts/geo/` | Geography track (Node ≥ 20, no npm deps): HDX dengue reporting units → COD-AB / PSA PSGC. Docs: `scripts/geo/README.md`, `docs/geo/`. | `node scripts/geo/fetch-sources.mjs && node scripts/geo/build-geo.mjs` |
+| `ml/` | Python dengue pipeline: `clean_dengue.py` → `ears.py` → `export_sigma_web.py` (map data), QA reports in `ml/qa/` → `docs/reports/`. Docs: `docs/dengue-pipeline.md`. | `pip install -r ml/requirements.txt`, `python -m compileall -q ml` |
+| `scripts/geo/` | Geography track (Node ≥ 20, no npm deps): HDX dengue reporting units → COD-AB / PSA PSGC. Docs: `scripts/geo/README.md`, `docs/geo/`. | `node scripts/geo/fetch-sources.mjs && node scripts/geo/build-geo.mjs && node scripts/geo/build-boundaries.mjs` |
 | `data/reference/` | Small committed reference tables (crosswalks, hub rows, curated decisions). | |
 | `data/sample/` | Small sample data safe to commit. | |
 | `data/raw/`, `data/processed/` | Local only, git-ignored. | |
@@ -110,6 +110,8 @@ Run the checks for every area you touched before you commit, and report the resu
 - **Generated; never edit by hand.** Change the inputs or the script and rebuild:
   `data/reference/geo/hdx_dengue_crosswalk.csv`, `data/reference/geo/geography_hub_rows.csv`,
   `docs/geo/geo-data-quality-report.md`, `web/src/data/geo/hdx-reporting-units.json`,
+  `web/public/geo/hdx-reporting-units.geojson` (`scripts/geo/build-boundaries.mjs`),
+  `web/public/data/sigma/hdx-dengue-sigma.json` (`ml/export_sigma_web.py`),
   `docs/reports/*.pdf`, and the OpenDengue fixture built by `web/scripts/build-opendengue.mjs`.
 - **Hand-curated, logged decisions:** `data/reference/geo/{name_overrides,source_region_labels,city_classes}.csv`.
   Every row needs a `reason`/`basis`.
