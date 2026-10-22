@@ -32,7 +32,8 @@ from any working directory.
 | Complete calendar | Every series has every week. Missing weeks are **null rows**: never deleted, zero-filled or interpolated, because EARS baselines must cover consecutive weeks. |
 | Columns kept | National: `geographic_level`, `period_start`, `value`. Local: everything except `deaths`. |
 | Name fixes | BASILIG CITY → BISLIG CITY, NUEVA VISCAYA → NUEVA VIZCAYA, SISQUIJOR → SIQUIJOR; REGION VII-EASTERN VISAYAS → REGION VIII-EASTERN VISAYAS; casing and whitespace normalised. |
-| `data_quality` | `ok` / `missing` everywhere. National also has `incomplete` (fade-out before each year-end reporting cut-off) and `backlog` (early-January catch-up). Only `ok` weeks are used in calculations. |
+| `data_quality` | `ok` / `missing` everywhere. National also has `incomplete` (fade-out before each year-end reporting cut-off) and `backlog` (early-January catch-up). Local also has `suspect swap` (below). Only `ok` weeks are used in calculations. |
+| Suspected cases↔deaths swap (local) | 665 rows in 15 weeks (Sep–Oct of 2016, 2017 and 2020; 87 places) look like they have cases and deaths swapped: `cases` is ~0–1 and `deaths` holds the week's case count. Rule: a row out of date order in the source file, in a week where 10+ places have one (same rule as `scripts/geo/build-geo.mjs`). They are `data_quality = suspect swap`: missing data, never zero and never swapped back. `value` keeps the published `cases`. |
 | `data_flag` (local) | `possible non-reporting`: 4+ consecutive zero weeks where the place normally reports 10+. `one-week spike`: over 8× the 9-week median and at least 4× both neighbouring weeks. Values are kept as published; the true counts are not recoverable from the data. |
 
 ### DOH alert and epidemic thresholds
@@ -68,9 +69,9 @@ flags.
   onset (mid-May to early June each year), so it does not single out 2019 on its
   own. Combined with the DOH threshold it does: all 13 national 2019 alarms came
   in DOH-epidemic weeks, none of the 14 in 2020.
-- Week-by-week agreement with the DOH threshold is low (κ = 0.19 local) because
+- Week-by-week agreement with the DOH threshold is low (κ = 0.18 local) because
   the two answer different questions, but EARS fired at or before the onset of
-  245 of 409 local DOH epidemic episodes.
+  248 of 413 local DOH epidemic episodes.
 
 Full detail, checks and news sources: [dengue_qa_report.pdf](reports/dengue_qa_report.pdf)
 and [dengue_ears_qa_report.pdf](reports/dengue_ears_qa_report.pdf).

@@ -3,8 +3,9 @@
 Output: data/processed/dengue_cases_combined.xlsx, with a NATIONAL sheet and a
 LOCAL sheet. Both cover the local data's date range (minus its incomplete
 final week) on a complete weekly calendar; weeks with no record have a null
-value. data_quality marks each week as ok / missing, and national weeks
-distorted by the year-end reporting cut-off as incomplete / backlog. Anything
+value. data_quality marks each week as ok / missing, national weeks
+distorted by the year-end reporting cut-off as incomplete / backlog, and local
+rows whose cases and deaths look swapped in the source as suspect swap. Anything
 other than "ok" should be excluded from EARS baselines and alarms. data_flag
 warns about local weeks that are "ok" but look like reporting artefacts
 (possible non-reporting, one-week spike); their values are kept.
@@ -27,6 +28,9 @@ REGION_FIXES = {
     "REGION VII-EASTERN VISAYAS": "REGION VIII-EASTERN VISAYAS",
     "REGION IVB-MIMAROPA": "REGION IV-B-MIMAROPA",
 }
+# A week is a swap block when at least this many places have an out-of-order row
+# in it (same rule as scripts/geo/build-geo.mjs).
+SWAP_BLOCK_MIN_PLACES = 10
 
 
 def clean_national() -> pd.DataFrame:
@@ -38,14 +42,34 @@ def clean_national() -> pd.DataFrame:
     return df.drop_duplicates().sort_values("period_start").reset_index(drop=True)
 
 
+def mark_suspect_swaps(df: pd.DataFrame) -> pd.Series:
+    """Return True for source rows whose cases and deaths look swapped.
+
+    In 15 weeks (Sep-Oct of 2016, 2017 and 2020) many places have a row that
+    is out of date order in the source file (appended after the place's later
+    weeks). In those rows cases is ~0-1 and deaths holds what looks like the
+    week's case count. A row is suspect when it is out of order and its week
+    has SWAP_BLOCK_MIN_PLACES or more such rows; isolated out-of-order rows
+    elsewhere are ordering anomalies only. Needs the source row order, so call
+    it before any sorting. See docs/geo/geo-data-quality-report.md §5.1.
+    """
+    prev_max = df.groupby("loc")["date"].transform(lambda s: s.cummax().shift())
+    out_of_order = df["date"] < prev_max
+    per_week = out_of_order.groupby(df["date"]).transform("sum")
+    return out_of_order & (per_week >= SWAP_BLOCK_MIN_PLACES)
+
+
 def clean_local() -> pd.DataFrame:
     # Row 1 is an HXL tag row (#adm2+name, ...), not data.
     df = pd.read_csv(LOCAL_SRC, skiprows=[1])
-    df = df.drop(columns="deaths")
 
     df["loc"] = df["loc"].str.strip().str.upper().replace(LOC_FIXES)
     df["Region"] = df["Region"].str.strip().str.upper().replace(REGION_FIXES)
     df["date"] = pd.to_datetime(df["date"], format="%m/%d/%Y")
+
+    # The swap can only be seen with deaths still present.
+    df["suspect_swap"] = mark_suspect_swaps(df)
+    df = df.drop(columns="deaths")
 
     df = df.rename(columns={
         "loc": "geography_name",
@@ -54,7 +78,7 @@ def clean_local() -> pd.DataFrame:
         "cases": "value",
     })
     df.insert(0, "geographic_level", "local")
-    df = df[["geographic_level", "region", "geography_name", "period_start", "value"]]
+    df = df[["geographic_level", "region", "geography_name", "period_start", "value", "suspect_swap"]]
 
     return (df.drop_duplicates()
               .sort_values(["region", "geography_name", "period_start"])
@@ -72,18 +96,24 @@ def flag_year_end_artefacts(national: pd.DataFrame, local: pd.DataFrame) -> None
     October to mid-January so that real events elsewhere in the year (the
     2019 epidemic, the 2020 lockdown dip) are left as "ok".
     """
-    # Only compare against weeks where nearly every local place reported
-    # (Davao Occidental alone has scattered gaps through 2016-2018).
-    complete = local.groupby("period_start")["value"].agg(
-        lambda v: v.sum() if v.isna().sum() <= 5 else None)
-    ratio = national["value"] / national["period_start"].map(complete)
+    # The "backlog" test only uses weeks where nearly every local place is "ok"
+    # (Davao Occidental alone has scattered gaps through 2016-2018). The sum of
+    # the "ok" places is a lower bound on the full sum, so the "incomplete" test
+    # can also use weeks with more gaps, such as the suspect-swap blocks.
+    ok_value = local["value"].where(local["data_quality"] == "ok")
+    by_week = ok_value.groupby(local["period_start"])
+    partial = by_week.sum()
+    complete = partial.where(by_week.apply(lambda v: v.isna().sum()) <= 5)
+    week = national["period_start"]
+    low = national["value"] / week.map(partial)
+    high = national["value"] / week.map(complete)
 
-    d = national["period_start"].dt
+    d = week.dt
     year_end = (d.month >= 10) | ((d.month == 1) & (d.day <= 15))
     is_ok = national["data_quality"] == "ok"
 
-    national.loc[is_ok & year_end & (ratio < 0.6), "data_quality"] = "incomplete"
-    national.loc[is_ok & year_end & (ratio > 1.4), "data_quality"] = "backlog"
+    national.loc[is_ok & year_end & (low < 0.6), "data_quality"] = "incomplete"
+    national.loc[is_ok & year_end & (high > 1.4), "data_quality"] = "backlog"
 
 
 def flag_suspect_local_weeks(local: pd.DataFrame) -> None:
@@ -96,11 +126,13 @@ def flag_suspect_local_weeks(local: pd.DataFrame) -> None:
     - "one-week spike": a week over 8x its place's 9-week rolling median, at
       least 30 cases, and at least 4x both neighbours (a backlog dumped into
       one week, or an entry error)
+    Only "ok" weeks are flagged or used as context; other weeks count as null.
     """
-    place = local.groupby("geography_name")["value"]
-    v = local["value"].astype(float)
+    value = local["value"].where(local["data_quality"] == "ok")
+    place = value.groupby(local["geography_name"])
+    v = value.astype(float)
 
-    typical = local["geography_name"].map(local[v > 0].groupby("geography_name")["value"].median())
+    typical = local["geography_name"].map(value[v > 0].groupby(local["geography_name"]).median())
     zero = v.eq(0)
     run_id = (zero != zero.groupby(local["geography_name"]).shift()).cumsum()
     run_len = zero.groupby(run_id).transform("sum").where(zero, 0)
@@ -220,13 +252,17 @@ def main() -> None:
     grid = places.merge(weeks.to_frame(index=False), how="cross")
     local = (grid.merge(local, on=["region", "geography_name", "period_start"], how="left")
                  .assign(geographic_level="local")
-                 [["geographic_level", "region", "geography_name", "period_start", "value"]]
+                 [["geographic_level", "region", "geography_name", "period_start", "value", "suspect_swap"]]
                  .sort_values(["region", "geography_name", "period_start"])
                  .reset_index(drop=True))
 
     for df in (national, local):
         df["value"] = df["value"].astype("Int64")
         df["data_quality"] = df["value"].isna().map({True: "missing", False: "ok"})
+
+    # Suspected cases/deaths swaps are missing data: value is kept as published
+    # (it is probably the week's death count), but the week is not "ok".
+    local.loc[local.pop("suspect_swap").eq(True), "data_quality"] = "suspect swap"
 
     flag_year_end_artefacts(national, local)
     national["data_flag"] = None
