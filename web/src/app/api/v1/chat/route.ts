@@ -15,19 +15,39 @@ import { methodNotAllowed, withErrors } from "@/lib/api/route";
 import { rateLimited } from "@/lib/api/chat";
 
 export const POST = withErrors(async (request: NextRequest) => {
-  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
+  if (process.env.CHAT_DISABLED === "true" || process.env.CHAT_PUBLIC_DISABLED === "true") {
+    throw ApiError.notConfigured(
+      "The Policy Copilot is temporarily disabled and cannot answer requests.",
+    );
+  }
+
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded
+    ? forwarded.split(",")[0]?.trim() || null
+    : request.headers.get("x-real-ip")?.trim() || null;
   const retryAfter = rateLimited(ip);
   if (retryAfter !== null) {
-    throw ApiError.rateLimited('Too many requests. Please try again later.', retryAfter);
+    throw ApiError.rateLimited("Too many requests. Please try again later.", retryAfter);
   }
+
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (contentLength > LIMITS.maxBodyBytes) {
     throw ApiError.payloadTooLarge("The request body is too large.");
   }
 
+  let rawBody: string;
+  try {
+    rawBody = await request.text();
+  } catch {
+    throw ApiError.badRequest("A valid JSON body is required.");
+  }
+  if (new TextEncoder().encode(rawBody).length > LIMITS.maxBodyBytes) {
+    throw ApiError.payloadTooLarge("The request body is too large.");
+  }
+
   let body: unknown;
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     throw ApiError.badRequest("A valid JSON body is required.");
   }
@@ -46,6 +66,3 @@ export const POST = withErrors(async (request: NextRequest) => {
 });
 
 export const GET = methodNotAllowed(["POST"]);
-
-
-
