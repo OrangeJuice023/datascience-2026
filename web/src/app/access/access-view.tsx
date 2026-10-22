@@ -31,7 +31,7 @@ export function AccessView({
   const [query, setQuery] = useState("");
   const [metric, setMetric] = useState<AccessMetricView>("gap");
   const [view, setView] = useState<MapViewMode>("2d");
-  const [toggles, setToggles] = useState<MapLayerToggles>({ links: false, columns: true });
+  const [toggles, setToggles] = useState<MapLayerToggles>({ links: false, columns: true, areas: false });
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [playing, setPlaying] = useState(false);
   const [index, setIndex] = useState<number | null>(null);
@@ -45,6 +45,7 @@ export function AccessView({
       window: "all",
       medicine: medicineId,
       accessMetric: metric,
+      sigmaLayer: "ears",
     }),
     [medicineId, metric],
   );

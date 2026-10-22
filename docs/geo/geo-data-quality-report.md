@@ -13,6 +13,7 @@
 | Philippines - Subnational Population Statistics, admin 1, 2022 projection | `data/raw/cod_ps_phl/phl_admpop_adm1_2022.csv` | `40ac6ef448da1231…` | CC BY-IGO | 2026-10-17 |
 | Philippines - Subnational Population Statistics, admin 2, 2022 projection (v2) | `data/raw/cod_ps_phl/phl_admpop_adm2_2022_v2.csv` | `dd06a7d799371900…` | CC BY-IGO | 2026-10-17 |
 | Project CCHAIN — location.csv (barangays of the 12 CCHAIN cities) | `data/raw/cchain/location.csv` | `32347494bc6cdc9d…` | CC BY (Creative Commons Attribution International) | 2026-10-21 |
+| geoBoundaries gbOpen PHL ADM3 (2020), simplified GeoJSON | `data/raw/geoboundaries_phl/geoBoundaries-PHL-ADM3_simplified.geojson` | `2ece3d44a5c6a2af…` | CC BY 3.0 IGO | 2026-10-21 |
 | Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile | `data/raw/psa_psgc/PSGC-3Q-2026-Publication-Datafile.xlsx` | `8aad47f84e4f6317…` | PSA terms of use; kept in git-ignored data/raw, not redistributed | 2026-10-19 |
 
 - Boundary reference: OCHA COD-AB PHL **v03**, valid on 2025-02-13: 17 regions, 88 admin-2, 1,642 admin-3 units.

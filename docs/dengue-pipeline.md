@@ -60,6 +60,16 @@ result but are left out of other weeks' baselines
 computed; `ears_note` explains the calculation and `flag_note` carries the data
 flags.
 
+## Step 3: map export (`ml/export_sigma_web.py`)
+
+Writes `web/public/data/sigma/hdx-dengue-sigma.json` for the web map's SIGMA mode (Explore →
+SIGMA). One record per reporting unit, joined on the crosswalk's `ml_geography_name` and keyed by
+the canonical unit id that the map polygons (`scripts/geo/build-boundaries.mjs`) use. Weekly value,
+`data_quality`, `data_flag`, DOH status and thresholds, EARS result and C1–C3 statistics, stored
+column-wise with small codes. Any week that is not `ok` has a null value, so missing and
+suspect-swap weeks reach the map as "no data", never as zero. Local rows only; run it after
+`ears.py`. The file is generated: rebuild it, never edit it.
+
 ## Key findings
 
 - **2019 epidemic:** first national EARS alarm on 26/05/2019, 7 weeks before

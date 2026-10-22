@@ -165,7 +165,9 @@ The design has to work without population denominators.
 
 ## 5. How results may be shown on the map
 
-The map today draws **points**, not polygons. That fits this data.
+The SIGMA map mode draws **points** for every layer, and optional **area fills** (geoBoundaries
+polygons dissolved to the reporting units) for the categorical EARS and DOH states only. The rules
+below are what that mode implements.
 
 - **Marker position.** Each reporting unit is drawn at its representative point (`centroid` in the
   fixture). This is always inside the unit. It is not the location of the cases.
