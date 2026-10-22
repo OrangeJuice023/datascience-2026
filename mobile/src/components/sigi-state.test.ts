@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { sigiStateForData } from './sigi-state';
+import { copilotSigiState, isCopilotUnavailable, sigiStateForData } from './sigi-state';
 
 /**
  * The mascot's state mapping.
@@ -33,5 +33,26 @@ describe('sigiStateForData', () => {
 
   it('never reports a result while a request is still running', () => {
     expect(sigiStateForData({ loading: true, hasResult: true })).toBe('thinking');
+  });
+});
+
+describe('copilotSigiState', () => {
+  const base = { sending: false, errorCode: null, draft: '', hasReply: false };
+
+  it('waits, listens, then thinks only while a request is in flight', () => {
+    expect(copilotSigiState(base)).toBe('idle');
+    expect(copilotSigiState({ ...base, draft: ' hi ' })).toBe('listening');
+    expect(copilotSigiState({ ...base, draft: 'hi', sending: true })).toBe('thinking');
+  });
+
+  it('shows a result only once a real reply came back', () => {
+    expect(copilotSigiState({ ...base, hasReply: true })).toBe('insight');
+  });
+
+  it('distinguishes a switched-off copilot from a failure', () => {
+    expect(copilotSigiState({ ...base, errorCode: 'not_configured' })).toBe('unavailable');
+    expect(copilotSigiState({ ...base, errorCode: 'network_error' })).toBe('error');
+    expect(isCopilotUnavailable('not_configured')).toBe(true);
+    expect(isCopilotUnavailable(null)).toBe(false);
   });
 });

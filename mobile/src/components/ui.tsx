@@ -141,11 +141,13 @@ export function ChipGroup<T extends string>({
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             onPress={() => onSelect(option.value)}
-            style={[
+            hitSlop={6}
+            style={({ pressed }) => [
               styles.chip,
               {
                 backgroundColor: active ? theme.accent : theme.background,
                 borderColor: active ? theme.accent : theme.border,
+                opacity: pressed ? 0.7 : 1,
               },
             ]}>
             <Text style={[styles.chipText, { color: active ? '#ffffff' : theme.textSecondary }]}>
@@ -158,7 +160,65 @@ export function ChipGroup<T extends string>({
   );
 }
 
+/**
+ * A collapsible section: supporting detail a reader may need but should not
+ * have to scroll past. The header is one large touch target and announces
+ * whether it is expanded.
+ */
+export function Disclosure({
+  title,
+  summary,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const theme = useTheme();
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <View style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityHint={open ? 'Collapses this section' : 'Expands this section'}
+        onPress={() => setOpen((value) => !value)}
+        style={({ pressed }) => [styles.disclosureHeader, { opacity: pressed ? 0.7 : 1 }]}>
+        <View style={styles.disclosureText}>
+          <Text style={[Type.title, { fontSize: 16, lineHeight: 22, color: theme.text }]}>{title}</Text>
+          {summary ? <Text style={[styles.bannerBody, { color: theme.textSecondary }]}>{summary}</Text> : null}
+        </View>
+        <Text style={[styles.disclosureChevron, { color: theme.textSecondary }]} accessibilityElementsHidden importantForAccessibility="no">
+          {open ? '−' : '+'}
+        </Text>
+      </Pressable>
+      {open ? <View style={styles.disclosureBody}>{children}</View> : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  disclosureHeader: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  disclosureText: {
+    flex: 1,
+    gap: 2,
+  },
+  disclosureChevron: {
+    fontSize: 22,
+    fontWeight: '400',
+    width: 24,
+    textAlign: 'center',
+  },
+  disclosureBody: {
+    gap: Spacing.two,
+  },
   card: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 14,
@@ -253,6 +313,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    minHeight: 36,
+    justifyContent: 'center',
   },
   chipText: {
     fontSize: 13,
