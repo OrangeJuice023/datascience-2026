@@ -116,6 +116,7 @@ Run the checks for every area you touched before you commit, and report the resu
   `docs/geo/geo-data-quality-report.md`, `web/src/data/geo/hdx-reporting-units.json`,
   `web/public/geo/hdx-reporting-units.geojson` (`scripts/geo/build-boundaries.mjs`),
   `web/public/data/sigma/hdx-dengue-sigma.json` (`ml/export_sigma_web.py`),
+  `web/src/data/landing/pixel-map.json` (`web/scripts/build-landing-pixels.mjs`),
   `docs/reports/*.pdf`, and the OpenDengue fixture built by `web/scripts/build-opendengue.mjs`.
 - **Hand-curated, logged decisions:** `data/reference/geo/{name_overrides,source_region_labels,city_classes}.csv`.
   Every row needs a `reason`/`basis`.
