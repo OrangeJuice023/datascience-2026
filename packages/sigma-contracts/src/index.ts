@@ -424,5 +424,6 @@ export type SigiState =
   | "insight"
   | "unavailable"
   | "error"
-  | "success";
+  | "success"
+  | "sleepy";
 

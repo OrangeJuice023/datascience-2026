@@ -1,818 +1,361 @@
 #!/usr/bin/env python3
 """
-Generates the Sigi mascot asset set.
+Generates the Sigi mascot asset set from the official character sheet.
 
-Sigi is the original Philippine maya-inspired bird companion for SIGMA. This
-script is the single canonical source for the character: it renders every
-state from one parametric pixel-art model and writes the platform copies.
+Sigi is SIGMA's Philippine maya-inspired companion. The canonical artwork is
+the character sheet in docs/brand/sigi-mascot-guide.png: one pose per state
+under "Expressions & states". This script cuts each pose out of the sheet
+(no redrawing, no resampling) and animates it with whole-sprite motion only:
+
+- the body bobs, hops or shakes by a few pixels;
+- the state's effect marks (sparks, bulb, bubbles, "zzz") are separate
+  pieces of the sheet, so they pulse, float or build up on their own;
+- idle and listening blink: the eyes are found in the artwork and closed
+  for one frame.
 
     python web/scripts/generate-sigi-mascot.py
 
 Outputs
     web/public/mascot/sigi/<state>.gif      animated GIF (web)
-    web/public/mascot/sigi/<state>.png      static still (web fallback)
+    web/public/mascot/sigi/<state>.png      static still (web, reduced motion)
     web/public/mascot/sigi/manifest.json    dimensions, frames, rate, size
     mobile/assets/mascot/sigi/<state>.gif   animated GIF (mobile copy)
-    mobile/assets/mascot/sigi/<state>.png   static still (mobile copy)
-    mobile/assets/mascot/sigi/frames/<state>/frame_NN.png  frame sequence
+    mobile/assets/mascot/sigi/manifest.json
+    mobile/assets/mascot/sigi/frames/<state>/frame_NN.png  frame sequence;
+        frame_00 is the mobile still for reduced motion
 
-The character is drawn on a 64x64 logical grid and scaled up with
-nearest-neighbour so every edge stays a crisp pixel. Frames are rendered in
-palette-index space with a fixed palette, which keeps the GIFs small and
-lets a single transparent index be reserved for the background.
-
-No network access, no external assets: the artwork is computed here.
+No network access. The sheet is hash-checked so a changed sheet is noticed
+rather than silently re-cut with boxes that no longer fit it.
 """
 
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
-import math
 import os
-from dataclasses import dataclass, field
-from typing import Iterable, Sequence
+import shutil
+import time
+from collections import deque
+from dataclasses import dataclass
 
 import numpy as np
 from PIL import Image
 
-# --------------------------------------------------------------------------
-# Paths
-# --------------------------------------------------------------------------
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
+SHEET = os.path.join(REPO, "docs", "brand", "sigi-mascot-guide.png")
+SHEET_SHA256 = "fd4b8188869a106acc983531afbed11c59acb1e6e21994ea91b76b06253eb27f"
 WEB_OUT = os.path.join(REPO, "web", "public", "mascot", "sigi")
 MOBILE_OUT = os.path.join(REPO, "mobile", "assets", "mascot", "sigi")
 
-# --------------------------------------------------------------------------
-# Canvas and palette
-# --------------------------------------------------------------------------
-
-LOGICAL = 64          # logical pixel-art grid
-SCALE = 2             # output pixels per logical pixel
-OUT = LOGICAL * SCALE  # 128
-
-# Palette index 0 is reserved for fully transparent pixels.
-TRANSPARENT = 0
-INK = 1               # primary ink, used for the silhouette outline
-OLIVE = 2             # feathers
-OLIVE_DARK = 3        # wings, feather shading
-OLIVE_LIGHT = 4       # crest highlight
-CREAM = 5             # face and belly
-CREAM_SHADE = 6       # feather underside
-TERRACOTTA = 7        # beak and feet
-TERRACOTTA_DARK = 8   # beak lower half
-COBALT = 9            # the signal accent
-COBALT_LIGHT = 10     # signal accent highlight
-
-PALETTE = [
-    (255, 255, 255),  # 0 transparent placeholder
-    (0x22, 0x23, 0x1F),  # 1 ink
-    (0x74, 0x7D, 0x59),  # 2 olive
-    (0x5F, 0x67, 0x46),  # 3 olive dark
-    (0x8E, 0x96, 0x6E),  # 4 olive light
-    (0xFF, 0xFC, 0xF5),  # 5 cream
-    (0xEF, 0xE7, 0xD6),  # 6 cream shade
-    (0xB6, 0x6D, 0x4D),  # 7 terracotta
-    (0x96, 0x55, 0x3A),  # 8 terracotta dark
-    (0x24, 0x68, 0xC9),  # 9 cobalt
-    (0x5B, 0x94, 0xE4),  # 10 cobalt light
-]
-
-PALETTE_ARRAY = np.array(PALETTE, dtype=np.uint8)
-
-# --------------------------------------------------------------------------
-# Mask helpers
-# --------------------------------------------------------------------------
-
-YY, XX = np.mgrid[0:LOGICAL, 0:LOGICAL]
-
-
-def ellipse(cx: float, cy: float, rx: float, ry: float) -> np.ndarray:
-    """Hard-edged filled ellipse. No anti-aliasing: this is pixel art."""
-    return (((XX + 0.5 - cx) / rx) ** 2 + ((YY + 0.5 - cy) / ry) ** 2) <= 1.0
-
-
-def circle(cx: float, cy: float, r: float) -> np.ndarray:
-    return ellipse(cx, cy, r, r)
-
-
-def polygon(points: Sequence[tuple[float, float]]) -> np.ndarray:
-    """Filled simple polygon using the even-odd rule."""
-    inside = np.zeros((LOGICAL, LOGICAL), dtype=bool)
-    n = len(points)
-    for i in range(n):
-        x1, y1 = points[i]
-        x2, y2 = points[(i + 1) % n]
-        if y1 == y2:
-            # Horizontal edges never cross a scan line; dividing by zero here
-            # would scatter stray pixels across the canvas.
-            continue
-        cond = ((y1 > YY) != (y2 > YY)) & (
-            XX + 0.5 < (x2 - x1) * (YY - y1 + 0.5) / (y2 - y1) + x1
-        )
-        inside ^= cond
-    return inside
-
-
-def band(x0: float, y0: float, x1: float, y1: float) -> np.ndarray:
-    """Axis-aligned filled rectangle."""
-    m = np.zeros((LOGICAL, LOGICAL), dtype=bool)
-    m[
-        max(0, int(round(y0))) : min(LOGICAL, int(round(y1)) + 1),
-        max(0, int(round(x0))) : min(LOGICAL, int(round(x1)) + 1),
-    ] = True
-    return m
-
-
-def paint(canvas: np.ndarray, mask: np.ndarray, index: int) -> None:
-    canvas[mask] = index
-
-
-def dilate(mask: np.ndarray) -> np.ndarray:
-    """One-pixel dilation using 8-neighbour connectivity."""
-    out = mask.copy()
-    for dy in (-1, 0, 1):
-        for dx in (-1, 0, 1):
-            if dx == 0 and dy == 0:
-                continue
-            out |= np.roll(np.roll(mask, dy, axis=0), dx, axis=1)
-    return out
-
-
-def rotate(arr: np.ndarray, degrees: float, pivot: tuple[float, float]) -> np.ndarray:
-    """Nearest-neighbour rotation of an index layer about a pivot."""
-    if abs(degrees) < 1e-6:
-        return arr.copy()
-    rad = math.radians(degrees)
-    cos_a, sin_a = math.cos(rad), math.sin(rad)
-    dx = XX + 0.5 - pivot[0]
-    dy = YY + 0.5 - pivot[1]
-    sx = np.round(pivot[0] + dx * cos_a + dy * sin_a - 0.5).astype(int)
-    sy = np.round(pivot[1] - dx * sin_a + dy * cos_a - 0.5).astype(int)
-    valid = (sx >= 0) & (sx < LOGICAL) & (sy >= 0) & (sy < LOGICAL)
-    out = np.zeros_like(arr)
-    out[valid] = arr[sy[valid], sx[valid]]
-    return out
-
-
-def translate(arr: np.ndarray, dx: float, dy: float) -> np.ndarray:
-    out = np.zeros_like(arr)
-    ix, iy = int(round(dx)), int(round(dy))
-    src_y0, src_y1 = max(0, -iy), min(LOGICAL, LOGICAL - iy)
-    src_x0, src_x1 = max(0, -ix), min(LOGICAL, LOGICAL - ix)
-    if src_y1 <= src_y0 or src_x1 <= src_x0:
-        return out
-    out[src_y0 + iy : src_y1 + iy, src_x0 + ix : src_x1 + ix] = arr[
-        src_y0:src_y1, src_x0:src_x1
-    ]
-    return out
-
-
-# --------------------------------------------------------------------------
-# Character model
-# --------------------------------------------------------------------------
-
-HEAD_C = (32.0, 22.0)
-HEAD_R = 13.5
-NECK = (32.0, 34.0)          # rotation pivot for the head
-BODY_C = (32.0, 42.0)
-BODY_RX, BODY_RY = 11.0, 11.0
-
-EYE_L = (26.4, 20.6)
-EYE_R = (37.6, 20.6)
-EYE_RADIUS = 4.2
-BEAK_C = (32.0, 29.0)
-
-CREST = ((28.0, 10.2, 2.2, 2.8), (32.0, 8.4, 2.4, 3.4), (36.0, 10.2, 2.2, 2.8))
-WINGS = ((20.5, 39.5, 3.0, 6.4), (43.5, 39.5, 3.0, 6.4))
-TAIL = ((41.0, 51.0, 4.0, 2.4), (44.5, 53.5, 3.4, 2.0), (47.0, 55.5, 2.8, 1.6))
-FEET = ((27.0, 53.5, 3.0, 2.0), (36.0, 53.5, 3.0, 2.0))
-BELLY_C = (32.0, 46.0)
-BELLY_RX, BELLY_RY = 6.4, 5.6
-FACE_C = (32.0, 23.5)
-FACE_RX, FACE_RY = 9.6, 9.0
-BADGE_C = (32.0, 38.4)
-
-
-@dataclass
-class FrameSpec:
-    """One rendered frame."""
-
-    body_y: float = 0.0            # body-group vertical offset (breathing)
-    whole_y: float = 0.0           # whole-character offset (hop)
-    head_tilt: float = 0.0         # degrees, positive leans right
-    head_x: float = 0.0
-    eye: str = "open"
-    brow: str = "none"
-    beak: str = "closed"
-    wing: str = "rest"             # rest | raise | out | shrug
-    crest: str = "neutral"         # neutral | up | down
-    badge: str = "normal"          # normal | glow
-    dots: tuple[tuple[float, float, float], ...] = ()   # cobalt signal dots
-    sparkles: tuple[tuple[float, float, float], ...] = ()  # cobalt sparkles
-    ring: tuple[float, float, float] | None = None        # pulse ring (cx,cy,r)
-    squash: float = 0.0            # body squash/stretch, fraction
-
-
-def eye_mask(style: str, cx: float, cy: float) -> tuple[np.ndarray, np.ndarray]:
-    """Returns (ink mask, highlight mask) for one eye."""
-    highlight = np.zeros((LOGICAL, LOGICAL), dtype=bool)
-    if style == "open":
-        ink = circle(cx, cy, EYE_RADIUS)
-        highlight = circle(cx - 1.4, cy - 1.6, 1.5)
-    elif style == "wide":
-        ink = circle(cx, cy, EYE_RADIUS + 0.7)
-        highlight = circle(cx - 1.4, cy - 1.6, 1.6)
-    elif style == "blink":
-        ink = band(cx - EYE_RADIUS + 0.6, cy - 0.8, cx + EYE_RADIUS - 0.6, cy + 0.8)
-    elif style == "squint":
-        ink = band(cx - EYE_RADIUS + 0.8, cy - 0.4, cx + EYE_RADIUS - 0.8, cy + 0.4)
-    elif style == "half":
-        ink = circle(cx, cy, EYE_RADIUS) & (YY + 0.5 >= cy - 1.0)
-    elif style == "downcast":
-        ink = circle(cx, cy, EYE_RADIUS) & (YY + 0.5 >= cy + 1.4)
-    elif style == "worried":
-        ink = circle(cx, cy, EYE_RADIUS) & (YY + 0.5 >= cy - 1.6)
-    elif style == "happy":
-        # An upward arch: the middle of the lid sits highest.
-        width = EYE_RADIUS
-        height = 2.6
-        dx = (XX + 0.5 - cx) / width
-        arc_y = cy - height * (1.0 - np.clip(dx, -1, 1) ** 2) + 1.0
-        ink = (np.abs(dx) <= 1.0) & (YY + 0.5 >= arc_y) & (YY + 0.5 <= arc_y + 1.8)
-    else:
-        raise ValueError(f"unknown eye style: {style}")
-    return ink, highlight
-
-
-def brow_mask(style: str) -> np.ndarray:
-    """A short ink stroke above the eyes."""
-    m = np.zeros((LOGICAL, LOGICAL), dtype=bool)
-    if style == "none":
-        return m
-    raised = EYE_L[1] - 6.2
-    low = EYE_L[1] - 5.2
-    if style == "raised_left":
-        m = band(EYE_L[0] - 3.4, raised, EYE_L[0] + 3.4, raised + 1.0)
-    elif style == "raised_right":
-        m = band(EYE_R[0] - 3.4, raised, EYE_R[0] + 3.4, raised + 1.0)
-    elif style == "raised_both":
-        m = band(EYE_L[0] - 3.4, raised, EYE_L[0] + 3.4, raised + 1.0)
-        m |= band(EYE_R[0] - 3.4, raised, EYE_R[0] + 3.4, raised + 1.0)
-    elif style == "worried":
-        # Inner ends lifted, outer ends lowered.
-        for cx, sign in ((EYE_L[0], 1), (EYE_R[0], -1)):
-            for i in range(7):
-                x = cx + sign * (i - 3)
-                y = low - abs(i - 3) * 0.5
-                m = m | band(x, y, x + 1, y + 1)
-    elif style == "concerned":
-        # Inner ends drawn down: a mild, non-alarming frown.
-        for cx, sign in ((EYE_L[0], 1), (EYE_R[0], -1)):
-            for i in range(7):
-                x = cx + sign * (i - 3)
-                y = low + abs(i - 3) * 0.4
-                m = m | band(x, y, x + 1, y + 1)
-    else:
-        raise ValueError(f"unknown brow style: {style}")
-    return m
-
-
-def beak_mask(style: str) -> tuple[np.ndarray, np.ndarray]:
-    """Returns (beak mask, mouth mask)."""
-    cx, cy = BEAK_C
-    mouth = np.zeros((LOGICAL, LOGICAL), dtype=bool)
-    if style == "closed":
-        beak = polygon([(cx - 4.0, cy - 3.0), (cx + 4.0, cy - 3.0), (cx, cy + 2.2)])
-    elif style == "open":
-        beak = polygon([(cx - 4.4, cy - 3.2), (cx + 4.4, cy - 3.2), (cx, cy + 3.2)])
-        mouth = polygon([(cx - 2.4, cy - 1.6), (cx + 2.4, cy - 1.6), (cx, cy + 2.2)])
-    elif style == "smile":
-        beak = polygon([(cx - 5.0, cy - 3.4), (cx + 5.0, cy - 3.4), (cx, cy + 2.0)])
-    elif style == "flat":
-        beak = polygon([(cx - 3.6, cy - 2.4), (cx + 3.6, cy - 2.4), (cx, cy + 0.6)])
-    elif style == "frown":
-        beak = polygon([(cx - 3.6, cy - 0.4), (cx + 3.6, cy - 0.4), (cx, cy - 4.0)])
-    elif style == "small":
-        beak = polygon([(cx - 2.8, cy - 2.2), (cx + 2.8, cy - 2.2), (cx, cy + 1.0)])
-    else:
-        raise ValueError(f"unknown beak style: {style}")
-    return beak, mouth
-
-
-def wing_positions(style: str) -> tuple[tuple[float, float, float, float], ...]:
-    if style == "rest":
-        return WINGS
-    if style == "out":
-        return ((17.0, 39.5, 3.0, 6.0), (47.0, 39.5, 3.0, 6.0))
-    if style == "raise":
-        return ((15.0, 28.0, 3.0, 5.4), (49.0, 39.5, 3.0, 6.4))
-    if style == "shrug":
-        return ((17.5, 36.5, 3.0, 4.2), (46.5, 36.5, 3.0, 4.2))
-    raise ValueError(f"unknown wing style: {style}")
-
-
-def crest_offset(style: str) -> float:
-    return {"neutral": 0.0, "up": -1.6, "down": 1.2}.get(style, 0.0)
-
-
-def build_head(spec: FrameSpec) -> np.ndarray:
-    """The head group: head, face, crest, brows, eyes, beak."""
-    arr = np.zeros((LOGICAL, LOGICAL), dtype=np.uint8)
-
-    paint(arr, circle(*HEAD_C, HEAD_R), OLIVE)
-    paint(arr, ellipse(*FACE_C, FACE_RX, FACE_RY), CREAM)
-
-    crest_dy = crest_offset(spec.crest)
-    for cx, cy, rx, ry in CREST:
-        paint(arr, ellipse(cx, cy + crest_dy, rx, ry), OLIVE_LIGHT)
-        paint(arr, ellipse(cx, cy + crest_dy - 0.4, rx - 1.1, ry - 1.6), OLIVE)
-
-    paint(arr, brow_mask(spec.brow), INK)
-
-    for eye_cx, eye_cy in (EYE_L, EYE_R):
-        ink, highlight = eye_mask(spec.eye, eye_cx, eye_cy)
-        paint(arr, ink, INK)
-        paint(arr, highlight, CREAM)
-
-    beak, mouth = beak_mask(spec.beak)
-    paint(arr, beak, TERRACOTTA)
-    paint(arr, mouth, TERRACOTTA_DARK)
-    if spec.beak in ("closed", "smile"):
-        paint(arr, band(BEAK_C[0] - 2.2, BEAK_C[1] - 1.4, BEAK_C[0] + 2.2, BEAK_C[1] - 0.4), TERRACOTTA_DARK)
-
-    return arr
-
-
-def build_body(spec: FrameSpec) -> np.ndarray:
-    """The body group: body, belly, wings, tail, feet, signal badge."""
-    arr = np.zeros((LOGICAL, LOGICAL), dtype=np.uint8)
-
-    squash = spec.squash
-    paint(arr, ellipse(BODY_C[0], BODY_C[1], BODY_RX * (1 + squash), BODY_RY * (1 - squash)), OLIVE)
-    paint(arr, ellipse(BODY_C[0], BODY_C[1] + 3.4, BODY_RX, BODY_RY * 0.6), CREAM_SHADE)
-    paint(arr, ellipse(*BELLY_C, BELLY_RX, BELLY_RY), CREAM)
-
-    for cx, cy, rx, ry in wing_positions(spec.wing):
-        paint(arr, ellipse(cx, cy, rx, ry), OLIVE_DARK)
-
-    for cx, cy, rx, ry in TAIL:
-        paint(arr, ellipse(cx, cy, rx, ry), OLIVE_DARK)
-    for cx, cy, rx, ry in FEET:
-        paint(arr, ellipse(cx, cy, rx, ry), TERRACOTTA)
-
-    badge = polygon(
-        [
-            (BADGE_C[0], BADGE_C[1] - 3.0),
-            (BADGE_C[0] + 2.6, BADGE_C[1]),
-            (BADGE_C[0], BADGE_C[1] + 3.0),
-            (BADGE_C[0] - 2.6, BADGE_C[1]),
-        ]
-    )
-    paint(arr, badge, COBALT_LIGHT if spec.badge == "glow" else COBALT)
-
-    return arr
-
-
-def render(spec: FrameSpec) -> np.ndarray:
-    """Renders one frame as a palette-index array."""
-    body = build_body(spec)
-    head = build_head(spec)
-
-    body = translate(body, 0, spec.body_y)
-    head = rotate(head, spec.head_tilt, NECK)
-    head = translate(head, spec.head_x, spec.body_y * 0.45)
-
-    character = np.zeros((LOGICAL, LOGICAL), dtype=np.uint8)
-    character[body > 0] = body[body > 0]
-    character[head > 0] = head[head > 0]
-
-    canvas = np.zeros((LOGICAL, LOGICAL), dtype=np.uint8)
-
-    # A single silhouette outline around the whole character.
-    silhouette = character > 0
-    outline = dilate(silhouette) & ~silhouette
-    canvas[outline] = INK
-
-    canvas[character > 0] = character[character > 0]
-
-    # Signal decorations sit on top and carry no outline.
-    for cx, cy, r in spec.dots:
-        paint(canvas, circle(cx, cy, r), COBALT)
-    for cx, cy, r in spec.sparkles:
-        paint(canvas, circle(cx, cy, r), COBALT_LIGHT)
-        paint(canvas, band(cx - r, cy, cx + r, cy + 0.8), COBALT_LIGHT)
-        paint(canvas, band(cx, cy - r, cx + 0.8, cy + r), COBALT_LIGHT)
-    if spec.ring:
-        cx, cy, r = spec.ring
-        ring = circle(cx, cy, r) & ~circle(cx, cy, r - 0.9)
-        paint(canvas, ring, COBALT_LIGHT)
-
-    return translate(canvas, 0, spec.whole_y)
-
-
-# --------------------------------------------------------------------------
-# Animation specs
-# --------------------------------------------------------------------------
-
-
-def _ease(t: float) -> float:
-    return 0.5 - 0.5 * math.cos(2 * math.pi * t)
-
-
-# Every state's frame list is written out explicitly rather than derived from
-# a formula. Two reasons: a hand-authored frame list can guarantee that no
-# two frames are identical (a validator checks this), and the poses read as
-# deliberate animation rather than a sinusoid.
-
-
-def idle_frames() -> list[FrameSpec]:
-    """Gentle breathing with a periodic blink.
-
-    Six frames, each a distinct combination of body offset and eye state, so
-    the loop never holds on a repeated frame.
-    """
-    combos = [
-        (0, "open"),
-        (-1, "open"),
-        (-1, "half"),
-        (0, "half"),
-        (0, "blink"),
-        (-1, "blink"),
-    ]
-    return [
-        FrameSpec(body_y=float(body), eye=eye, beak="closed") for body, eye in combos
-    ]
-
-
-def greeting_frames() -> list[FrameSpec]:
-    """A friendly hop with a raised wing."""
-    frames = []
-    for i in range(10):
-        t = i / 10
-        hop = math.sin(math.pi * t) ** 1.4
-        wave = math.sin(2 * math.pi * t)
-        frames.append(
-            FrameSpec(
-                whole_y=-2.6 * hop,
-                body_y=-0.4 * hop,
-                head_tilt=2.5 * wave * (1 if hop > 0.05 else 0),
-                eye="happy" if hop > 0.35 else "open",
-                beak="smile" if hop > 0.2 else "open",
-                wing="raise",
-                crest="up" if hop > 0.4 else "neutral",
-                badge="glow" if hop > 0.6 else "normal",
-            )
-        )
-    return frames
-
-
-def listening_frames() -> list[FrameSpec]:
-    """Attentive: a slow head tilt, wide eyes, a pulsing signal ring.
-
-    Each frame uses a different tilt angle, so no two frames repeat.
-    """
-    tilts = [-1, 0, 2, 4, 3, 1, -2, -4]
-    brows = ["raised_left", "raised_left", "raised_right", "raised_right",
-             "raised_left", "raised_right", "raised_left", "raised_right"]
-    rings = [False, True, True, False, True, True, False, True]
-    return [
-        FrameSpec(
-            head_tilt=float(tilts[i]),
-            body_y=-0.3,
-            eye="wide",
-            brow=brows[i],
-            beak="small",
-            wing="rest",
-            ring=(46.0, 20.0, 4.2) if rings[i] else None,
-        )
-        for i in range(8)
-    ]
-
-
-def thinking_frames() -> list[FrameSpec]:
-    """Restrained: a slow head sway and one cobalt thought dot."""
-    frames = []
-    for i in range(10):
-        t = i / 10
-        sway = math.sin(2 * math.pi * t)
-        angle = 2 * math.pi * t
-        dot_x = 41.0 + 4.2 * math.cos(angle)
-        dot_y = 8.0 + 2.0 * math.sin(angle)
-        frames.append(
-            FrameSpec(
-                head_tilt=5.0 * sway,
-                head_x=1.0 * sway,
-                eye="squint",
-                brow="raised_left",
-                beak="flat",
-                wing="rest",
-                dots=((dot_x, dot_y, 1.5),),
-            )
-        )
-    return frames
-
-
-def responding_frames() -> list[FrameSpec]:
-    """Small presenting movement while a reply is on screen."""
-    poses = [
-        (0, 0, "open"),
-        (-1, -1, "small"),
-        (-1, -2, "open"),
-        (0, -3, "small"),
-        (0, -2, "open"),
-        (1, -1, "small"),
-        (1, 1, "open"),
-        (0, 2, "small"),
-    ]
-    frames = []
-    for i, (body, tilt, beak) in enumerate(poses):
-        bob = math.sin(2 * math.pi * i / 8)
-        frames.append(
-            FrameSpec(
-                body_y=float(body),
-                head_tilt=float(tilt),
-                eye="open",
-                beak=beak,
-                wing="out",
-                dots=(
-                    (47.0, 30.0 - 1.5 * bob, 1.2),
-                    (50.5, 26.0 - 1.5 * bob, 1.0),
-                ),
-            )
-        )
-    return frames
-
-
-def insight_frames() -> list[FrameSpec]:
-    """A positive discovery reaction."""
-    frames = []
-    for i in range(10):
-        t = i / 10
-        rise = math.sin(math.pi * t)
-        frames.append(
-            FrameSpec(
-                whole_y=-1.8 * rise,
-                body_y=-0.6 * rise,
-                head_tilt=2.0 * math.sin(2 * math.pi * t),
-                eye="happy" if rise > 0.3 else "open",
-                beak="smile" if i % 5 < 3 else "open",
-                wing="out",
-                crest="up" if rise > 0.25 else "neutral",
-                badge="glow" if rise > 0.25 else "normal",
-                sparkles=((14.0, 12.0, 1.2), (50.0, 14.0, 1.2)) if rise > 0.55 else (),
-            )
-        )
-    return frames
-
-
-def unavailable_frames() -> list[FrameSpec]:
-    """Puzzled and sympathetic: a slow tilt and a small shrug."""
-    poses = [
-        (-1, False),
-        (1, True),
-        (3, False),
-        (4, True),
-        (2, False),
-        (0, True),
-        (-2, False),
-        (-3, True),
-    ]
-    return [
-        FrameSpec(
-            head_tilt=float(tilt),
-            body_y=-0.4,
-            eye="half",
-            brow="raised_right",
-            beak="flat",
-            wing="shrug" if shrug else "rest",
-        )
-        for tilt, shrug in poses
-    ]
-
-
-def error_frames() -> list[FrameSpec]:
-    """Concerned, not alarmed: lowered posture and a slow sway."""
-    poses = [
-        (0, 0),
-        (0.5, -2),
-        (1, -3),
-        (0.5, -3),
-        (0, -2),
-        (-0.5, -1),
-        (-1, 0),
-        (0, 1),
-    ]
-    return [
-        FrameSpec(
-            whole_y=0.6,
-            body_y=float(body),
-            head_tilt=float(tilt),
-            eye="worried",
-            brow="concerned",
-            beak="frown",
-            wing="rest",
-            crest="down",
-        )
-        for body, tilt in poses
-    ]
-
-
-def success_frames() -> list[FrameSpec]:
-    """A small celebratory hop."""
-    poses = [
-        (0, 0),
-        (-1, -1),
-        (-2, -2),
-        (-3, -1),
-        (-3, 0),
-        (-2, 1),
-        (-1, 2),
-        (0, 1),
-    ]
-    frames = []
-    for body, tilt in poses:
-        airborne = body <= -2
-        frames.append(
-            FrameSpec(
-                whole_y=float(body),
-                body_y=-0.4 * body,
-                head_tilt=float(tilt),
-                eye="happy",
-                beak="open" if airborne else "smile",
-                wing="out",
-                crest="up" if airborne else "neutral",
-                badge="glow" if airborne else "normal",
-                sparkles=((15.0, 13.0, 1.3), (49.0, 15.0, 1.3)) if body <= -3 else (),
-            )
-        )
-    return frames
-
-
-@dataclass
-class StateSpec:
+OUT = 160        # square canvas; the largest pose is 142 x 137
+BASELINE = 154   # feet rest on this row, leaving room to hop
+
+PALETTE = {
+    "leafGreen": "#747D59",
+    "warmBrown": "#B66D4D",
+    "sandCream": "#F4F0E6",
+    "cobaltBlue": "#2468C9",
+    "ink": "#22231F",
+}
+
+
+@dataclass(frozen=True)
+class State:
     name: str
-    frames: list[FrameSpec]
-    frame_ms: int
     purpose: str
+    # Box around the pose on the sheet (x0, y0, x1, y1), above its label.
+    box: tuple[int, int, int, int]
+    frame_ms: int
+    # Per frame: (dx, dy) body offset, which effect pieces show, blink.
+    body: tuple[tuple[int, int], ...]
+    effects: str = "all"   # all | pulse | build | float
+    blink_at: int | None = None
 
-    @property
-    def fps(self) -> float:
-        return round(1000 / self.frame_ms, 3)
 
-
-STATE_SPECS: list[StateSpec] = [
-    StateSpec("idle", idle_frames(), 125, "Resting companion: slow breathing and a periodic blink."),
-    StateSpec("greeting", greeting_frames(), 100, "A short wave and hop used for an explicit welcome."),
-    StateSpec("listening", listening_frames(), 125, "Attentive pose with a head tilt while the user composes a message."),
-    StateSpec("thinking", thinking_frames(), 100, "Restrained thinking motion while a request is genuinely in flight."),
-    StateSpec("responding", responding_frames(), 125, "Small presenting motion while a reply is on screen."),
-    StateSpec("insight", insight_frames(), 100, "Positive reaction to a real, supported result becoming available."),
-    StateSpec("unavailable", unavailable_frames(), 125, "Puzzled, sympathetic pose for a source that is not connected."),
-    StateSpec("error", error_frames(), 125, "Concerned, non-alarming pose after an actual failure."),
-    StateSpec("success", success_frames(), 83, "A small celebratory hop after an action genuinely completes."),
+STATES = [
+    State("idle", "Resting companion: slow breathing and a periodic blink.",
+          (18, 436, 160, 578), 140,
+          ((0, 0), (0, -1), (0, -2), (0, -1), (0, 0), (0, -1), (0, -2), (0, -1)), blink_at=5),
+    State("greeting", "A wave and a little hop used for an explicit welcome.",
+          (172, 436, 325, 578), 100,
+          ((0, 0), (0, -3), (0, -6), (0, -3), (0, 0), (0, -1), (0, -3), (0, -6), (0, -3), (0, -1)),
+          effects="pulse"),
+    State("listening", "Attentive pose while the user composes a message.",
+          (325, 436, 480, 578), 140,
+          ((0, 0), (0, -1), (0, -1), (0, 0), (0, -1), (0, -2), (0, -1), (0, 0)),
+          effects="float", blink_at=6),
+    State("thinking", "Working on a request: thought bubbles build up.",
+          (488, 436, 632, 578), 120,
+          ((0, 0), (0, -1), (0, 0), (0, -1), (0, 0), (0, -1), (0, 0), (0, -1), (0, 0), (0, -1)),
+          effects="build"),
+    State("responding", "Writing a reply at the laptop.",
+          (636, 436, 795, 578), 110,
+          ((0, 0), (0, -1), (0, 0), (0, -2), (0, 0), (0, -1), (0, 0), (0, -2)), effects="pulse"),
+    State("insight", "A result came back: the idea bulb glows.",
+          (10, 632, 165, 778), 110,
+          ((0, 0), (0, -2), (0, -4), (0, -2), (0, 0), (0, -1), (0, 0), (0, -1), (0, 0), (0, -1)),
+          effects="pulse"),
+    State("unavailable", "Not connected to a source: a puzzled scribble.",
+          (166, 632, 318, 778), 160,
+          ((0, 0), (0, -1), (0, -1), (0, 0), (0, -1), (0, -2), (0, -1), (0, 0)), effects="float"),
+    State("error", "Reporting a failure with a short startled shake.",
+          (322, 632, 475, 778), 100,
+          ((0, 0), (2, 0), (-2, 0), (2, 0), (-2, 0), (0, 0), (0, -1), (0, -2)), effects="pulse"),
+    State("success", "Reporting a completed action with a happy jump.",
+          (482, 632, 640, 778), 100,
+          ((0, 0), (0, -4), (0, -8), (0, -4), (0, 0), (0, -1), (0, -4), (0, -8), (0, -4), (0, -1)),
+          effects="pulse"),
+    State("sleepy", "Dozing while nothing is happening; the z's drift up.",
+          (642, 632, 800, 778), 220,
+          ((0, 0), (0, -1), (0, -1), (0, 0), (0, -1), (0, 0), (0, -1), (0, 0)), effects="build"),
 ]
 
 
 # --------------------------------------------------------------------------
-# Output
+# Cutting a pose out of the sheet
 # --------------------------------------------------------------------------
 
-
-def to_rgba(index_array: np.ndarray) -> Image.Image:
-    """Converts a palette-index array to an RGBA image at output resolution."""
-    small = Image.fromarray(index_array.astype(np.uint8), mode="L")
-    big = small.resize((OUT, OUT), Image.NEAREST)
-    indices = np.array(big)
-    rgb = PALETTE_ARRAY[indices]
-    alpha = np.where(indices == TRANSPARENT, 0, 255).astype(np.uint8)
-    rgba = np.dstack([rgb, alpha])
-    return Image.fromarray(rgba, mode="RGBA")
+def is_paper(px: np.ndarray) -> np.ndarray:
+    """Light, unsaturated pixels: the sheet's paper and the poses' paper halo."""
+    r, g, b = (px[..., i].astype(int) for i in range(3))
+    lum = (r * 299 + g * 587 + b * 114) // 1000
+    sat = px.max(axis=-1).astype(int) - px.min(axis=-1).astype(int)
+    return (lum > 196) & (sat < 48)
 
 
-def to_palette(index_array: np.ndarray) -> Image.Image:
-    """Converts a palette-index array to a P-mode image with index 0 clear."""
-    small = Image.fromarray(index_array.astype(np.uint8), mode="L")
-    big = small.resize((OUT, OUT), Image.NEAREST)
-    palette = []
-    for r, g, b in PALETTE:
-        palette.extend([r, g, b])
-    palette.extend([0] * (256 * 3 - len(palette)))
-    p = big.convert("P")
-    p.putpalette(palette)
-    p.info["transparency"] = TRANSPARENT
-    return p
+def components(mask: np.ndarray) -> list[np.ndarray]:
+    """8-connected components of a mask, as arrays of (y, x)."""
+    h, w = mask.shape
+    seen = np.zeros_like(mask)
+    parts = []
+    for sy, sx in zip(*np.nonzero(mask)):
+        if seen[sy, sx]:
+            continue
+        seen[sy, sx] = True
+        stack, pts = [(sy, sx)], []
+        while stack:
+            y, x = stack.pop()
+            pts.append((y, x))
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True
+                        stack.append((ny, nx))
+        parts.append(np.array(pts))
+    return parts
 
 
-def assert_no_repeated_frames(name: str, rendered: list[np.ndarray]) -> None:
-    """Fails when two adjacent frames are identical.
+def cut(sheet: np.ndarray, box: tuple[int, int, int, int]) -> np.ndarray:
+    """RGBA pose with the paper removed, cropped to its bounding box."""
+    x0, y0, x1, y1 = box
+    crop = sheet[y0:y1, x0:x1]
+    h, w, _ = crop.shape
+    paper = is_paper(crop)
+    bg = np.zeros((h, w), bool)
+    q = deque([(y, x) for y in range(h) for x in (0, w - 1)] + [(y, x) for x in range(w) for y in (0, h - 1)])
+    while q:
+        y, x = q.popleft()
+        if bg[y, x] or not paper[y, x]:
+            continue
+        bg[y, x] = True
+        for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+            if 0 <= ny < h and 0 <= nx < w and not bg[ny, nx]:
+                q.append((ny, nx))
+    fg = ~bg
+    for part in components(fg):
+        if len(part) < 24:  # paper texture specks
+            fg[part[:, 0], part[:, 1]] = False
+    rgba = np.dstack([crop, np.where(fg, 255, 0).astype(np.uint8)])
+    ys, xs = np.nonzero(fg)
+    return rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 
-    A repeated frame makes the animation hold for twice as long as it should,
-    which reads as a stutter. The frame lists are written by hand precisely so
-    that this never happens, so it is checked rather than assumed.
+
+def split(pose: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
+    """The body (largest piece) and the effect marks, each as a full-size RGBA layer."""
+    parts = sorted(components(pose[..., 3] > 0), key=len, reverse=True)
+    layers = []
+    for part in parts:
+        layer = np.zeros_like(pose)
+        layer[part[:, 0], part[:, 1]] = pose[part[:, 0], part[:, 1]]
+        layers.append(layer)
+    return layers[0], layers[1:]
+
+
+def closed_eyes(body: np.ndarray) -> np.ndarray:
+    """The body with its eyes closed: each eye becomes a short dark line.
+
+    Eyes are solid near-black, roughly round blobs away from the silhouette's
+    outline. Shrinking the dark mask by two pixels removes thin outlines (the
+    beak's, the wing's) and keeps only the eye cores; each core is then grown
+    back to cover the eye and its soft edge.
     """
-    for index in range(1, len(rendered)):
-        if rendered[index].tobytes() == rendered[index - 1].tobytes():
-            raise SystemExit(
-                f"{name}: frames {index - 1} and {index} render identically; "
-                "adjust the pose list so every frame is distinct."
-            )
+    rgb = body[..., :3].astype(int)
+    lum = (rgb[..., 0] * 299 + rgb[..., 1] * 587 + rgb[..., 2] * 114) // 1000
+    opaque = body[..., 3] > 0
+    edge = np.zeros_like(opaque)
+    edge[1:-1, 1:-1] = ~(opaque[:-2, 1:-1] & opaque[2:, 1:-1] & opaque[1:-1, :-2] & opaque[1:-1, 2:])
+    core = opaque & (lum < 45)
+    for _ in range(2):
+        core = core & np.roll(core, 1, 0) & np.roll(core, -1, 0) & np.roll(core, 1, 1) & np.roll(core, -1, 1)
+    ink = np.array([int(PALETTE["ink"][i:i + 2], 16) for i in (1, 3, 5)], np.uint8)
+    out = body.copy()
+    for seed in components(core):
+        if len(seed) < 12:
+            continue
+        grown = np.zeros_like(opaque)
+        grown[seed[:, 0], seed[:, 1]] = True
+        for _ in range(4):
+            grown = grown | np.roll(grown, 1, 0) | np.roll(grown, -1, 0) | np.roll(grown, 1, 1) | np.roll(grown, -1, 1)
+        part = np.argwhere(grown & opaque & (lum < 150))
+        if edge[part[:, 0], part[:, 1]].any():
+            continue  # touches the silhouette: not an eye
+        ya, xa = part.min(axis=0)
+        yb, xb = part.max(axis=0)
+        if (yb - ya) > 1.6 * (xb - xa) or (xb - xa) > 1.6 * (yb - ya):
+            continue  # not eye-shaped
+        # Face colour from a ring around the eye, painted over the eye and its highlight.
+        ring = body[max(ya - 4, 0):yb + 5, max(xa - 4, 0):xb + 5]
+        lit = ring[(ring[..., 3] > 0) & (ring[..., :3].astype(int).sum(axis=-1) > 450)]
+        if not len(lit):
+            continue
+        skin = np.median(lit[:, :3], axis=0).astype(np.uint8)
+        # The eye is its dark pixels plus the highlight inside them: fill each
+        # row between its leftmost and rightmost dark pixel.
+        for y in range(ya, yb + 1):
+            xs = part[part[:, 0] == y, 1]
+            if len(xs):
+                out[y, xs.min():xs.max() + 1, :3] = skin
+        mid = (ya + yb) // 2 + 1
+        out[mid:mid + 2, xa + 1:xb, :3] = ink
+    return out
 
 
-def write_assets(spec: StateSpec) -> dict:
-    os.makedirs(WEB_OUT, exist_ok=True)
-    os.makedirs(MOBILE_OUT, exist_ok=True)
-    frames_dir = os.path.join(MOBILE_OUT, "frames", spec.name)
-    os.makedirs(frames_dir, exist_ok=True)
+# --------------------------------------------------------------------------
+# Frames
+# --------------------------------------------------------------------------
 
-    rendered = [render(frame) for frame in spec.frames]
-    assert_no_repeated_frames(spec.name, rendered)
+def effect_layers(effects: list[np.ndarray], mode: str, i: int, n: int) -> list[tuple[np.ndarray, int]]:
+    """Which effect pieces show on frame i, with a vertical offset each."""
+    if not effects:
+        return []
+    if mode == "all":
+        return [(e, 0) for e in effects]
+    if mode == "pulse":  # marks flash on and off
+        return [(e, 0) for e in effects] if i % 4 < 3 else []
+    if mode == "float":  # marks drift up and back
+        return [(e, (0, -1, -2, -1)[i % 4]) for e in effects]
+    # build: pieces appear one by one, smallest (or lowest) first, then all hold
+    order = sorted(effects, key=lambda e: int((e[..., 3] > 0).sum()))
+    shown = min(len(order), 1 + i * len(order) // max(1, n - 3))
+    return [(e, 0) for e in order[:shown]]
 
-    # A shorter state must not leave the frames of a longer one behind.
-    for stale in glob.glob(os.path.join(frames_dir, "frame_*.png")):
-        os.remove(stale)
 
-    gif_frames = [to_palette(frame) for frame in rendered]
-    gif_path = os.path.join(WEB_OUT, f"{spec.name}.gif")
-    gif_frames[0].save(
-        gif_path,
-        save_all=True,
-        append_images=gif_frames[1:],
-        duration=spec.frame_ms,
-        loop=0,
-        disposal=2,
-        transparency=TRANSPARENT,
-        optimize=True,
-    )
-    mobile_gif_path = os.path.join(MOBILE_OUT, f"{spec.name}.gif")
-    with open(gif_path, "rb") as src, open(mobile_gif_path, "wb") as dst:
-        dst.write(src.read())
+def compose(layer: np.ndarray, dx: int, dy: int) -> Image.Image:
+    canvas = Image.new("RGBA", (OUT, OUT), (0, 0, 0, 0))
+    h, w = layer.shape[:2]
+    canvas.alpha_composite(Image.fromarray(layer, "RGBA"), ((OUT - w) // 2 + dx, BASELINE - h + dy))
+    return canvas
 
-    still = to_rgba(rendered[0])
-    still_path = os.path.join(WEB_OUT, f"{spec.name}.png")
-    still.save(still_path, optimize=True)
-    still.save(os.path.join(MOBILE_OUT, f"{spec.name}.png"), optimize=True)
 
-    for i, frame in enumerate(rendered):
-        to_rgba(frame).save(
-            os.path.join(frames_dir, f"frame_{i:02d}.png"), optimize=True
-        )
+def frames_for(state: State, sheet: np.ndarray) -> list[Image.Image]:
+    body, effects = split(cut(sheet, state.box))
+    blink = closed_eyes(body) if state.blink_at is not None else None
+    n = len(state.body)
+    frames = []
+    for i, (dx, dy) in enumerate(state.body):
+        frame = compose(blink if i == state.blink_at else body, dx, dy)
+        for layer, ey in effect_layers(effects, state.effects, i, n):
+            frame.alpha_composite(compose(layer, dx, dy + ey))
+        frames.append(frame)
+    return frames
 
-    return {
-        "state": spec.name,
-        "purpose": spec.purpose,
-        "gif": f"/mascot/sigi/{spec.name}.gif",
-        "still": f"/mascot/sigi/{spec.name}.png",
-        "frames": len(rendered),
-        "frameMs": spec.frame_ms,
-        "fps": spec.fps,
-        "durationMs": spec.frame_ms * len(rendered),
-        "width": OUT,
-        "height": OUT,
-        "logicalSize": LOGICAL,
-        "bytes": os.path.getsize(gif_path),
-        "stillBytes": os.path.getsize(still_path),
-    }
+
+def write_gif(frames: list[Image.Image], path: str, frame_ms: int) -> None:
+    """One shared 255-colour palette; index 255 is transparent."""
+    fill = np.array(frames[0])[..., :3][np.array(frames[0])[..., 3] > 0][0]
+    strip = Image.new("RGB", (OUT, OUT * len(frames)), tuple(int(v) for v in fill))
+    for k, f in enumerate(frames):
+        strip.paste(f.convert("RGB"), (0, OUT * k), f)
+    palette = strip.quantize(255, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    pal = palette.getpalette()[: 255 * 3] + [0, 0, 0]
+    out = []
+    for f in frames:
+        idx = np.array(f.convert("RGB").quantize(palette=palette, dither=Image.Dither.NONE))
+        idx[np.array(f)[..., 3] < 128] = 255
+        p = Image.fromarray(idx.astype(np.uint8), "P")
+        p.putpalette(pal)
+        out.append(p)
+    out[0].save(path, save_all=True, append_images=out[1:], duration=frame_ms, loop=0,
+                transparency=255, disposal=2, optimize=False)
+
+
+def retry(action, *args, **kwargs):
+    """Windows can briefly lock a just-written file (indexer, antivirus, editor watcher)."""
+    for attempt in range(10):
+        try:
+            return action(*args, **kwargs)
+        except OSError:
+            if attempt == 9:
+                raise
+            time.sleep(0.3)
 
 
 def main() -> None:
+    digest = hashlib.sha256(open(SHEET, "rb").read()).hexdigest()
+    if digest != SHEET_SHA256:
+        raise SystemExit(f"{SHEET} changed (sha256 {digest}); re-check the pose boxes before updating the hash")
+    sheet = np.array(Image.open(SHEET).convert("RGB"))
+
+    os.makedirs(WEB_OUT, exist_ok=True)
+    os.makedirs(MOBILE_OUT, exist_ok=True)
+
     entries = []
-    for spec in STATE_SPECS:
-        entry = write_assets(spec)
-        entries.append(entry)
-        print(
-            f"{spec.name:<12} {entry['frames']:>3} frames  {entry['width']}x{entry['height']}  "
-            f"{entry['fps']:>6} fps  {entry['bytes'] / 1024:>7.1f} KB"
-        )
+    for state in STATES:
+        frames = frames_for(state, sheet)
+        gif = os.path.join(WEB_OUT, f"{state.name}.gif")
+        still = os.path.join(WEB_OUT, f"{state.name}.png")
+        retry(write_gif, frames, gif, state.frame_ms)
+        retry(frames[0].save, still, optimize=True)
+        retry(shutil.copyfile, gif, os.path.join(MOBILE_OUT, f"{state.name}.gif"))
+        frame_dir = os.path.join(MOBILE_OUT, "frames", state.name)
+        os.makedirs(frame_dir, exist_ok=True)
+        for k, f in enumerate(frames):
+            retry(f.save, os.path.join(frame_dir, f"frame_{k:02d}.png"), optimize=True)
+        for stale in glob.glob(os.path.join(frame_dir, "frame_*.png")):
+            if int(os.path.basename(stale)[6:8]) >= len(frames):
+                retry(os.remove, stale)
+        entries.append({
+            "state": state.name,
+            "purpose": state.purpose,
+            "gif": f"/mascot/sigi/{state.name}.gif",
+            "still": f"/mascot/sigi/{state.name}.png",
+            "frames": len(frames),
+            "frameMs": state.frame_ms,
+            "fps": round(1000 / state.frame_ms, 1),
+            "durationMs": state.frame_ms * len(frames),
+            "width": OUT,
+            "height": OUT,
+            "bytes": os.path.getsize(gif),
+            "stillBytes": os.path.getsize(still),
+        })
+        print(f"{state.name:12s} {len(frames):2d} frames  {os.path.getsize(gif):6d} B")
 
     manifest = {
         "character": "Sigi",
         "description": "Philippine maya-inspired bird companion for SIGMA.",
-        "grid": LOGICAL,
+        "source": "docs/brand/sigi-mascot-guide.png",
+        "sourceSha256": SHEET_SHA256,
         "outputSize": OUT,
-        "palette": {
-            "ink": "#22231F",
-            "olive": "#747D59",
-            "oliveDark": "#5F6746",
-            "oliveLight": "#8E966E",
-            "cream": "#FFFCF5",
-            "creamShade": "#EFE7D6",
-            "terracotta": "#B66D4D",
-            "terracottaDark": "#96553A",
-            "cobalt": "#2468C9",
-            "cobaltLight": "#5B94E4",
-        },
+        "palette": PALETTE,
         "states": entries,
     }
-    for out in (WEB_OUT, MOBILE_OUT):
-        with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as fh:
+    for folder in (WEB_OUT, MOBILE_OUT):
+        with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as fh:
             json.dump(manifest, fh, indent=2)
             fh.write("\n")
-
-    total = sum(e["bytes"] for e in entries)
-    print(f"\ntotal GIF payload: {total / 1024:.1f} KB across {len(entries)} animations")
 
 
 if __name__ == "__main__":
