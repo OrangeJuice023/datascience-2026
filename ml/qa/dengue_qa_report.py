@@ -66,7 +66,9 @@ ok = loc[loc.data_quality == "ok"].set_index(["geography_name", "epi_year", "epi
 checked = mism = 0
 for r in loc[(loc.epi_year >= 2019) & loc.doh_note.isna()].itertuples():
     b = [ok.get((r.geography_name, r.epi_year - j, r.epi_week)) for j in (1, 2, 3)]
-    a = np.mean(b); e = a + 2 * np.std(b, ddof=1); checked += 1
+    # DOH PIDSR MOP 3rd ed. s5.3.5: alert = mean + 1 SD, epidemic = mean + 2 SD.
+    m, sd = np.mean(b), np.std(b, ddof=1)
+    a, e = m + sd, m + 2 * sd; checked += 1
     st = "epidemic" if r.value > e else "alert" if r.value > a else "normal"
     if abs(a - r.alert_threshold) > 0.06 or abs(e - r.epidemic_threshold) > 0.06 or st != r.doh_status:
         mism += 1
@@ -344,7 +346,7 @@ story += [para("4. Cleaning already applied", H2),
                  ["Region fixes", "REGION VII-EASTERN VISAYAS → REGION VIII-EASTERN VISAYAS; REGION IVB → IV-B; case unified"],
                  ["data_quality flag", "ok / missing on both sheets; incomplete / backlog on national year-end weeks"],
                  ["data_flag", "local: “possible non-reporting” (F1) and “one-week spike” (F2); values unchanged"],
-                 ["DOH thresholds", "A = mean of same epi week in 3 prior years; E = A + 2·SD (sample); 2-of-3 fallback; week 53 uses week 52; every deviation explained in doh_note"]],
+                 ["DOH thresholds", "Per DOH PIDSR Manual of Procedures (2014) §5.3.5, over the same epi week in 3 prior years: alert = mean + 1·SD, epidemic = mean + 2·SD (sample SD); 2-of-3 fallback; week 53 uses week 52; every deviation explained in doh_note"]],
                 [44, 130])]
 
 # 5. EARS readiness

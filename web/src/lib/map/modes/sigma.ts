@@ -60,7 +60,7 @@ const LAYER_COPY: Record<SigmaLayer, { title: string; metric: string; track: str
   },
   doh: {
     title: "DOH threshold",
-    metric: "Weekly cases vs. the DOH alert (3-year mean) and epidemic (+2 SD) thresholds",
+    metric: "Weekly cases vs. the DOH alert (3-year mean +1 SD) and epidemic (+2 SD) thresholds",
     track: "Reporting units above the DOH alert threshold per week",
     unit: (v) => `${formatCount(v)} unit${v === 1 ? "" : "s"} above alert`,
   },

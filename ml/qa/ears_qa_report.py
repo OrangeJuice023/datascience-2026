@@ -68,6 +68,20 @@ season = pd.DataFrame({
 doh_at_alarm = al_n[al_n.epi_year >= 2019].groupby("epi_year").doh_status.value_counts().unstack(fill_value=0)
 la = loc[ALARM(loc) & loc.data_flag.isna() & loc.epi_year.isin([2019, 2020]) & loc.doh_status.isin(DOH_OK)]
 loc_elev = la.groupby("epi_year").doh_status.apply(lambda s: s.isin(ELEVATED).mean())
+# Region-level agreement with DOH's 15/07/2019 announcement, computed (not typed in).
+match_epi = int(((rt.news == "epidemic") & (rt.doh_calc == "epidemic")).sum())
+match_alert = int(((rt.news == "alert") & (rt.doh_calc == "alert")).sum())
+alert_as_epi = int(((rt.news == "alert") & (rt.doh_calc == "epidemic")).sum())
+alert_as_normal = int(((rt.news == "alert") & (rt.doh_calc == "normal")).sum())
+first_two = ", ".join(rt.sort_values("first_ears").region.head(2).str.title())
+# Watch-out figures, computed from the EARS workbook.
+nr = loc.data_flag.eq("possible non-reporting")
+nr_eval = nr & ~loc.ears_alarm.eq("not computed")
+c3_only = int(loc.ears_alarm.eq("C3").sum())
+per_place = loc[ALARM(loc) & loc.epi_year.between(2016, 2020)].groupby("epi_year").size() / loc.geography_name.nunique()
+notes = loc.ears_note.fillna("")
+sd_floor_rows = int(notes.str.contains("floored").sum())
+suppressed = int(notes.str.count("no alarm").sum())
 q1 = SRC["NATIONAL"][SRC["NATIONAL"].period_start.dt.month.isin([1, 2, 3])]
 q1 = q1.groupby(q1.period_start.dt.year).value.mean()
 
@@ -311,10 +325,10 @@ S += [para("4. Regions on 15 July 2019: DOH announcement vs. this analysis", H2)
       para("Figure 2. First EARS alarm in 2019 for each region, coloured by how DOH classified it on 15/07/2019.", CAP),
       para(f"<b>Reading:</b> every region alarmed before 15/07, including the four DOH did not name (NCR, Central "
            "Luzon, Caraga, Soccsksargen). EARS therefore gave early warning everywhere, but its first-alarm date does "
-           "not rank severity: Zamboanga Peninsula and Soccsksargen alarmed first, while two of the four "
-           "“epidemic” regions alarmed in mid/late June. The calculated DOH threshold matched the announced "
-           "classification for 3 of 4 epidemic regions and 4 of 9 alert regions; the other 5 alert regions it rated "
-           "“epidemic” — it runs hotter than the official system (§5).")]
+           f"not rank severity: {first_two} alarmed first. The calculated DOH threshold matched the announced "
+           f"classification for {match_epi} of 4 epidemic regions and {match_alert} of 9 alert regions; of the other "
+           f"alert regions it rated {alert_as_epi} “epidemic” and {alert_as_normal} “normal”. It uses 3 years and "
+           "reporting-unit sums, where the official system uses 3–5 years and regional thresholds (§5).")]
 
 S += [para("5. Consistency with the DOH threshold columns", H2),
       para("Week by week, 2019 onward, where both systems produced a result. “Elevated” = DOH alert or epidemic."),
@@ -331,6 +345,8 @@ S += [para("5. Consistency with the DOH threshold columns", H2),
            "(is the level unusual for the season?). EARS compares it with the last 7–9 weeks (did it just jump?). "
            "During a long epidemic, DOH stays at “epidemic” while EARS falls silent once the rise levels off — "
            f"nationally, DOH was “epidemic” every usable week from {fmt(first_doh_nat)}, EARS only during the climb."),
+      para("• <b>Thresholds follow the DOH PIDSR Manual of Procedures (2014), §5.3.5:</b> the same-week average "
+           "over 3 prior years, + 1 SD for alert and + 2 SD for epidemic."),
       para(f"• <b>The calculated DOH threshold runs hot in 2019.</b> January–March 2019 averaged "
            f"{q1.get(2019, np.nan):,.0f} national cases a week against {q1.get(2016, np.nan):,.0f} / "
            f"{q1.get(2017, np.nan):,.0f} / {q1.get(2018, np.nan):,.0f} in 2016–2018, so the 3-year baseline put "
@@ -344,17 +360,18 @@ S += [para("5. Consistency with the DOH threshold columns", H2),
 S += [para("6. Watch-outs", H2),
       para(f"{badge('WARN')} &nbsp;<b>Artefact alarms.</b> All {spike_alarms} weeks flagged “one-week spike” raise "
            "C1+C2+C3. They are labelled in flag_note and should be excluded when counting true alarms."),
-      para(f"{badge('WARN')} &nbsp;<b>Non-reporting weeks.</b> Of 253 “possible non-reporting” weeks, 97 were "
-           "evaluated (all “none”) and 156 could not be computed because their baselines were also zeros. Results "
-           "just after these runs rely on shortened baselines (see ears_note)."),
-      para(f"{badge('INFO')} &nbsp;<b>C3 on its own is the most frequent alarm</b> (2,908 local weeks). C3 "
+      para(f"{badge('WARN')} &nbsp;<b>Non-reporting weeks.</b> Of {int(nr.sum())} “possible non-reporting” weeks, "
+           f"{int(nr_eval.sum())} were evaluated and {int((nr & ~nr_eval).sum())} could not be computed because their "
+           "baselines were also zeros. Results just after these runs rely on shortened baselines (see ears_note)."),
+      para(f"{badge('INFO')} &nbsp;<b>C3 on its own is the most frequent alarm</b> ({c3_only:,} local weeks). C3 "
            "accumulates three weeks of C2 signal, so it fires on sustained but modest rises; it is useful as an "
            "early hint but generates most of the alarm volume."),
-      para(f"{badge('INFO')} &nbsp;<b>Alarm burden.</b> On average a place alarms 8–14 weeks a year (5.9 in 2020, "
+      para(f"{badge('INFO')} &nbsp;<b>Alarm burden.</b> On average a place alarms {per_place.drop(2020).min():.0f}–"
+           f"{per_place.drop(2020).max():.0f} weeks a year ({per_place.get(2020, np.nan):.1f} in 2020, "
            "when COVID-19 disrupted both dengue transmission and reporting). EARS is a screening tool: alarms "
            "prompt a look, not a declaration."),
-      para(f"{badge('INFO')} &nbsp;<b>Small places</b> rely on the SD floor (2,311 notes) and the 5-case minimum "
-           "(342 alarms suppressed); without them, single cases would trigger alarms.")]
+      para(f"{badge('INFO')} &nbsp;<b>Small places</b> rely on the SD floor ({sd_floor_rows:,} rows) and the 5-case "
+           f"minimum ({suppressed:,} alarms suppressed); without them, single cases would trigger alarms.")]
 
 S += [KeepTogether([para("Sources", H2)] + [para(f"[{i + 1}] {t}. <font color='{BLUE}'>{u}</font>", SM)
                                              for i, (t, u) in enumerate(SOURCES.values())]),
