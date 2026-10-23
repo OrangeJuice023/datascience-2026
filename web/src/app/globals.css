@@ -75,6 +75,146 @@ h2 {
   font-size: 10px;
 }
 
+/* ---------------------------------------------------------------------
+   Entry: the boot splash and the landing page (components/entry/).
+   Both are server-rendered so they paint on the first frame; a script in
+   the root layout sets these attributes before paint for a visitor who has
+   already seen them this session, so they never flash.
+   --------------------------------------------------------------------- */
+:root {
+  --entry-paper: #f4f6f2;
+  --entry-ink: #16302a;
+  --entry-green: #2f7a5f;
+  --entry-green-deep: #1d4f3f;
+  --entry-leaf: #747d59;
+  --entry-cream: #f4f0e6;
+  --entry-grid: rgb(22 48 42 / 0.06);
+}
+
+html[data-sigma-booted] #sigma-boot,
+html[data-sigma-entered] #sigma-entry {
+  display: none;
+}
+
+/* The landing page owns the scroll while it is open. */
+html:not([data-sigma-entered]) body:has(#sigma-entry) {
+  overflow: hidden;
+}
+
+.entry-paper {
+  background-color: var(--entry-paper);
+  background-image:
+    linear-gradient(var(--entry-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--entry-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--entry-ink);
+}
+
+.font-pixel {
+  font-family: var(--font-pixel), ui-monospace, monospace;
+}
+
+/* The 8-bit headline: a green gradient through the letters and a hard,
+   one-step offset shadow, the way sprites were drawn. */
+.entry-title {
+  background-image: linear-gradient(180deg, var(--entry-green) 0%, var(--entry-green-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0.06em 0.06em 0 rgb(29 79 63 / 0.18));
+}
+
+.pixel-image {
+  image-rendering: pixelated;
+}
+
+/* Buttons pressed like a console key: they sink by their shadow's depth. */
+.entry-key {
+  box-shadow: 0 6px 0 var(--entry-green-deep);
+  transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+}
+.entry-key:hover {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 var(--entry-green-deep);
+}
+.entry-key:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 var(--entry-green-deep);
+}
+
+@keyframes entry-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.entry-blink {
+  animation: entry-blink 1s steps(1) infinite;
+}
+
+@keyframes entry-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.entry-float {
+  animation: entry-float 4s steps(4) infinite;
+}
+
+/* The boot loader: an indeterminate run of pixels, not a progress figure. */
+@keyframes entry-pixel {
+  0%,
+  100% {
+    background: var(--entry-grid);
+  }
+  20% {
+    background: var(--entry-green);
+  }
+}
+.entry-loader span {
+  animation: entry-pixel 1.2s steps(1) infinite;
+}
+
+/* If the script never runs, the splash still gets out of the way. */
+@keyframes entry-boot-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+#sigma-boot {
+  animation: entry-boot-failsafe 0.3s 6s forwards;
+}
+
+/* The "power on" transition: pixels fill the screen, then clear. */
+@keyframes entry-wipe-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes entry-wipe-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.entry-wipe span {
+  transform: scale(0);
+  animation: entry-wipe-in 160ms steps(3) forwards;
+}
+.entry-wipe[data-phase="out"] span {
+  transform: scale(1);
+  animation: entry-wipe-out 160ms steps(3) forwards;
+}
+
 /* Mute the key-less OSM raster palette so data layers stay dominant. Only
    the MapLibre tile canvas is filtered: DOM markers and the deck.gl canvas
    are separate elements and keep their full encoding colors. Vector
