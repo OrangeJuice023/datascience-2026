@@ -29,7 +29,7 @@ SIGMA is organized around four conceptual modules:
 | --- | --- | --- | --- |
 | A. Formal health observation | `HealthObservation` | FORMAL | OpenDengue national weekly — **connected** |
 | B. Event-based signal | `PublicHealthSignal` + `SignalSource` | SIGNAL | Demo only |
-| C. Environmental / access covariate | planned `EnvironmentalCovariate` | CONTEXT | Planned |
+| C. Environmental / access covariate | `EnvironmentalObservation` (weather); ACCESS types | CONTEXT | Weather: CCHAIN + Open-Meteo, 12 cities, weekly — **connected** (static export); ACCESS demo |
 | D. Geographic reference | `GeographicEntity` | — | Geography track (PSGC/GADM) in progress |
 | E. Model output | `AnomalyResult`, `ForecastResult`, `TrendSeries` | MODEL | Demo on signals; **none fitted on formal data** |
 
@@ -108,7 +108,10 @@ config-driven legend. The Disease mode shows a national readout, not a
 spatial layer, because no sub-national formal data is connected. The Access
 mode (demo) draws facility availability/freshness points, a search-demand
 heatmap and area-level potential access gaps; see
-[access-data-model.md](access-data-model.md).
+[access-data-model.md](access-data-model.md). The Environment mode draws weekly
+weather for the 12 CCHAIN cities, one variable and one source at a time; the
+weather JSON is a separate chunk loaded only when the mode opens. See
+[environmental-covariates.md](environmental-covariates.md).
 
 ## Event-signal pipeline (planned)
 
