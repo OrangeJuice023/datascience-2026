@@ -4,7 +4,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Spacing, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+import { binSeries, peakBin } from './bar-bins';
+
 export interface BarDatum {
+  /** ISO date of the period start (YYYY-MM-DD). */
   label: string;
   /** Null marks a period with no record in the source. */
   value: number | null;
@@ -18,6 +21,10 @@ export interface BarDatum {
  * A null value is drawn as an empty slot with a dotted baseline, never as a
  * zero-height bar. A missing week and a week with zero reported cases are
  * different facts, and the chart has to keep them apart.
+ *
+ * A series longer than `maxBars` is never cut: consecutive weeks are grouped
+ * (bar-bins.ts), each bar shows the highest week in its span, and the chart
+ * says how many weeks each bar covers. The peak label names the actual week.
  */
 export function BarChart({
   data,
@@ -32,17 +39,9 @@ export function BarChart({
 }) {
   const theme = useTheme();
 
-  const visible = useMemo(() => {
-    if (data.length <= maxBars) return data;
-    const head = Math.floor(maxBars * 0.4);
-    const tail = maxBars - head;
-    return [...data.slice(0, head), ...data.slice(data.length - tail)];
-  }, [data, maxBars]);
-
-  const max = useMemo(() => {
-    const values = visible.map((d) => d.value ?? 0);
-    return Math.max(1, ...values);
-  }, [visible]);
+  const { bins: visible, weeksPerBar, totalWeeks } = useMemo(() => binSeries(data, maxBars), [data, maxBars]);
+  const peak = useMemo(() => peakBin(visible), [visible]);
+  const max = Math.max(1, peak?.value ?? 0);
 
   return (
     <View style={styles.wrapper}>
@@ -78,12 +77,17 @@ export function BarChart({
       <View style={styles.axis}>
         <Text style={[styles.axisText, Type.numeric, { color: theme.textSecondary }]}>{visible[0]?.label ?? ''}</Text>
         <Text style={[styles.axisText, Type.numeric, { color: theme.textSecondary }]}>
-          peak {max.toLocaleString()}{unit}
+          {peak ? `peak ${max.toLocaleString()}${unit} (${peak.peakLabel})` : 'no recorded weeks'}
         </Text>
         <Text style={[styles.axisText, Type.numeric, { color: theme.textSecondary }]}>
-          {visible[visible.length - 1]?.label ?? ''}
+          {visible[visible.length - 1]?.endLabel ?? ''}
         </Text>
       </View>
+      <Text style={[styles.axisText, { color: theme.textSecondary }]}>
+        {weeksPerBar === 1
+          ? `${totalWeeks} weeks, one bar per week.`
+          : `All ${totalWeeks} weeks shown; each bar is the highest week in a ${weeksPerBar}-week span.`}
+      </Text>
     </View>
   );
 }

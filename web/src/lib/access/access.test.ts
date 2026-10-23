@@ -236,3 +236,37 @@ describe("the ACCESS API payload", () => {
     expect(payload({ limit: 2 }).metrics).toHaveLength(2);
   });
 });
+
+describe("ACCESS missing data is never zero or 0,0", () => {
+  it("refuses a metric for a week outside the calendar instead of overwriting week 0", () => {
+    const bundle = bundleFor(RISING);
+    const { metrics } = run(RISING);
+    const stray = { ...metrics[0], periodStart: "2030-01-06" };
+    expect(() =>
+      packAccessBundle({
+        isSample: bundle.isSample,
+        medicines: bundle.medicines,
+        facilities: bundle.facilities,
+        weeks: bundle.weeks,
+        states: [],
+        metrics: [stray],
+        freshnessThresholds: bundle.freshnessThresholds,
+      }),
+    ).toThrow(/unknown week 2030-01-06/);
+  });
+
+  it("gives an area with no known location null coordinates, not 0,0", () => {
+    const data = payload({ lgus: LGUS.filter((l) => l.id !== "area-b") });
+    const b = data.areas.find((a) => a.id === "area-b");
+    expect(b).toMatchObject({ latitude: null, longitude: null });
+  });
+
+  it("has no weekly search total when an area has no metric that week", async () => {
+    const { weeklySearchTotal } = await import("@/lib/map/modes/access");
+    const bundle = bundleFor(RISING);
+    const total = weeklySearchTotal(bundle, ["area-a", "area-b"], MEDICINE.id, 0);
+    expect(typeof total).toBe("number");
+    expect(weeklySearchTotal(bundle, ["area-a", "area-missing"], MEDICINE.id, 0)).toBeNull();
+    expect(weeklySearchTotal(bundle, [], MEDICINE.id, 0)).toBeNull();
+  });
+});

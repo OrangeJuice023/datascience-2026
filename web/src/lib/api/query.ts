@@ -19,8 +19,10 @@ export const LIMITS = {
   maxBodyBytes: 16 * 1024,
   /** Maximum characters in a chat message. */
   maxMessageLength: 2000,
-  /** Maximum chat history messages carried into a request. */
+  /** Maximum chat history messages carried into a request. Even, so it keeps whole question/answer pairs. */
   maxHistory: 10,
+  /** Maximum characters in one history turn (an earlier reply can be longer than a question). */
+  maxReplyLength: 8000,
   /** Maximum completion tokens requested from a model provider. */
   maxCompletionTokens: 1500,
   /** Upstream request timeout, milliseconds. */

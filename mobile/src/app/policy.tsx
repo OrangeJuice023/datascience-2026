@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import type { ChatMessage, ChatResponseData } from '@sigma/contracts';
 
+import { conversationKey, historyForRequest } from '@/api/chat-history';
 import { ApiError } from '@/api/client';
 import { fetchPolicyInfo, sendChat } from '@/api/endpoints';
 import { Screen } from '@/components/screen';
@@ -30,6 +31,8 @@ interface CopilotError {
   code: string | null;
   message: string;
   question: string;
+  /** The conversation the error belongs to; it is not shown in another one. */
+  key: string;
 }
 
 /**
@@ -62,10 +65,15 @@ export default function PolicyScreen() {
   }, [info.data]);
   const place = activeLocation ? (areaNames.get(activeLocation) ?? activeLocation) : null;
 
-  const [turns, setTurns] = useState<Turn[]>([]);
+  // One conversation per server, disease and LGU: switching LGU starts a new
+  // one, so a Quezon City exchange is neither shown nor sent for Pasig.
+  const scopeKey = conversationKey(baseUrl, activeDisease, activeLocation);
+  const [conversation, setConversation] = useState<{ key: string; turns: Turn[] }>({ key: scopeKey, turns: [] });
+  const turns = conversation.key === scopeKey ? conversation.turns : [];
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState<CopilotError | null>(null);
+  const [lastError, setError] = useState<CopilotError | null>(null);
+  const error = lastError?.key === scopeKey ? lastError : null;
 
   const unavailable = isCopilotUnavailable(error?.code ?? null);
   const hasReply = turns.some((turn) => turn.role === 'assistant');
@@ -75,11 +83,16 @@ export default function PolicyScreen() {
     const question = text.trim();
     if (!question || !activeDisease || !activeLocation || sending) return;
 
+    const key = scopeKey;
     setDraft('');
     setError(null);
     setSending(true);
-    const history = turns.slice(-10).map(({ role, content }) => ({ role, content }));
-    setTurns((current) => [...current, { role: 'user', content: question }]);
+    // Signed, answered exchanges only: an earlier failed question is left out.
+    const history = historyForRequest(turns);
+    setConversation((current) => ({
+      key,
+      turns: [...(current.key === key ? current.turns : []), { role: 'user', content: question }],
+    }));
 
     try {
       const response = await sendChat(baseUrl, {
@@ -88,13 +101,25 @@ export default function PolicyScreen() {
         disease: activeDisease,
         locationId: activeLocation,
       });
-      const { reply, model, contextScope, limitations } = response.data;
-      setTurns((current) => [...current, { role: 'assistant', content: reply, meta: { model, contextScope, limitations } }]);
+      const { reply, model, contextScope, limitations, replySignature } = response.data;
+      // A reply that arrives after the user switched LGU is dropped, not shown in the new conversation.
+      setConversation((current) =>
+        current.key === key
+          ? {
+              key,
+              turns: [
+                ...current.turns,
+                { role: 'assistant', content: reply, signature: replySignature, meta: { model, contextScope, limitations } },
+              ],
+            }
+          : current
+      );
     } catch (caught) {
       setError({
         code: caught instanceof ApiError ? caught.code : null,
         message: caught instanceof ApiError ? caught.message : 'The copilot could not be reached.',
         question,
+        key,
       });
     } finally {
       setSending(false);
@@ -104,8 +129,13 @@ export default function PolicyScreen() {
   const retry = () => {
     if (!error) return;
     const question = error.question;
-    // Drop the unanswered question so it is not sent twice in the history.
-    setTurns((current) => (current.at(-1)?.role === 'user' ? current.slice(0, -1) : current));
+    // Drop the unanswered question from the log; send() re-adds it once.
+    // historyForRequest never includes it, so it is not sent twice.
+    setConversation((current) =>
+      current.key === scopeKey && current.turns.at(-1)?.role === 'user'
+        ? { key: current.key, turns: current.turns.slice(0, -1) }
+        : current
+    );
     void send(question);
   };
 
@@ -122,7 +152,12 @@ export default function PolicyScreen() {
             ? 'Answer received. Check it against the evidence before using it.'
             : `Ask about ${place ?? 'an LGU'}: what to verify, what is missing, what the evidence shows.`;
 
-  const refresh = () => info.reload();
+  // A refresh also clears a "not configured" refusal, so the copilot is
+  // usable again once the server is configured.
+  const refresh = () => {
+    setError(null);
+    info.reload();
+  };
   const loading = info.loading && !info.data;
   const failed = info.error && !info.data;
 
@@ -133,7 +168,8 @@ export default function PolicyScreen() {
       status={info.meta?.status}
       statusLabel="Demo data"
       onRefresh={refresh}
-      refreshing={info.refreshing}>
+      refreshing={info.refreshing}
+      staleError={info.stale ? info.error?.message : null}>
       {loading ? <LoadingState label="Loading policy context…" /> : null}
       {failed && info.error ? <ErrorState message={info.error.message} onRetry={refresh} /> : null}
 
@@ -204,15 +240,13 @@ export default function PolicyScreen() {
         {error ? (
           <View style={[styles.errorBox, { borderColor: theme.border, backgroundColor: theme.background }]}>
             <Text style={[styles.note, { color: unavailable ? theme.textSecondary : theme.unavailableText }]}>{error.message}</Text>
-            {!unavailable ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={retry}
-                hitSlop={8}
-                style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}>
-                <Text style={[styles.linkText, { color: theme.accent }]}>Try again</Text>
-              </Pressable>
-            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              onPress={retry}
+              hitSlop={8}
+              style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}>
+              <Text style={[styles.linkText, { color: theme.accent }]}>{unavailable ? 'Check again' : 'Try again'}</Text>
+            </Pressable>
           </View>
         ) : null}
 

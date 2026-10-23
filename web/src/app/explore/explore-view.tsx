@@ -32,6 +32,7 @@ import type {
   ModeFrame,
 } from "@/lib/map/types";
 import { SEVERITY_ORDER } from "@/lib/status";
+import { neighborKey } from "@/lib/neighbors";
 import { daysBetweenIso, formatCount, formatIsoDate } from "@/lib/map/format";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 
@@ -163,6 +164,14 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
     if (key === "envSource") setTime(null);
   }
 
+  // Filters change what the timeline means (e.g. the weather source's calendar),
+  // so a reset also returns the timeline to the latest slice and stops playback.
+  function resetFilters() {
+    setFilters(DEFAULT_FILTERS);
+    setTime(null);
+    setPlaying(false);
+  }
+
   const filterControls: Record<FilterKey, ReactNode> = {
     medicine: (
       <SelectFilter
@@ -263,7 +272,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
       {mode.filters.length > 0 && (
         <Card className="flex flex-wrap items-end gap-3 p-4">
           {mode.filters.map((key) => filterControls[key])}
-          <Button variant="ghost" onClick={() => setFilters(DEFAULT_FILTERS)}>
+          <Button variant="ghost" onClick={resetFilters}>
             Reset filters
           </Button>
         </Card>
@@ -379,7 +388,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
                 lgu={selectedLgu}
                 signal={selectedSignal}
                 trend={bundle.trends[selectedLgu.id]}
-                neighbors={bundle.neighbors[selectedLgu.id] ?? []}
+                neighbors={bundle.neighbors[neighborKey(selectedSignal.disease, selectedLgu.id)] ?? []}
                 onClose={() => setSelectedId(undefined)}
                 summary={modeSummary}
               />

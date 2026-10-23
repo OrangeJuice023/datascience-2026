@@ -61,8 +61,14 @@ export function packAccessBundle(input: {
     const point = Object.fromEntries(
       Object.entries(m).filter(([key]) => !POSITIONAL_FIELDS.has(key)),
     ) as AccessMetricPoint;
+    // A metric for a week outside the bundle's calendar is an input error;
+    // it must never land on (and overwrite) week 0.
+    const index = weekIndex.get(m.periodStart);
+    if (index === undefined) {
+      throw new Error(`ACCESS metric for ${m.medicineId}/${m.areaId} has unknown week ${m.periodStart}`);
+    }
     const byArea = (metrics[m.medicineId] ??= {});
-    (byArea[m.areaId] ??= [])[weekIndex.get(m.periodStart) ?? 0] = point;
+    (byArea[m.areaId] ??= [])[index] = point;
   }
   return { ...input, states, metrics };
 }

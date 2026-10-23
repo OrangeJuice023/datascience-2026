@@ -146,8 +146,8 @@ export class OpenDengueProvider implements DataProvider {
     return this.demo.getTrendSeries(geographyId);
   }
 
-  getNeighborSummaries(geographyId: string) {
-    return this.demo.getNeighborSummaries(geographyId);
+  getNeighborSummaries(geographyId: string, disease: string) {
+    return this.demo.getNeighborSummaries(geographyId, disease);
   }
 
   /** No baseline or anomaly model has been fitted to the formal series yet. */

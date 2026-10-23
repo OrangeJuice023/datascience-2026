@@ -87,6 +87,26 @@ function legendFor(metric: MapFilters["accessMetric"], medicine: string, t: { fr
   }
 }
 
+/**
+ * Searches across areas in one week. A total is only a total when every area
+ * has a metric that week; otherwise there is no total (null, drawn as a gap),
+ * never a sum that treats a missing area as zero searches.
+ */
+export function weeklySearchTotal(
+  access: MapDataBundle["access"],
+  areaIds: string[],
+  medicineId: string,
+  weekIndex: number,
+): number | null {
+  let sum = 0;
+  for (const areaId of areaIds) {
+    const m = metricFor(access, areaId, medicineId, weekIndex);
+    if (!m) return null;
+    sum += m.searchDemand;
+  }
+  return areaIds.length > 0 ? sum : null;
+}
+
 function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
   const access = bundle.access;
   const medicine = access.medicines.find((m) => m.id === filters.medicine) ?? access.medicines[0];
@@ -94,12 +114,15 @@ function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
   const areaIds = [...new Set(access.facilities.map((f) => f.areaId))].filter((id) => lguById.has(id));
   const metric = filters.accessMetric;
 
-  const weeklyTotals = access.weeks.map((w) =>
-    areaIds.reduce((sum, a) => sum + (metricFor(access, a, medicine.id, w.index)?.searchDemand ?? 0), 0),
-  );
+  const weeklyTotals = access.weeks.map((w) => weeklySearchTotal(access, areaIds, medicine.id, w.index));
   const maxDemand = Math.max(
     1,
-    ...access.weeks.flatMap((w) => areaIds.map((a) => metricFor(access, a, medicine.id, w.index)?.searchDemand ?? 0)),
+    ...access.weeks.flatMap((w) =>
+      areaIds.flatMap((a) => {
+        const m = metricFor(access, a, medicine.id, w.index);
+        return m ? [m.searchDemand] : [];
+      }),
+    ),
   );
 
   return {
@@ -173,8 +196,8 @@ function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
             rows: [
               { label: "Access gap", value: `${GAP_LABEL[m.accessGap]} · ${m.confidence} confidence` },
               { label: "Search demand", value: `${formatCount(m.searchDemand)} (${m.demandRatio.toFixed(1)}x early level)` },
-              { label: "Confirmed available", value: `${m.confirmedAvailable} of ${m.facilities} facilities` },
-              { label: "Reporting coverage", value: `${Math.round(m.facilityCoverage * 100)}%` },
+              { label: "Confirmed available", value: m.facilities > 0 ? `${m.confirmedAvailable} of ${m.facilities} facilities` : "No facilities" },
+              { label: "Reporting coverage", value: m.facilities > 0 ? `${Math.round(m.facilityCoverage * 100)}%` : "No facilities" },
             ],
           });
         }

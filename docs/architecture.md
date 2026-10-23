@@ -30,7 +30,7 @@ SIGMA is organized around four conceptual modules:
 | A. Formal health observation | `HealthObservation` | FORMAL | OpenDengue national weekly — **connected** |
 | B. Event-based signal | `PublicHealthSignal` + `SignalSource` | SIGNAL | Demo only |
 | C. Environmental / access covariate | `EnvironmentalObservation` (weather); ACCESS types | CONTEXT | Weather: CCHAIN + Open-Meteo, 12 cities, weekly — **connected** (static export); ACCESS demo |
-| D. Geographic reference | `GeographicEntity` | — | Geography track (PSGC/GADM) in progress |
+| D. Geographic reference | `GeographicEntity` | — | Geography track (HDX reporting units → COD-AB / PSA PSGC; geoBoundaries display polygons). GADM is not used |
 | E. Model output | `AnomalyResult`, `ForecastResult`, `TrendSeries` | MODEL | Demo on signals; **none fitted on formal data** |
 
 A signal is not a case count, a model score is not a diagnosis, and a

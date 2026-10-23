@@ -42,7 +42,7 @@ export interface DataProvider {
   getLgus(): Promise<LGU[]>;
   getLguById(id: string): Promise<LGU | undefined>;
   getTrendSeries(geographyId: string): Promise<TrendPoint[] | undefined>;
-  getNeighborSummaries(geographyId: string): Promise<NeighborSummary[]>;
+  getNeighborSummaries(geographyId: string, disease: string): Promise<NeighborSummary[]>;
   /**
    * Model outputs for a formal series. Empty until a baseline model has
    * actually been fitted and run; callers must show "not fitted", never a

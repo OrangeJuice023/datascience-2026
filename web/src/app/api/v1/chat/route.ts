@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { completeChat, parseChatRequest } from "@/lib/api/chat";
+import { chatEnvironment, completeChat, parseChatRequest, rateLimited } from "@/lib/api/chat";
 import { ApiError } from "@/lib/api/envelope";
 import { LIMITS } from "@/lib/api/query";
 import { methodNotAllowed, withErrors } from "@/lib/api/route";
@@ -12,10 +12,9 @@ import { methodNotAllowed, withErrors } from "@/lib/api/route";
  * model provider is configured the request is refused rather than answered
  * with a placeholder reply.
  */
-import { rateLimited } from "@/lib/api/chat";
-
 export const POST = withErrors(async (request: NextRequest) => {
-  if (process.env.CHAT_DISABLED === "true" || process.env.CHAT_PUBLIC_DISABLED === "true") {
+  const env = chatEnvironment();
+  if (env.switchedOff) {
     throw ApiError.notConfigured(
       "The Policy Copilot is temporarily disabled and cannot answer requests.",
     );
@@ -57,8 +56,9 @@ export const POST = withErrors(async (request: NextRequest) => {
   const data = await completeChat({
     request: parsed,
     config: {
-      apiKey: process.env.GROQ_API_KEY,
-      model: process.env.GROQ_MODEL,
+      apiKey: env.apiKey,
+      model: env.model,
+      historySecret: env.historySecret,
     },
   });
 

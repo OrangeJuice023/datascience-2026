@@ -67,8 +67,9 @@ export function buildAccessMetrics(input: BuildAccessMetricsInput): AccessMetric
       name: areaName(id),
       province: lgu?.province ?? "",
       region: lgu?.region ?? "",
-      latitude: lgu?.latitude ?? 0,
-      longitude: lgu?.longitude ?? 0,
+      // An area with no known location has no coordinates (null), never 0,0.
+      latitude: lgu?.latitude ?? null,
+      longitude: lgu?.longitude ?? null,
       facilityCount: bundle.facilities.filter((f) => f.areaId === id).length,
     };
   });

@@ -197,6 +197,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "service — the service name",
       "version — the service version",
       "configuration.aiProviderConfigured — whether a model provider key exists server-side (boolean)",
+      "configuration.chatEnabled — whether the copilot accepts requests: a key exists and CHAT_DISABLED / CHAT_PUBLIC_DISABLED is not set (boolean)",
       "configuration.mapTilesConfigured — whether map tiles are configured (boolean)",
       "services[] — id, name, status, enabled, and a plain-language note",
       "dataSources — connected, demo and planned source counts",
@@ -214,6 +215,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
         version: "0.1.0",
         configuration: {
           aiProviderConfigured: false,
+          chatEnabled: false,
           mapTilesConfigured: false,
         },
         services: [
@@ -233,9 +235,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
           },
         ],
         dataSources: {
-          connected: 4,
+          connected: 8,
           demo: 2,
-          planned: 4,
+          planned: 2,
         },
       },
       meta: {
@@ -1114,7 +1116,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
         name: "history",
         type: "body",
         required: false,
-        notes: "Earlier turns as { role, content }. Only the last 10 are kept, and each content string is truncated to 2000 characters.",
+        notes: "Earlier exchanges, oldest first, as complete pairs: { role: \"user\", content } then { role: \"assistant\", content, signature }, where signature is the replySignature this server returned for that reply. A system turn, a broken sequence, an unanswered question, or a reply not signed by this server for the same disease and LGU is a 400. Only the last 10 turns are kept.",
       },
       {
         name: "disease",
@@ -1134,6 +1136,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "model — the model that produced it",
       "contextScope — one line describing what the model was given",
       "limitations[] — the limits of model output, repeated in every response",
+      "replySignature — send back as this reply's signature in a later request's history",
     ],
     status: "demo",
     possibleStatuses: ["demo"],
@@ -1161,6 +1164,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
           "It does not confirm outbreaks, diagnose patients, or prescribe policy.",
           "The underlying signals, trends and facility figures are simulated.",
         ],
+        replySignature: "q3Yl8m0V2b7pF4cR9xT1uW6eH5kJ0nA2sD8gZ3vL1oQ",
       },
       meta: {
         apiVersion: "v1",

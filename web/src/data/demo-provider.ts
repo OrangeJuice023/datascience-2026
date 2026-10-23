@@ -41,8 +41,8 @@ export class DemoDataProvider implements DataProvider {
     return getTrendSeries(geographyId);
   }
 
-  async getNeighborSummaries(geographyId: string): Promise<NeighborSummary[]> {
-    return getNeighborSummaries(geographyId);
+  async getNeighborSummaries(geographyId: string, disease: string): Promise<NeighborSummary[]> {
+    return getNeighborSummaries(geographyId, disease);
   }
 
   async getAnomalyResults(): Promise<AnomalyResult[]> {

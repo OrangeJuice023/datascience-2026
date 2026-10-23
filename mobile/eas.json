@@ -27,11 +27,14 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://10.60.102.14:3000/api/v1"
+        "EXPO_PUBLIC_API_BASE_URL": "https://datascience-2026.vercel.app/api/v1"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://datascience-2026.vercel.app/api/v1"
+      }
     }
   },
   "submit": {

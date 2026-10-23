@@ -11,6 +11,11 @@ import { ApiError } from '@/api/client';
  * - `error`: the request failed; there is no data.
  * - `meta.status`: the request succeeded, but the data behind it is demo,
  *   unavailable or not connected.
+ *
+ * A failed refresh keeps the last good data on screen only as `stale`, with
+ * the error, so the screen must say the data is old and the refresh failed.
+ * When the resource itself changes (another server, another query) the old
+ * data is cleared at once: it belongs to a different request.
  */
 
 export interface Resource<T> {
@@ -20,6 +25,8 @@ export interface Resource<T> {
   loading: boolean;
   /** True while refreshing with data already on screen. */
   refreshing: boolean;
+  /** The last refresh failed and `data` is from an earlier successful load. */
+  stale: boolean;
   reload: () => void;
 }
 
@@ -35,6 +42,7 @@ export function useResource<T>(
   const [nonce, setNonce] = useState(0);
 
   const hasData = useRef(false);
+  const lastNonce = useRef(nonce);
   const loaderRef = useRef(loader);
 
   // Keep the latest loader without reading a ref during render. This effect
@@ -46,6 +54,17 @@ export function useResource<T>(
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
+
+    // Same nonce means the deps changed (e.g. a new server URL), not a reload:
+    // the data on screen answers a different request, so drop it.
+    const isReload = nonce !== lastNonce.current;
+    lastNonce.current = nonce;
+    if (!isReload && hasData.current) {
+      hasData.current = false;
+      setData(null);
+      setMeta(null);
+      setError(null);
+    }
 
     if (hasData.current) setRefreshing(true);
     else setLoading(true);
@@ -84,5 +103,5 @@ export function useResource<T>(
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
 
-  return { data, meta, error, loading, refreshing, reload };
+  return { data, meta, error, loading, refreshing, stale: data !== null && error !== null, reload };
 }

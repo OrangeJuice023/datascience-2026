@@ -24,7 +24,11 @@ SOURCE_WEEK_OFFSET_DAYS = {
     # shares 6 of its 7 days with a Mon-Sun week.
     "cchain_pidsr": -1,
     # HDX DOH-Epi dates are Sundays. -14 d is the empirical best alignment with
-    # CCHAIN (environment.crosscheck: HDX - 13 d = CCHAIN Monday, mean r 0.83).
+    # CCHAIN (environment.crosscheck: HDX - 13 d = CCHAIN Monday, mean r 0.83,
+    # measured before swap rows were excluded). UNCONFIRMED: the meaning of the
+    # HDX date is undocumented, and the SIGMA map uses the date as-is (0 d).
+    # Used only to cross-check against CCHAIN here; the climate model's outcome
+    # is CCHAIN PIDSR, not HDX. See docs/dengue-pipeline.md, "HDX week convention".
     "hdx_doh_epi": -14,
 }
 
