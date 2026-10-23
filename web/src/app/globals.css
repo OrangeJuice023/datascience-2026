@@ -52,6 +52,25 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* A reader who asks the system for less motion gets none: transitions and
+   animations finish instantly, and smooth scrolling is turned off. Sigi
+   switches to its still frame on its own (components/mascot/sigi.tsx). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .maplibregl-ctrl-attrib {
   font-size: 10px;
 }

@@ -25,6 +25,12 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="sr-only z-50 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Skip to content
+      </a>
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:flex">
         <SidebarContent logoSrc={logoSrc} />
       </aside>
@@ -53,7 +59,9 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 px-4 py-5 sm:px-6 sm:py-6">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-5 focus:outline-none sm:px-6 sm:py-6">
+          {children}
+        </main>
       </div>
     </div>
   );
