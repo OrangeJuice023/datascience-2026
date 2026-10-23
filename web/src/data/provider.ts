@@ -1,4 +1,12 @@
-import type { AnomalyResult, HealthObservation, TemporalResolution } from "@/types/data";
+import type {
+  AnomalyResult,
+  EnvironmentalObservation,
+  HealthObservation,
+  IsoDate,
+  TemporalResolution,
+  WeatherCoverage,
+  WeatherSourceId,
+} from "@/types/data";
 import type { Signal, LGU, TrendPoint, NeighborSummary } from "@/types";
 
 export interface SignalQuery {
@@ -9,6 +17,14 @@ export interface SignalQuery {
 
 export interface ObservationQuery {
   temporalResolution?: TemporalResolution;
+}
+
+export interface EnvironmentQuery {
+  /** Omit to get every source; sources are separate rows, never merged. */
+  sourceId?: WeatherSourceId;
+  /** Inclusive bounds on periodStart. */
+  from?: IsoDate;
+  to?: IsoDate;
 }
 
 /**
@@ -33,4 +49,14 @@ export interface DataProvider {
    * placeholder score.
    */
   getAnomalyResults(diseaseId: string, geographyId: string): Promise<AnomalyResult[]>;
+  /**
+   * Weekly city weather (context covariates), one record per week × source.
+   * geographyId is a COD-AB pcode; demo LGU ids return nothing.
+   */
+  getEnvironmentalObservations(
+    geographyId: string,
+    query?: EnvironmentQuery,
+  ): Promise<EnvironmentalObservation[]>;
+  /** Coverage period, quality counts and comparability per geography × source. */
+  getWeatherCoverage(): Promise<WeatherCoverage[]>;
 }
