@@ -38,12 +38,21 @@ from any working directory.
 
 ### DOH alert and epidemic thresholds
 
-A(w, y) = mean of Y(w, y−j) for j = 1..3 (same epi week, 3 previous years);
-E(w, y) = A + 2·SD (sample SD). The current year is excluded deliberately: with
-it inside the baseline, a week can be at most 1.155 SD above the mean, so the
-2-SD epidemic threshold could never be crossed. Fallbacks, each explained in
-`doh_note`: 2 of 3 baseline years if one is unusable; week 53 uses week 52.
-Thresholds start in 2019 (first year with 3 prior years).
+Defined by the DOH *Manual of Procedures for the Philippine Integrated Disease
+Surveillance and Response*, 3rd ed. (2014), §5.3.5: the weekly average over the
+past 3 to 5 years plus 1 SD (alert) or plus 2 SD (epidemic).
+
+M(w, y) = mean of Y(w, y−j) for j = 1..3 (same epi week, 3 previous years);
+alert A = M + 1·SD; epidemic E = M + 2·SD (sample SD). SIGMA uses 3 years, the
+shortest the manual allows, because the HDX series starts in 2016; 5 years
+would push the first threshold to 2021 and lose the 2019 epidemic.
+
+The current year is excluded ("past" years): with it inside the baseline, a
+week can be at most 1.155 SD above the mean, so the 2-SD epidemic threshold
+could never be crossed. Fallbacks, each explained in `doh_note`: 2 of 3
+baseline years if one is unusable; week 53 uses week 52. Thresholds start in
+2019 (first year with 3 prior years). Before 2026-10-23 the alert threshold
+was the mean alone (no +1 SD), which flagged more weeks as `alert`.
 
 ## Step 2: EARS (`ml/ears.py`)
 
@@ -96,5 +105,5 @@ the two raw files above in `data/raw/` and run the pipeline.
 - Zeros cannot be distinguished from "no report" in the local source; reporting
   disruptions (Marawi siege 2017, COVID-19 lockdowns 2020) appear as zero runs.
 - National OpenDengue data has year-end reporting artefacts every year.
-- The calculated DOH threshold runs hotter than the official system, which uses
-  3–5 years and regional thresholds.
+- The DOH thresholds use 3 prior years (the manual allows 3–5) and are computed
+  per reporting unit; official practice may use 5 years and regional thresholds.

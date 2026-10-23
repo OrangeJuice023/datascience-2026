@@ -124,8 +124,9 @@ and [docs/geo/](docs/geo/README.md)):
   province rows exclude their cities are **unconfirmed** assumptions.
 - Zeros cannot be told apart from "no report"; long zero runs and one-week spikes are
   flagged, not corrected. National OpenDengue data has year-end reporting artefacts.
-- The calculated DOH threshold uses 3 prior years and runs hotter than the official
-  system.
+- The DOH alert and epidemic thresholds follow the PIDSR Manual of Procedures (2014,
+  §5.3.5: same-week mean + 1 SD / + 2 SD) using 3 prior years, the shortest the manual
+  allows; the official system may use 5 years and regional thresholds.
 
 ## API
 

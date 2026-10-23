@@ -148,10 +148,18 @@ def flag_suspect_local_weeks(local: pd.DataFrame) -> None:
 
 
 def add_doh_thresholds(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
-    """Append DOH alert and epidemic thresholds (Eligado et al., 2026).
+    """Append DOH alert and epidemic thresholds.
 
-    A(w, y) = mean of Y(w, y-j) for j = 1..3   (same week, 3 previous years)
-    E(w, y) = A(w, y) + 2 * sd of those 3 values
+    DOH, Manual of Procedures for the Philippine Integrated Disease
+    Surveillance and Response, 3rd ed. (2014), section 5.3.5: the weekly
+    average over the past 3 to 5 years plus 1 standard deviation (alert) or
+    plus 2 standard deviations (epidemic). SIGMA uses 3 years, the shortest
+    the manual allows, because the HDX series starts in 2016.
+
+    M(w, y) = mean of Y(w, y-j) for j = 1..3   (same week, 3 previous years)
+    S(w, y) = sd of those 3 values
+    A(w, y) = M + 1 * S                        (alert)
+    E(w, y) = M + 2 * S                        (epidemic)
 
     Weeks are epidemiological (MMWR) weeks: Sunday to Saturday, numbered by
     the year that holds the week's Wednesday. sd is the sample sd (n - 1).
@@ -203,8 +211,10 @@ def add_doh_thresholds(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
             note.append("; ".join(notes + ["fewer than 2 usable baseline years"]))
             continue
 
-        a = sum(values) / len(values)
-        e = a + 2 * pd.Series(values).std()
+        mean = sum(values) / len(values)
+        sd = pd.Series(values).std()
+        a = mean + sd
+        e = mean + 2 * sd
         alert.append(round(a, 1)); epidemic.append(round(e, 1))
         if len(values) == 2:
             notes.append("threshold from 2 of 3 baseline years")

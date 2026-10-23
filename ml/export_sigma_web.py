@@ -103,7 +103,7 @@ def main() -> None:
                         "it lines up best with OpenDengue shifted 1-2 weeks earlier.",
             "codes": {"quality": QUALITY, "doh": DOH, "ears": EARS_RESULT, "flag": FLAG},
             "ears": {"c1c2Threshold": 3.0, "c3Threshold": 2.0, "minCount": 5, "baselineWeeks": 7, "minBaseline": 5},
-            "doh": "Alert = mean of the same epi week in the 3 previous years; epidemic = alert + 2 SD. From 2019.",
+            "doh": "Alert = mean of the same epi week in the 3 previous years + 1 SD; epidemic = mean + 2 SD (DOH PIDSR Manual of Procedures, 3rd ed., s. 5.3.5). From 2019.",
             "assumptions": [
                 "Province rows are assumed to exclude their separately reported cities (supported, not proven).",
                 "Counts are assumed to be by place of residence (unconfirmed).",
