@@ -12,23 +12,10 @@ export const EVIDENCE_KIND: Record<ModeEvidence, EvidenceKind> = {
 import { ACCESS_MODE } from "./access";
 import { ANOMALY_MODE } from "./anomaly";
 import { DISEASE_MODE } from "./disease";
+import { ENVIRONMENT_MODE } from "./environment";
 import { SIGMA_MODE } from "./sigma";
 import { SIGNALS_MODE } from "./signals";
 import { SIMULATION_MODE } from "./simulation";
-
-const ENVIRONMENT_MODE: MapModeDefinition = {
-  id: "environment",
-  label: "Environment",
-  question: "What contextual conditions surround the signals?",
-  availability: "planned",
-  evidence: "context",
-  evidenceLabel: "Environmental covariates",
-  extent: "metro",
-  filters: [],
-  layerToggles: [],
-  unavailableReason:
-    "Planned: weekly city weather (CCHAIN, Open-Meteo) is connected in the data layer for 12 CCHAIN cities; the map layer is not built yet.",
-};
 
 /** Display order follows TRACE → ANALYZE → SIMULATE. */
 export const MAP_MODES: MapModeDefinition[] = [

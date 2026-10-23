@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { AnalyticalMap } from "@/components/maps/analytical/analytical-map";
 import { LocationDetailPanel } from "@/components/maps/location-detail-panel";
 import { SigmaDetailPanel } from "@/components/maps/sigma-detail-panel";
+import { EnvironmentDetailPanel } from "@/components/maps/environment-detail-panel";
+import {
+  WEATHER_SOURCE_LABEL,
+  WEATHER_VARIABLE_META,
+  type EnvironmentBundle,
+} from "@/lib/environment/bundle";
+import type { WeatherSourceId, WeatherVariable } from "@/types/data";
 import { SIGMA_DATA_URL, type SigmaData } from "@/lib/sigma/data";
 import { AccessDetailPanel } from "@/components/access/access-detail-panel";
 import { ACCESS_METRIC_LABEL, type AccessMetricView } from "@/lib/access/bundle";
@@ -38,6 +45,8 @@ const DEFAULT_FILTERS: MapFilters = {
   medicine: "oral-rehydration-salts",
   accessMetric: "gap",
   sigmaLayer: "ears",
+  envVariable: "precipitation_mm",
+  envSource: "cchain",
 };
 
 const EMPTY_FRAME: ModeFrame = { features: [], links: [] };
@@ -81,9 +90,30 @@ export function ExploreView({
       );
   }
 
+  // City weather (~0.9 MB) is a separate chunk, imported only when the mode is first opened.
+  const [environment, setEnvironment] = useState<{ data?: EnvironmentBundle; error?: string; requested: boolean }>({
+    requested: false,
+  });
+
+  function loadEnvironment() {
+    if (environment.requested) return;
+    setEnvironment({ requested: true });
+    import("@/data/environment-weekly.json")
+      .then((mod) => setEnvironment({ data: mod.default as unknown as EnvironmentBundle, requested: true }))
+      .catch((error: unknown) =>
+        setEnvironment({ error: error instanceof Error ? error.message : "unknown error", requested: true }),
+      );
+  }
+
   const modeBundle = useMemo(
-    () => (sigma.data || sigma.error ? { ...bundle, sigma: sigma.data, sigmaError: sigma.error } : bundle),
-    [bundle, sigma.data, sigma.error],
+    () => ({
+      ...bundle,
+      ...(sigma.data || sigma.error ? { sigma: sigma.data, sigmaError: sigma.error } : {}),
+      ...(environment.data || environment.error
+        ? { environment: environment.data, environmentError: environment.error }
+        : {}),
+    }),
+    [bundle, sigma.data, sigma.error, environment.data, environment.error],
   );
 
   const mode = getMapMode(modeId);
@@ -140,12 +170,15 @@ export function ExploreView({
 
   function changeMode(next: MapModeId) {
     if (next === "sigma") loadSigma();
+    if (next === "environment") loadEnvironment();
     setPlaying(false);
     setModeId(next);
   }
 
   function updateFilter(key: FilterKey, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
+    // The two weather sources have different calendars, so a slice index means a different week.
+    if (key === "envSource") setTime(null);
   }
 
   const filterControls: Record<FilterKey, ReactNode> = {
@@ -227,6 +260,30 @@ export function ExploreView({
           { value: "doh", label: "DOH threshold" },
           { value: "cases", label: "Reported cases" },
         ]}
+      />
+    ),
+    envVariable: (
+      <SelectFilter
+        key="envVariable"
+        label="Weather variable"
+        value={filters.envVariable}
+        onChange={(v) => updateFilter("envVariable", v)}
+        options={(Object.keys(WEATHER_VARIABLE_META) as WeatherVariable[]).map((v) => ({
+          value: v,
+          label: `${WEATHER_VARIABLE_META[v].label} (${WEATHER_VARIABLE_META[v].unit})`,
+        }))}
+      />
+    ),
+    envSource: (
+      <SelectFilter
+        key="envSource"
+        label="Weather source"
+        value={filters.envSource}
+        onChange={(v) => updateFilter("envSource", v)}
+        options={(Object.keys(WEATHER_SOURCE_LABEL) as WeatherSourceId[]).map((s) => ({
+          value: s,
+          label: s === "cchain" ? `${WEATHER_SOURCE_LABEL[s]} (2003–2022)` : `${WEATHER_SOURCE_LABEL[s]} (2008–present)`,
+        }))}
       />
     ),
     window: (
@@ -378,6 +435,18 @@ export function ExploreView({
               <SigmaDetailPanel
                 data={sigma.data}
                 unitId={selectedId}
+                week={slice?.key}
+                onClose={() => setSelectedId(undefined)}
+              />
+            </Card>
+          ) : mode.id === "environment" &&
+            selectedId &&
+            environment.data?.geographies.some((g) => g.id === selectedId) ? (
+            <Card className="overflow-hidden">
+              <EnvironmentDetailPanel
+                data={environment.data}
+                geographyId={selectedId}
+                variable={filters.envVariable}
                 week={slice?.key}
                 onClose={() => setSelectedId(undefined)}
               />

@@ -3,66 +3,15 @@ import "server-only";
 import type {
   ConfidenceLevel,
   EnvironmentalObservation,
-  GeographicLevel,
-  HdxUnitRelation,
   IsoDate,
-  WeatherComparability,
   WeatherCoverage,
   WeatherQcFlag,
   WeatherSourceId,
   WeatherVariable,
 } from "@/types/data";
 import type { EnvironmentQuery } from "@/data/provider";
+import { addDays, type EnvironmentBundle } from "./bundle";
 import bundle from "@/data/environment-weekly.json";
-
-/**
- * Columnar bundle written by ml/environment/export.py from
- * data/processed/environment/city_weekly_weather.csv. One series per
- * geography × source, one array slot per consecutive Sunday–Saturday week.
- */
-interface EnvironmentBundle {
-  generatedBy: string;
-  weekConvention: string;
-  variables: Record<WeatherVariable, string>;
-  sources: Record<
-    WeatherSourceId,
-    {
-      name: string;
-      upstreamProduct: string;
-      aggregationMethod: string;
-      url: string;
-      retrievedAt: string;
-      license: string;
-      attribution: string;
-    }
-  >;
-  geographies: Array<{
-    id: string;
-    name: string;
-    level: GeographicLevel;
-    latitude: number;
-    longitude: number;
-    inCchain: boolean;
-    psgcCode: string;
-    hdxUnitId: string;
-    hdxUnitRelation: HdxUnitRelation;
-  }>;
-  comparability: Record<WeatherVariable, WeatherComparability>;
-  series: Array<{
-    geographyId: string;
-    sourceId: WeatherSourceId;
-    firstPeriodStart: IsoDate;
-    coverageStart: IsoDate;
-    coverageEnd: IsoDate;
-    gridCell: string | null;
-    values: Record<WeatherVariable, Array<number | null>>;
-    daysObserved: number[];
-    /** ";"-joined WeatherQcFlag values; "" = ok. */
-    qcFlags: string[];
-    /** H / M / L */
-    confidence: string[];
-  }>;
-}
 
 const BUNDLE = bundle as unknown as EnvironmentBundle;
 
@@ -76,10 +25,6 @@ const REGISTRY_ID: Record<WeatherSourceId, string> = {
 
 const CONFIDENCE: Record<string, ConfidenceLevel> = { H: "high", M: "medium", L: "low" };
 const DAY_MS = 86_400_000;
-
-function addDays(date: IsoDate, days: number): IsoDate {
-  return new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
-}
 
 /** MMWR epi year/week: the year of the week's Wednesday. */
 function epiWeek(periodStart: IsoDate): { epiYear: number; epiWeek: number } {
