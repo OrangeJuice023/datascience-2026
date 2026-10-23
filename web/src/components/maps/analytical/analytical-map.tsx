@@ -48,6 +48,7 @@ const TOGGLE_LABEL: Record<MapModeId, Partial<Record<LayerToggleId, string>>> = 
   signals: { links: "Neighbor links", columns: "3D columns" },
   simulation: { links: "Reach links", columns: "3D columns" },
   anomaly: { columns: "3D columns" },
+  sigma: { areas: "Area fills" },
   disease: {},
   environment: {},
   access: { columns: "3D columns" },

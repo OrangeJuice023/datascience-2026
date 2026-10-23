@@ -14,6 +14,11 @@ export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  /**
+   * True when the destination does not exist yet. A disabled item is shown
+   * but is not a link.
+   */
+  disabled?: boolean;
 }
 
 export const PRIMARY_NAV: NavItem[] = [
@@ -26,6 +31,6 @@ export const PRIMARY_NAV: NavItem[] = [
 ];
 
 export const SECONDARY_NAV: NavItem[] = [
-  { href: "/data-sources", label: "Data Sources", icon: Database },
+  { href: "/data-sources", label: "Data Sources", icon: Database, disabled: true },
   { href: "/documentation", label: "Documentation", icon: BookOpen },
 ];
