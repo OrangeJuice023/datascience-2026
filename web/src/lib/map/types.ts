@@ -2,6 +2,8 @@ import type { HealthObservation } from "@/types/data";
 import type { AccessBundle } from "@/lib/access/bundle";
 import type { LGU, NeighborSummary, SimulationInputs, Signal, TrendPoint } from "@/types";
 import type { SigmaData } from "@/lib/sigma/data";
+import type { EnvironmentBundle } from "@/lib/environment/bundle";
+import type { WeatherSourceId, WeatherVariable } from "@/types/data";
 
 export type MapViewMode = "2d" | "3d" | "globe";
 
@@ -143,7 +145,9 @@ export type FilterKey =
   | "window"
   | "medicine"
   | "accessMetric"
-  | "sigmaLayer";
+  | "sigmaLayer"
+  | "envVariable"
+  | "envSource";
 
 export interface MapFilters {
   disease: string;
@@ -158,6 +162,10 @@ export interface MapFilters {
   accessMetric: "availability" | "demand" | "freshness" | "gap";
   /** SIGMA: which result the map encodes. */
   sigmaLayer: SigmaLayer;
+  /** ENVIRONMENT: which weather variable the map encodes. */
+  envVariable: WeatherVariable;
+  /** ENVIRONMENT: one source at a time; the two are never spliced on the map. */
+  envSource: WeatherSourceId;
 }
 
 export type SigmaLayer = "ears" | "doh" | "cases";
@@ -191,6 +199,10 @@ export interface MapDataBundle {
   sigma?: SigmaData;
   /** Why `sigma` could not be loaded, if it failed. */
   sigmaError?: string;
+  /** Weekly city weather; imported on the client when the mode opens. */
+  environment?: EnvironmentBundle;
+  /** Why `environment` could not be loaded, if it failed. */
+  environmentError?: string;
 }
 
 export interface PreparedMode {
