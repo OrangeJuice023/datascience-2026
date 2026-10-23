@@ -29,6 +29,13 @@
 > `python -m environment.validate` passes all 34 checks, and a full rebuild
 > reproduces every output byte for byte. Still no model fitted.
 >
+> **Update, 2026-10-23. Canonical geography ids.** The geography track (PR #3,
+> now on `main`) set SIGMA's canonical ids, so `geography_id` is now the slug
+> id, e.g. `davao-city`, instead of the CCHAIN pcode (§4.6). The CCHAIN pcode,
+> PSA PSGC code and HDX reporting unit are kept as columns. Every weekly value
+> is unchanged; only the key changed. `environment.validate` now runs 36
+> checks, all passing.
+>
 > Nothing here establishes that weather causes dengue. Every relationship this
 > track estimates is a conditional association in observational data.
 
@@ -98,7 +105,7 @@ python -m environment.crosscheck  # crosscheck.json (HDX vs CCHAIN, checks the H
 python -m environment.compare     # weather_comparability.{json,csv}
 python -m environment.export --hub ../DATASCIENCE_MASTER_DATA_HUB.xlsx
                                   # hub_environment.csv, hub ENVIRONMENT tab, web JSON
-python -m environment.validate    # 34 checks; non-zero exit on failure
+python -m environment.validate    # 36 checks; non-zero exit on failure
 ```
 
 The first Open-Meteo fetch is 240 requests (12 cities × 20 years) and took
@@ -180,22 +187,38 @@ Navotas, Muntinlupa. Fit window: 2008-01 → 2020-03-15. The 2020-03-16 →
 2022 period is tagged `covid_disruption` and is reported separately, not
 pooled.
 
-### 4.6 Geography key (decided 2026-10-20)
+### 4.6 Geography key (decided 2026-10-20, changed 2026-10-23)
 
-**`geography_id` = OCHA COD-AB pcode** ("PH" + 9-digit PSGC, 2016 COD-AB
-release), e.g. `PH112402000` Davao City. CCHAIN uses these codes, so they need
-no translation. Every cross-source join lives in one tracked file,
-`ml/environment/geography_crosswalk.csv` (pcode ↔ HDX DOH-Epi location and
-province names). `environment.geography` builds `geography.csv` from it, with
-province/region, barangay count, WorldPop 2020 population and the
+**`geography_id` = SIGMA canonical id** from the geography track, e.g.
+`davao-city` (`data/reference/geo/geography_hub_rows.csv`). Until 2026-10-23
+this track used CCHAIN's 2016 COD-AB pcode (`PH112402000`). That code is still
+how CCHAIN files are keyed, so it stays as `cchain_adm3_pcode` and is
+translated on read.
+
+Every cross-source join lives in one tracked file,
+`ml/environment/geography_crosswalk.csv`: canonical id, CCHAIN pcode, COD-AB
+v03 pcode, PSA PSGC code, HDX reporting unit and relation, and the HDX DOH-Epi
+location and province names. The ids and codes are copied from the geography
+track's `data/reference/geo/cchain_city_crosswalk.csv`. `environment.geography`
+stops if they drift from it or from `geography_hub_rows.csv`.
+
+| Relation | Cities | geography_id | Rule |
+| --- | --- | --- | --- |
+| `same_area` | 10 | the HDX unit id, e.g. `davao-city` | weather and HDX counts describe the same area and can be joined |
+| `inside_unit` | Palayan (in `nueva-ecija`), Legazpi (in `albay`) | `palayan-city`, `legazpi-city` | never join city weather to the province's HDX counts |
+
+`palayan-city` and `legazpi-city` follow the same naming but are not rows in
+`geography_hub_rows.csv`, because no HDX series reports them separately.
+
+`environment.geography` builds `geography.csv` from the crosswalk, with
+province/region names, barangay count, WorldPop 2020 population and the
 **population-weighted centroid of barangay polygons** (CCHAIN
 `brgy_geography`). Open-Meteo is queried at that centroid.
 
-To add an LGU outside CCHAIN, add a crosswalk row with its pcode, name, a
-centroid and `coordinate_source` (a named, verified source). Nothing is
-geocoded from a name. Mapping these pcodes to the current 10-digit PSA PSGC
-and to SIGMA's web ids is for Physics 2. `geography.csv` is ready to seed the
-hub GEOGRAPHY tab, which I have left untouched.
+To add an LGU outside CCHAIN, add a crosswalk row with its canonical id,
+name, PSGC code, HDX unit, a centroid and `coordinate_source` (a named,
+verified source). Nothing is geocoded from a name. The hub GEOGRAPHY tab is
+seeded by the geography track, not by this one.
 
 ### 4.7 Are CCHAIN and Open-Meteo comparable? (2026-10-20)
 
@@ -420,9 +443,8 @@ evidence_type, is_sample, notes`
 1. ~~Week convention~~ **Decided 2026-10-20:** Sun–Sat MMWR (§4.2).
    Conversion lives in `ml/environment/weeks.py`. Physics 1 / Software Eng
    should use it for any new weekly source.
-2. **Geography IDs.** *Partly decided 2026-10-20:* COD-AB pcodes for the
-   environment track (§4.6). Still open: how Physics 2's canonical IDs and
-   the web ids map to them, and who seeds the GEOGRAPHY tab. (Physics 2)
+2. ~~Geography IDs~~ **Decided 2026-10-23:** the geography track's
+   canonical ids (§4.6), checked against `data/reference/geo/` on every build.
 3. **Model output typing.** `ModelOutputBase` requires a health-observation
    `Measure` (cases); a relative change is not one. Extend the type, or add a
    separate scenario type? (Software Eng)
@@ -430,7 +452,7 @@ evidence_type, is_sample, notes`
    extension (§4.8). New: **should we ingest CHIRPS directly** so rainfall can
    extend past 2022 and outside CCHAIN on the same product? (Physics 3)
 7. **Which LGUs outside CCHAIN?** The pipeline accepts them (§4.6), but none
-   are listed yet. They need pcodes and verified centroids. (Physics 2 /
+   are listed yet. They need canonical ids and verified centroids. (Physics 2 /
    whole team)
 5. **ACT wording.** How should "illustrative, not causal" appear to LGU users?
    (Public Admin)

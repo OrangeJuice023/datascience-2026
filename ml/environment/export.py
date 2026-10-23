@@ -127,7 +127,8 @@ def web_bundle(weather: pd.DataFrame, geo: pd.DataFrame, verdicts: dict) -> dict
         },
         "geographies": [
             {"id": r.geography_id, "name": r.geography_name, "level": r.geographic_level,
-             "latitude": r.latitude, "longitude": r.longitude, "inCchain": bool(r.in_cchain)}
+             "latitude": r.latitude, "longitude": r.longitude, "inCchain": bool(r.in_cchain),
+             "psgcCode": r.psgc_code, "hdxUnitId": r.hdx_unit_id, "hdxUnitRelation": r.hdx_unit_relation}
             for r in geo.itertuples()
         ],
         "comparability": {v: d["verdict"] for v, d in verdicts.items()},

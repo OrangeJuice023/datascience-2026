@@ -419,7 +419,7 @@ export type WeatherComparability =
  */
 export interface EnvironmentalObservation {
   id: string;
-  /** COD-AB pcode, e.g. PH112402000 (Davao City). */
+  /** Canonical geography id, e.g. "davao-city" (data/reference/geo/geography_hub_rows.csv). */
   geographyId: string;
   geographicLevel: GeographicLevel;
   /** Sunday. */
@@ -441,12 +441,23 @@ export interface EnvironmentalObservation {
 }
 
 /** What one source covers for one geography. */
+export type HdxUnitRelation = "same_area" | "inside_unit";
+
 export interface WeatherCoverage {
   geographyId: string;
   geographyName: string;
   centroid: GeoPoint;
   /** True when the geography is one of the CCHAIN cities. */
   inCchain: boolean;
+  /** PSA PSGC 10-digit code. */
+  psgcCode: string;
+  /** HDX DOH-Epi reporting unit containing this geography (SIGMA map id). */
+  hdxUnitId: string;
+  /**
+   * same_area: the HDX unit is this city, so its counts can sit next to this weather.
+   * inside_unit: the city is part of a larger unit; never join this weather to that unit's counts.
+   */
+  hdxUnitRelation: HdxUnitRelation;
   sourceId: WeatherSourceId;
   upstreamProduct: string;
   /** e.g. population-weighted barangay mean vs a single grid cell. */

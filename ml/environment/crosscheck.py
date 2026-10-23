@@ -54,8 +54,8 @@ def main() -> None:
     pidsr, hdx = load()
     xw = load_crosswalk()
     city = xw.dropna(subset=["hdx_doh_epi_loc"]).set_index("geography_name")
-    a_of = {c: pidsr[pidsr["adm3_pcode"] == gid].set_index("date")["case_total"]
-            for c, gid in city["geography_id"].items()}
+    a_of = {c: pidsr[pidsr["adm3_pcode"] == code].set_index("date")["case_total"]
+            for c, code in city["cchain_adm3_pcode"].items()}
     b_of = lambda loc: hdx[hdx["loc"] == loc].set_index("date")["cases"]
 
     by_offset = {}

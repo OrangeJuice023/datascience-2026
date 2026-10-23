@@ -1,13 +1,13 @@
-geography_id,geography_name,hdx_doh_epi_loc,hdx_doh_epi_province,latitude,longitude,coordinate_source,notes
-PH015518000,Dagupan City,DAGUPAN CITY,,,,,
-PH034919000,Palayan City,,,,,,No separate HDX DOH-Epi series
-PH050506000,Legazpi City,,,,,,No separate HDX DOH-Epi series
-PH063022000,Iloilo City,ILOILO CITY,ILOILO,,,,CCHAIN PIDSR series matches HDX Iloilo province; see build.SPATIAL_MISMATCH
-PH072230000,Mandaue City,MANDAUE CITY,,,,,
-PH083747000,Tacloban City,TACLOBAN,LEYTE,,,,
-PH097332000,Zamboanga City,ZAMBOANGA CITY,,,,,
-PH104305000,Cagayan de Oro City,CAGAYAN DE ORO CITY,,,,,
-PH112402000,Davao City,DAVAO CITY,,,,,
-PH137401000,City of Mandaluyong,MANDALUYONG CITY,,,,,
-PH137503000,City of Navotas,NAVOTAS CITY,,,,,
-PH137603000,City of Muntinlupa,MUNTINLUPA CITY,,,,,
+geography_id,geography_name,cchain_adm3_pcode,cod_ab_adm3_pcode,psgc_code,hdx_unit_id,hdx_unit_relation,hdx_doh_epi_loc,hdx_doh_epi_province,latitude,longitude,coordinate_source,notes
+cagayan-de-oro-city,Cagayan de Oro City,PH104305000,PH1004305,1030500000,cagayan-de-oro-city,same_area,CAGAYAN DE ORO CITY,,,,,
+dagupan-city,Dagupan City,PH015518000,PH0105518,0105518000,dagupan-city,same_area,DAGUPAN CITY,,,,,
+davao-city,Davao City,PH112402000,PH1102402,1130700000,davao-city,same_area,DAVAO CITY,,,,,
+iloilo-city,Iloilo City,PH063022000,PH0603022,0631000000,iloilo-city,same_area,ILOILO CITY,ILOILO,,,,CCHAIN PIDSR series matches HDX Iloilo province; see build.SPATIAL_MISMATCH
+legazpi-city,Legazpi City,PH050506000,PH0500506,0500506000,albay,inside_unit,,,,,,No separate HDX DOH-Epi series
+mandaluyong-city,City of Mandaluyong,PH137401000,PH1307401,1380500000,mandaluyong-city,same_area,MANDALUYONG CITY,,,,,
+mandaue-city,Mandaue City,PH072230000,PH0702230,0731300000,mandaue-city,same_area,MANDAUE CITY,,,,,
+muntinlupa-city,City of Muntinlupa,PH137603000,PH1307603,1380800000,muntinlupa-city,same_area,MUNTINLUPA CITY,,,,,
+navotas-city,City of Navotas,PH137503000,PH1307503,1380900000,navotas-city,same_area,NAVOTAS CITY,,,,,
+palayan-city,Palayan City,PH034919000,PH0304919,0304919000,nueva-ecija,inside_unit,,,,,,No separate HDX DOH-Epi series
+tacloban-city,Tacloban City,PH083747000,PH0803747,0831600000,tacloban-city,same_area,TACLOBAN,LEYTE,,,,
+zamboanga-city,Zamboanga City,PH097332000,PH0907332,0931700000,zamboanga-city,same_area,ZAMBOANGA CITY,,,,,

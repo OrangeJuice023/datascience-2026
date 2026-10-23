@@ -2,15 +2,19 @@
 
     python -m environment.geography   # -> data/processed/environment/geography.csv
 
-geography_id is the OCHA COD-AB adm3 pcode ("PH" + 9-digit PSGC as of the
-2016 COD-AB release), which is what CCHAIN uses. Decision and caveats:
-docs/environmental-covariates.md §4.6.
+geography_id is the canonical SIGMA geography id from the geography track
+(e.g. "davao-city"; data/reference/geo/geography_hub_rows.csv). CCHAIN keys
+its files on 2016 COD-AB adm3 pcodes ("PH" + 9 digits), kept here as
+cchain_adm3_pcode and translated to geography_id on read. Decision and
+caveats: docs/environmental-covariates.md §4.6.
 
 Rows come from ml/environment/geography_crosswalk.csv (tracked, hand-curated):
-  - CCHAIN cities: latitude/longitude are left blank there and computed here as
+  - CCHAIN cities: ids, codes and HDX units are copied from the geography
+    track's data/reference/geo/cchain_city_crosswalk.csv and checked against it
+    on every build. latitude/longitude are left blank there and computed here as
     the WorldPop-2020 population-weighted mean of barangay polygon centroids
     (CCHAIN brgy_geography). This is the point Open-Meteo is queried at.
-  - LGUs outside CCHAIN: add a row with the pcode, name and a centroid taken
+  - LGUs outside CCHAIN: add a row with the canonical id, name and a centroid taken
     from a named, verified source (`coordinate_source`). Nothing is geocoded
     from a name automatically.
 The HDX DOH-Epi location names used by environment.crosscheck live in the same
@@ -22,10 +26,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .paths import OUT, raw_dir, verified_inputs
+from .paths import OUT, REPO, raw_dir, verified_inputs
 
 RAW = raw_dir("cchain")
 CROSSWALK = Path(__file__).with_name("geography_crosswalk.csv")
+GEO_REFERENCE = REPO / "data" / "reference" / "geo"
 POPULATION_YEAR = 2020
 
 
@@ -49,6 +54,33 @@ def load_crosswalk() -> pd.DataFrame:
     return xw
 
 
+def cchain_ids() -> pd.Series:
+    """CCHAIN adm3 pcode -> geography_id, for reading CCHAIN files."""
+    xw = load_crosswalk().dropna(subset=["cchain_adm3_pcode"])
+    return xw.set_index("cchain_adm3_pcode")["geography_id"]
+
+
+def check_reference(xw: pd.DataFrame) -> None:
+    """Fail if the crosswalk drifts from the geography track's reference tables."""
+    ref = pd.read_csv(GEO_REFERENCE / "cchain_city_crosswalk.csv", dtype=str).set_index("cchain_adm3_pcode")
+    hub = pd.read_csv(GEO_REFERENCE / "geography_hub_rows.csv", dtype=str).set_index("geography_id")
+    cc = xw.dropna(subset=["cchain_adm3_pcode"]).set_index("cchain_adm3_pcode")
+    if set(cc.index) != set(ref.index):
+        raise SystemExit(f"CCHAIN cities in {CROSSWALK.name} differ from cchain_city_crosswalk.csv")
+    pairs = {"cod_ab_adm3_pcode": "cod_ab_adm3_pcode", "psgc_code": "psa_psgc_code",
+             "hdx_unit_id": "hdx_unit_id", "hdx_unit_relation": "relation"}
+    for ours, theirs in pairs.items():
+        bad = cc.index[cc[ours] != ref.loc[cc.index, theirs]]
+        if len(bad):
+            raise SystemExit(f"{ours} disagrees with cchain_city_crosswalk.csv for {sorted(bad)}")
+    same = cc[cc["hdx_unit_relation"] == "same_area"]
+    if (same["geography_id"] != same["hdx_unit_id"]).any():
+        raise SystemExit("same_area cities must use their HDX unit id as geography_id")
+    in_hub = xw[xw["geography_id"].isin(hub.index)]
+    if (in_hub["psgc_code"] != hub.loc[in_hub["geography_id"], "psgc_code"].values).any():
+        raise SystemExit("psgc_code disagrees with geography_hub_rows.csv")
+
+
 def build() -> pd.DataFrame:
     loc = pd.read_csv(RAW / "location.csv")
     geo = pd.read_csv(RAW / "brgy_geography.csv", usecols=["adm4_pcode", "geometry"])
@@ -70,13 +102,18 @@ def build() -> pd.DataFrame:
         "population_2020": g["pop_count_total"].sum(),
     }), include_groups=False)
     names = brgy.drop_duplicates("adm3_pcode").set_index("adm3_pcode")
+    xw = load_crosswalk()
+    check_reference(xw)
+    ids = cchain_ids()
+    missing = set(names.index) - set(ids.index)
+    if missing:
+        raise SystemExit(f"CCHAIN cities {sorted(missing)} missing from {CROSSWALK.name}")
     cchain = pd.DataFrame({
-        "geography_id": names.index,
+        "geography_id": ids[names.index].values,
         "geography_name": names["adm3_en"].values,
         "geographic_level": "municipal",
-        "province_id": names["adm2_pcode"].values,
+        "cchain_adm3_pcode": names.index,
         "province_name": names["adm2_en"].values,
-        "region_id": names["adm1_pcode"].values,
         "region_name": names["adm1_en"].values,
         "in_cchain": True,
         "barangays": brgy.groupby("adm3_pcode").size().reindex(names.index).values,
@@ -86,15 +123,11 @@ def build() -> pd.DataFrame:
         "coordinate_method": f"population_weighted_barangay_centroid (WorldPop {POPULATION_YEAR})",
     })
 
-    xw = load_crosswalk()
     unknown = set(xw.loc[xw["latitude"].isna(), "geography_id"]) - set(cchain["geography_id"])
     if unknown:
         raise SystemExit(f"{sorted(unknown)} are not CCHAIN cities and have no coordinates in {CROSSWALK.name}")
-    missing = set(cchain["geography_id"]) - set(xw["geography_id"])
-    if missing:
-        raise SystemExit(f"CCHAIN cities {sorted(missing)} missing from {CROSSWALK.name}")
-    out = cchain.merge(xw[["geography_id", "hdx_doh_epi_loc", "hdx_doh_epi_province", "notes"]],
-                       on="geography_id", how="left")
+    links = ["psgc_code", "hdx_unit_id", "hdx_unit_relation", "hdx_doh_epi_loc", "hdx_doh_epi_province", "notes"]
+    out = cchain.merge(xw[["geography_id", *links]], on="geography_id", how="left")
 
     extra = xw[xw["latitude"].notna()]
     if len(extra):
@@ -108,9 +141,7 @@ def build() -> pd.DataFrame:
             "latitude": extra["latitude"].astype(float),
             "longitude": extra["longitude"].astype(float),
             "coordinate_method": "point: " + extra["coordinate_source"],
-            "hdx_doh_epi_loc": extra["hdx_doh_epi_loc"],
-            "hdx_doh_epi_province": extra["hdx_doh_epi_province"],
-            "notes": extra["notes"],
+            **{c: extra[c] for c in links},
         })], ignore_index=True)
     return out.sort_values("geography_id").reset_index(drop=True)
 
@@ -120,7 +151,7 @@ def load() -> pd.DataFrame:
     path = OUT / "geography.csv"
     if not path.exists():
         raise SystemExit("data/processed/environment/geography.csv missing; run `python -m environment.geography`")
-    return pd.read_csv(path, dtype={"geography_id": str})
+    return pd.read_csv(path, dtype={"geography_id": str, "cchain_adm3_pcode": str, "psgc_code": str})
 
 
 def main() -> None:

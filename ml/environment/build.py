@@ -53,7 +53,7 @@ POPULATION_YEAR = 2020
 
 # Found by environment.crosscheck against HDX DOH-Epi 2016-2020.
 SPATIAL_MISMATCH = {
-    "PH063022000": "Iloilo City PIDSR series tracks DOH-Epi Iloilo province "
+    "iloilo-city": "Iloilo City PIDSR series tracks DOH-Epi Iloilo province "
                    "(r=0.99, volume ratio 0.99) not Iloilo City (ratio 5.4); "
                    "climate covers city barangays only",
 }
@@ -86,18 +86,20 @@ RANGE = {
 def build_dengue(names: pd.Series) -> tuple[pd.DataFrame, dict]:
     raw = pd.read_csv(RAW / "disease_pidsr_totals.csv")
     raw = raw[raw["disease_common_name"] == "DENGUE FEVER"].copy()
+    raw["geography_id"] = raw["adm3_pcode"].map(geography.cchain_ids())
+    assert raw["geography_id"].notna().all(), "PIDSR city missing from geography crosswalk"
     raw["source_week_label"] = pd.to_datetime(raw["date"])
     assert (raw["source_week_label"].dt.dayofweek == 0).all(), "PIDSR dates are not all Mondays"
     raw["period_start"] = weeks.from_source_label(raw["source_week_label"], "cchain_pidsr")
-    assert not raw.duplicated(["adm3_pcode", "period_start"]).any(), "duplicate city-weeks"
+    assert not raw.duplicated(["geography_id", "period_start"]).any(), "duplicate city-weeks"
 
     grid = pd.MultiIndex.from_product(
-        [sorted(raw["adm3_pcode"].unique()),
+        [sorted(raw["geography_id"].unique()),
          pd.date_range(raw["period_start"].min(), raw["period_start"].max(), freq="W-SUN")],
         names=["geography_id", "period_start"],
     )
     df = (
-        raw.rename(columns={"adm3_pcode": "geography_id", "case_total": "cases", "uuid": "upstream_id"})
+        raw.rename(columns={"case_total": "cases", "uuid": "upstream_id"})
         .set_index(["geography_id", "period_start"])[["cases", "upstream_id"]]
         .reindex(grid)
         .reset_index()
@@ -152,6 +154,8 @@ def cchain_daily() -> tuple[pd.DataFrame, dict]:
     weights = cities.merge(pop[["adm4_pcode", "pop_count_total"]], on="adm4_pcode", how="left")
     missing_weight = int(weights["pop_count_total"].isna().sum())
     weights = weights.dropna(subset=["pop_count_total"]).set_index("adm4_pcode")
+    weights["geography_id"] = weights["adm3_pcode"].map(geography.cchain_ids())
+    assert weights["geography_id"].notna().all(), "CCHAIN city missing from geography crosswalk"
 
     variables = list(CLIMATE_VARIABLES)
     parts = []
@@ -159,7 +163,7 @@ def cchain_daily() -> tuple[pd.DataFrame, dict]:
                              usecols=["adm4_pcode", "date", "freq", *variables],
                              chunksize=2_000_000):
         chunk = chunk[(chunk["freq"] == "D") & chunk["adm4_pcode"].isin(weights.index)]
-        chunk["geography_id"] = chunk["adm4_pcode"].map(weights["adm3_pcode"])
+        chunk["geography_id"] = chunk["adm4_pcode"].map(weights["geography_id"])
         w = chunk["adm4_pcode"].map(weights["pop_count_total"])
         agg = {}
         for v in variables:
