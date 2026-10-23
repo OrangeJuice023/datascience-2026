@@ -31,7 +31,7 @@ export function AccessView({
   const [query, setQuery] = useState("");
   const [metric, setMetric] = useState<AccessMetricView>("gap");
   const [view, setView] = useState<MapViewMode>("2d");
-  const [toggles, setToggles] = useState<MapLayerToggles>({ links: false, columns: true });
+  const [toggles, setToggles] = useState<MapLayerToggles>({ links: false, columns: true, areas: false });
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [playing, setPlaying] = useState(false);
   const [index, setIndex] = useState<number | null>(null);
@@ -45,6 +45,7 @@ export function AccessView({
       window: "all",
       medicine: medicineId,
       accessMetric: metric,
+      sigmaLayer: "ears",
     }),
     [medicineId, metric],
   );
@@ -232,10 +233,10 @@ export function AccessView({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-slate-900">Areas for assessment</h2>
-            <StatusBadge label="Feeds ACT" tone="info" />
+            <StatusBadge label="Feeds Policy (ACT)" tone="info" />
           </div>
           <Link href="/policy" className="text-xs font-medium text-accent hover:underline">
-            Open in ACT →
+            Open in Policy →
           </Link>
         </div>
         <p className="mt-1 text-xs text-slate-500">

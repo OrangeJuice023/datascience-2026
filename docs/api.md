@@ -4,6 +4,12 @@ The web app serves a versioned JSON API under `/api/v1`. The Expo client in
 `mobile/` is its only other consumer, and the shared request/response types
 live in `packages/sigma-contracts`.
 
+A rendered, human-readable reference for the same API is served at
+`/documentation` in the web app. It is rendered from the same registry
+(`web/src/lib/api/registry.ts`) that the `GET /api/v1` index is generated
+from, and a test checks that registry against the route files and the real
+handler responses, so the two cannot drift apart.
+
 ## Envelopes
 
 Every response is one of two shapes. There is no third.
@@ -43,6 +49,13 @@ Failure:
 | `demo`          | Simulated / prototype records.                                 |
 | `unavailable`   | The capability exists but there is no data right now.          |
 | `not_connected` | The capability has not been wired to a source yet.             |
+
+These four are the only values the shared `DataStatus` contract allows. A
+client may derive further states for itself — the mobile client reports
+"historical data" when the API says `live` but the newest period in the
+payload has already passed — but the API never sends one. A connected source
+is not a current source: the national dengue series is `live` and ends on
+2023-11-25.
 
 An empty array never means "zero cases" and never means "no outbreak". A
 capability that is not connected says so in `status` and in a `reason`
@@ -136,6 +149,23 @@ areas, and the AI disclosure. `chatScope` lists, per disease, the locations
 the copilot actually has data for, so a client can offer only combinations
 that will succeed.
 
+### `GET /api/v1/policy/evidence`
+
+The curated policy-evidence research pack.
+
+| Parameter            | Type   | Notes                                                     |
+| -------------------- | ------ | --------------------------------------------------------- |
+| `locationId`         | string | Optional. Keeps one location plus the national records.   |
+| `topic`              | string | Optional. One of the seven evidence topics.               |
+| `verificationStatus` | string | Optional. `verified`, `partially_verified` or `needs_review`. |
+
+Each record is one claim, tied to the document it came from, with
+`verifiedWhat`, `unverifiedWhat`, `limitations`, `caveats` and
+`unresolvedQuestions` stated alongside it. Budget amounts carry a
+`financialStage`, because many of them are planned amounts rather than awards,
+payments or expenditure. The pack is not an exhaustive census of Philippine
+LGUs.
+
 ### `POST /api/v1/chat`
 
 The Policy Copilot.
@@ -193,7 +223,20 @@ error mapping; see [mobile.md](mobile.md).
 
 ## Authentication
 
-There is none. The API is read-only and serves public or simulated data.
-`POST /api/v1/chat` does reach a paid model provider, so it inherits the
-is the only intended chat endpoint (the legacy `/api/policy-chat` route has been removed). It is
-intended for a prototype deployment, not for public exposure.
+There is none. No endpoint reads an API key, a bearer token or a session, and
+none of them requires one: the API is read-only and serves public or
+simulated data.
+
+`POST /api/v1/chat` is the only endpoint that reaches a paid external
+service. Its provider key is read from the server environment, is never
+returned to a client and is never exposed in the browser bundle. It is rate
+limited to 30 requests per 60 seconds per IP address, and without a
+configured provider it refuses the request with `not_configured` rather than
+answering with a placeholder. `GET` on the same path is a 405.
+
+The legacy `/api/policy-chat` route has been removed; `/api/v1/chat` is the
+only chat endpoint.
+
+This is a prototype deployment, not a hardened public API. There is no API
+key management, no quota beyond the copilot rate limit, and no per-consumer
+accounting.

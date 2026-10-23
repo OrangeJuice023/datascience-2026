@@ -1,6 +1,7 @@
 import type { HealthObservation } from "@/types/data";
 import type { AccessBundle } from "@/lib/access/bundle";
 import type { LGU, NeighborSummary, SimulationInputs, Signal, TrendPoint } from "@/types";
+import type { SigmaData } from "@/lib/sigma/data";
 
 export type MapViewMode = "2d" | "3d" | "globe";
 
@@ -8,6 +9,7 @@ export type MapModeId =
   | "signals"
   | "disease"
   | "anomaly"
+  | "sigma"
   | "environment"
   | "access"
   | "simulation";
@@ -79,6 +81,11 @@ export interface ModeFrame {
   heat?: Array<{ position: [number, number]; weight: number }>;
   /** Sequential color range for `heat`, low → high. */
   heatColors?: Rgba[];
+  /**
+   * Area fills for categorical signal states only, never for counts. The
+   * GeoJSON is loaded from `url`; each feature's `id` keys into `fills`.
+   */
+  areas?: { url: string; fills: Record<string, Rgba> };
 }
 
 export interface TimelineSlice {
@@ -135,7 +142,8 @@ export type FilterKey =
   | "confidence"
   | "window"
   | "medicine"
-  | "accessMetric";
+  | "accessMetric"
+  | "sigmaLayer";
 
 export interface MapFilters {
   disease: string;
@@ -148,13 +156,18 @@ export interface MapFilters {
   medicine: string;
   /** ACCESS: which indicator the map encodes. */
   accessMetric: "availability" | "demand" | "freshness" | "gap";
+  /** SIGMA: which result the map encodes. */
+  sigmaLayer: SigmaLayer;
 }
 
-export type LayerToggleId = "links" | "columns";
+export type SigmaLayer = "ears" | "doh" | "cases";
+
+export type LayerToggleId = "links" | "columns" | "areas";
 
 export interface MapLayerToggles {
   links: boolean;
   columns: boolean;
+  areas: boolean;
 }
 
 export type NationalWeeklyPoint = Pick<HealthObservation, "periodStart" | "periodEnd" | "value">;
@@ -174,6 +187,10 @@ export interface MapDataBundle {
   scenario: SimulationInputs;
   /** ACCESS demo bundle (aggregated on the server). */
   access: AccessBundle;
+  /** SIGMA reporting-unit results; fetched on the client when the mode opens. */
+  sigma?: SigmaData;
+  /** Why `sigma` could not be loaded, if it failed. */
+  sigmaError?: string;
 }
 
 export interface PreparedMode {

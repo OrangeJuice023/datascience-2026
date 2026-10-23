@@ -1,0 +1,98 @@
+{
+  "_comment": "Upstream files for the geography track. fetch-sources.mjs downloads each into data/raw/<dir>/ and refuses a file whose SHA-256 differs from `sha256` (set to null to accept and record a new upstream version). Entries with `manual: true` cannot be scripted (psa.gov.ph returns HTTP 403); download them by hand from `datasetUrl` into the same place. `pinnedRetrievedAt` is when the pinned file (`sha256`) was first retrieved; the committed outputs cite it rather than the local fetch time in data/raw/geo-sources-manifest.json, so a fresh checkout rebuilds them byte for byte. Update it together with `sha256`. Licences were checked on the HDX dataset pages on 2026-10-17.",
+  "sources": [
+    {
+      "id": "hdx-doh-epi-dengue",
+      "title": "Philippine Dengue Cases and Deaths — DOH-Epi Dengue Data 2016-2021.csv",
+      "publisher": "Cirrolytix (HDX organisation); data attributed to DOH Epidemiology Bureau",
+      "datasetUrl": "https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths",
+      "url": "https://data.humdata.org/dataset/ac63a95e-7296-42fb-802b-7f7541c73e45/resource/9e839677-3ff0-44b3-992c-1a99e68df515/download/doh-epi-dengue-data-2016-2021.csv",
+      "dir": "hdx_dengue",
+      "file": "doh-epi-dengue-data-2016-2021.csv",
+      "license": "CC BY (Creative Commons Attribution International)",
+      "upstreamModified": "2022-05-02",
+      "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
+    },
+    {
+      "id": "cod-ab-phl",
+      "title": "Philippines - Subnational Administrative Boundaries (COD-AB v03), tabular attributes",
+      "publisher": "OCHA FISS; source NAMRIA and PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ab-phl",
+      "url": "https://data.humdata.org/dataset/caf116df-f984-4deb-85ca-41b349d3f313/resource/159ffd3d-679f-431c-812f-b6d6f957045e/download/phl_admin_boundaries.xlsx",
+      "dir": "cod_ab_phl",
+      "file": "phl_admin_boundaries.xlsx",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2026-05-28",
+      "sha256": "3fbaa5f9aab058960ec48e8c8c490b8c7e1257db911913f967d70a7497091f49",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
+    },
+    {
+      "id": "cod-ps-phl-adm1-2022",
+      "title": "Philippines - Subnational Population Statistics, admin 1, 2022 projection",
+      "publisher": "UNFPA; source PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ps-phl",
+      "url": "https://data.humdata.org/dataset/5a466c38-32a2-47de-ba36-70530505df98/resource/f80291eb-3e22-4716-bc1a-b046de27d067/download/phl_admpop_adm1_2022.csv",
+      "dir": "cod_ps_phl",
+      "file": "phl_admpop_adm1_2022.csv",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2021-10-25",
+      "sha256": "40ac6ef448da123185e32ea48e4ba9b3dd7e9e0f1ddd325076a379a45c4b19a3",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
+    },
+    {
+      "id": "cod-ps-phl-adm2-2022",
+      "title": "Philippines - Subnational Population Statistics, admin 2, 2022 projection (v2)",
+      "publisher": "UNFPA; source PSA",
+      "datasetUrl": "https://data.humdata.org/dataset/cod-ps-phl",
+      "url": "https://data.humdata.org/dataset/5a466c38-32a2-47de-ba36-70530505df98/resource/04cad68c-f7fb-43b0-94bf-af78eea7f982/download/phl_admpop_adm2_2022_v2.csv",
+      "dir": "cod_ps_phl",
+      "file": "phl_admpop_adm2_2022_v2.csv",
+      "license": "CC BY-IGO",
+      "upstreamModified": "2022-07-28",
+      "sha256": "dd06a7d799371900580c93e2ee8d1d63e6c0ee4ca2899d4e8a8a68a33a3eb063",
+      "pinnedRetrievedAt": "2026-10-17T01:19:00+08:00"
+    },
+    {
+      "id": "cchain-location",
+      "title": "Project CCHAIN — location.csv (barangays of the 12 CCHAIN cities)",
+      "publisher": "Thinking Machines Data Science (Project CCHAIN)",
+      "datasetUrl": "https://data.humdata.org/dataset/project-cchain",
+      "url": "https://data.humdata.org/dataset/5b580664-365e-4d7e-b5e5-2990df8f12a5/resource/31a3dddb-decc-4fd7-a0f7-acff922a7a76/download/location.csv",
+      "dir": "cchain",
+      "file": "location.csv",
+      "license": "CC BY (Creative Commons Attribution International)",
+      "upstreamModified": "2024-05-01",
+      "sha256": "32347494bc6cdc9d2052af4e087edc25f9e7a9af438c1a69b415ef1844b8b293",
+      "pinnedRetrievedAt": "2026-10-21T16:00:00+08:00"
+    },
+    {
+      "id": "geoboundaries-phl-adm3",
+      "title": "geoBoundaries gbOpen PHL ADM3 (2020), simplified GeoJSON",
+      "publisher": "William & Mary geoLab (geoBoundaries); source NAMRIA, PSA, OCHA Philippines",
+      "datasetUrl": "https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM3/",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/PHL/ADM3/geoBoundaries-PHL-ADM3_simplified.geojson",
+      "dir": "geoboundaries_phl",
+      "file": "geoBoundaries-PHL-ADM3_simplified.geojson",
+      "license": "CC BY 3.0 IGO",
+      "attribution": "geoBoundaries (Runfola et al. 2020), CC BY 3.0 IGO; boundaries from NAMRIA, PSA and OCHA Philippines",
+      "upstreamModified": "2023-12-12",
+      "sha256": "2ece3d44a5c6a2afb385ffbf3a6b88d83e4d3a3e7eed9a52cb3be1bc59e289fc",
+      "pinnedRetrievedAt": "2026-10-21T17:45:00+08:00"
+    },
+    {
+      "id": "psa-psgc",
+      "title": "Philippine Standard Geographic Code (PSGC), 3rd Quarter 2026 publication datafile",
+      "publisher": "Philippine Statistics Authority (PSA)",
+      "datasetUrl": "https://psa.gov.ph/classification/psgc/",
+      "url": null,
+      "manual": true,
+      "dir": "psa_psgc",
+      "file": "PSGC-3Q-2026-Publication-Datafile.xlsx",
+      "license": "PSA terms of use; kept in git-ignored data/raw, not redistributed",
+      "upstreamModified": "2026-09-30",
+      "sha256": "8aad47f84e4f6317dc4222b9fe35d36b5d71f2b74ad8f0c7622289c131dc9a59",
+      "pinnedRetrievedAt": "2026-10-19T01:26:12.571Z"
+    }
+  ]
+}

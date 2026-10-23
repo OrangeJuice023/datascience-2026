@@ -61,20 +61,41 @@ export function SidebarContent({
         <ul className="mt-1 flex flex-col gap-1">
           {SECONDARY_NAV.map((item) => {
             const Icon = item.icon;
+            if (item.disabled) {
+              return (
+                <li key={item.href}>
+                  <span
+                    className="flex cursor-not-allowed items-center justify-between gap-2.5 rounded-md px-3 py-2 text-sm text-slate-400"
+                    title="Coming soon"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {item.label}
+                    </span>
+                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                      Soon
+                    </span>
+                  </span>
+                </li>
+              );
+            }
+            const isActive = pathname === item.href;
             return (
               <li key={item.href}>
-                <span
-                  className="flex cursor-not-allowed items-center justify-between gap-2.5 rounded-md px-3 py-2 text-sm text-slate-400"
-                  title="Coming soon"
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                  )}
                 >
-                  <span className="flex items-center gap-2.5">
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    {item.label}
-                  </span>
-                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
-                    Soon
-                  </span>
-                </span>
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {item.label}
+                </Link>
               </li>
             );
           })}
