@@ -7,7 +7,6 @@ import { SelectFilter } from "@/components/ui/select-filter";
 import { Tabs, TabPanel } from "@/components/ui/tabs";
 import { TrendTab } from "@/components/lab/trend-tab";
 import { AnomalyTab } from "@/components/lab/anomaly-tab";
-import { SpatialTab } from "@/components/lab/spatial-tab";
 import { ComparisonTab } from "@/components/lab/comparison-tab";
 import { SourcesTab } from "@/components/lab/sources-tab";
 import { AskDataPanel } from "@/components/lab/ask-data-panel";
@@ -30,7 +29,6 @@ export type NationalLoad =
 const TABS = [
   { id: "trend", label: "Trend" },
   { id: "anomaly", label: "Anomaly" },
-  { id: "spatial", label: "Spatial" },
   { id: "comparison", label: "Comparison" },
   { id: "sources", label: "Sources" },
 ];
@@ -112,9 +110,6 @@ export function LabView({ load }: { load: NationalLoad }) {
             </TabPanel>
             <TabPanel id="anomaly" activeId={activeTab}>
               <AnomalyTab signal={signal} trend={trend} />
-            </TabPanel>
-            <TabPanel id="spatial" activeId={activeTab}>
-              <SpatialTab lgu={lgu} signal={signal} />
             </TabPanel>
             <TabPanel id="comparison" activeId={activeTab}>
               <ComparisonTab key={lgu.id} lgu={lgu} signal={signal} trend={trend} />

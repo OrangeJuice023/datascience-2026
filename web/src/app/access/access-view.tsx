@@ -38,11 +38,6 @@ export function AccessView({
 
   const filters = useMemo<MapFilters>(
     () => ({
-      disease: "all",
-      geography: "all",
-      status: "all",
-      confidence: "all",
-      window: "all",
       medicine: medicineId,
       accessMetric: metric,
       sigmaLayer: "ears",
