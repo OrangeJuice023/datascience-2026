@@ -122,7 +122,7 @@ export function OverviewView({ formal }: { formal: FormalSummary | null }) {
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-slate-900">Current signal landscape</h2>
+              <h2 className="text-sm font-semibold text-slate-900">Demo signal landscape</h2>
               <EvidenceBadge kind="signal" />
             </div>
             <p className="text-xs text-slate-500">
