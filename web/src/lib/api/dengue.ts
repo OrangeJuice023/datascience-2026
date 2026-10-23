@@ -83,6 +83,8 @@ export function dengueSource(descriptor: DengueSourceDescriptor) {
     },
     provenance: `${descriptor.extract}; filter ${descriptor.filter}; ${descriptor.citation}; ${descriptor.license}`,
     accessMethod: "Bulk release extract, validated at build time and committed as a frontend fixture",
+    licence: descriptor.license,
+    attribution: descriptor.citation,
   };
 }
 

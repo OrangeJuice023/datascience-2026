@@ -54,7 +54,8 @@ export function MapTimeline({
     return <p className="text-xs text-slate-400">No time slices available for this mode.</p>;
   }
 
-  const max = Math.max(...slices.map((s) => s.value), 1);
+  const max = Math.max(...slices.map((s) => s.value ?? 0), 1);
+  const show = (value: number | null) => (value === null ? "No data" : spec.formatValue(value));
   const hovered = hoverIndex === null ? null : slices[hoverIndex];
   const cursorPct = last > 0 ? (index / last) * 100 : 0;
 
@@ -98,7 +99,7 @@ export function MapTimeline({
         <p className="min-w-0 text-sm text-slate-800" aria-live={playing ? "off" : "polite"}>
           <span className="font-semibold">{current.label}</span>
           <span className="text-slate-400"> · </span>
-          <span className="tabular-nums text-slate-600">{spec.formatValue(current.value)}</span>
+          <span className="tabular-nums text-slate-600">{show(current.value)}</span>
         </p>
         <p className="ml-auto hidden text-[11px] text-slate-400 lg:block">{spec.trackLabel}</p>
       </div>
@@ -112,11 +113,15 @@ export function MapTimeline({
         >
           <line x1={0} x2={slices.length} y1={TRACK_HEIGHT - 0.25} y2={TRACK_HEIGHT - 0.25} stroke="#e2e8f0" strokeWidth={0.5} vectorEffect="non-scaling-stroke" />
           {slices.map((slice, i) => {
-            const h = Math.max(slice.value > 0 ? 2 : 0, (slice.value / max) * (TRACK_HEIGHT - 4));
+            const value = slice.value ?? 0;
+            const h = Math.max(value > 0 ? 2 : 0, (value / max) * (TRACK_HEIGHT - 4));
             return (
               <g key={slice.key}>
                 {slice.gapBefore && (
                   <line x1={i} x2={i} y1={0} y2={TRACK_HEIGHT} stroke="#94a3b8" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+                )}
+                {slice.value === null && (
+                  <line x1={i + 0.12} x2={i + 0.88} y1={TRACK_HEIGHT - 1} y2={TRACK_HEIGHT - 1} stroke="#94a3b8" strokeWidth={1} strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
                 )}
                 <rect
                   x={i + 0.12}
@@ -141,7 +146,7 @@ export function MapTimeline({
           step={1}
           value={index}
           aria-label="Timeline position"
-          aria-valuetext={`${current.label}, ${spec.formatValue(current.value)}`}
+          aria-valuetext={`${current.label}, ${show(current.value)}`}
           onChange={(event) => {
             onPlayingChange(false);
             onIndexChange(Number(event.target.value));
@@ -161,7 +166,7 @@ export function MapTimeline({
           >
             <span className="font-medium text-slate-700">{hovered.label}</span>
             <span className="text-slate-400"> · </span>
-            <span className="tabular-nums text-slate-600">{spec.formatValue(hovered.value)}</span>
+            <span className="tabular-nums text-slate-600">{show(hovered.value)}</span>
           </div>
         )}
       </div>

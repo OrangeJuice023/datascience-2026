@@ -8,6 +8,11 @@ import type { EvidenceKind } from "@/components/ui/evidence-badge";
  * - planned: identified in research; nothing ingested
  *
  * `sourceId` matches Source.id in data/sample/reference.ts.
+ *
+ * GADM is deliberately absent: its licence forbids redistribution and
+ * commercial use, and the project never uses it (AGENTS.md). Boundaries come
+ * from geoBoundaries, matched to OCHA COD-AB; geography sources record their
+ * licence and pinned hash in scripts/geo/sources.json.
  */
 export type SourceCatalogStatus = "connected" | "demo" | "planned";
 
@@ -21,6 +26,10 @@ export interface SourceCatalogEntry {
   updateBehavior: string;
   provenance: string;
   accessMethod: string;
+  /** Licence as recorded where the data was retrieved; null when not verified. */
+  licence: string | null;
+  /** Credit line to show wherever the data is displayed. */
+  attribution: string;
 }
 
 export const SOURCE_CATALOG: SourceCatalogEntry[] = [
@@ -34,6 +43,21 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Static v1.3 release. scripts/build_opendengue.py (data track) → processed CSV → web/scripts/build-opendengue.mjs",
     provenance: "Temporal extract (WPRO), PH Admin0; per-row upstream record ids; input SHA-256; planning/OPENDENGUE_RECONCILIATION.md",
     accessMethod: "Bulk download (release extract), processed at build time",
+    licence: "CC BY 4.0",
+    attribution: "OpenDengue (Clarke et al.), v1.3; national records from WHO WPRO and the Philippine DOH",
+  },
+  {
+    sourceId: "hdx-doh-dengue",
+    name: "HDX Philippine Dengue Cases and Deaths (DOH-Epi, 2016–2021)",
+    evidence: "formal",
+    purpose: "Weekly dengue counts for 126 DOH reporting units; the input to SIGMA's EARS and DOH-threshold map.",
+    status: "connected",
+    resolution: "126 DOH reporting units (provinces, province remainders, cities) · weekly, 2016-01-10 – 2021-01-03",
+    updateBehavior: "Static dataset (last upstream change 2022-05-02). ml/clean_dengue.py → ml/ears.py → ml/export_sigma_web.py → web/public/data/sigma/hdx-dengue-sigma.json",
+    provenance: "HDX resource URL and pinned SHA-256 in scripts/geo/sources.json; 665 suspected cases/deaths swap rows and missing weeks are kept as no data; the meaning of the date column is unconfirmed",
+    accessMethod: "Bulk download (HDX), processed offline into a committed static export",
+    licence: "CC BY",
+    attribution: "Cirrolytix via HDX; data attributed to the DOH Epidemiology Bureau",
   },
   {
     sourceId: "gdelt-doc",
@@ -45,6 +69,8 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Planned polling (~15-minute upstream cadence, rate-limited)",
     provenance: "Per-document URL, publisher and timestamps",
     accessMethod: "API",
+    licence: null,
+    attribution: "Not ingested; the TRACE signals shown are synthetic stand-ins",
   },
   {
     sourceId: "ph-news-rss",
@@ -56,6 +82,8 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Planned per-feed polling",
     provenance: "Per-item link, outlet and publish date",
     accessMethod: "RSS",
+    licence: null,
+    attribution: "Not ingested; the TRACE signals shown are synthetic stand-ins",
   },
   {
     sourceId: "doh-weekly",
@@ -67,6 +95,8 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Weekly PDFs; needs a per-report parser",
     provenance: "Report URL and publication week",
     accessMethod: "Manual / PDF extraction",
+    licence: null,
+    attribution: "Department of Health (not yet ingested)",
   },
   {
     sourceId: "ritm-surveillance",
@@ -78,6 +108,8 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Periodic PDFs",
     provenance: "Report URL and date",
     accessMethod: "Manual / PDF extraction",
+    licence: null,
+    attribution: "Research Institute for Tropical Medicine (not yet ingested)",
   },
   {
     sourceId: "project-cchain",
@@ -89,6 +121,8 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Static release (ends 2022)",
     provenance: "HDX resource URL, SHA-256 and retrieval time",
     accessMethod: "Bulk download (HDX)",
+    licence: "CC BY 4.0",
+    attribution: "Project CCHAIN (Thinking Machines Data Science) via HDX; ERA5 (Copernicus) and CHIRPS upstream",
   },
   {
     sourceId: "open-meteo",
@@ -100,28 +134,47 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "On-demand API, pinned end date",
     provenance: "API parameters, grid cell, SHA-256 and retrieval time",
     accessMethod: "API",
+    licence: "CC BY 4.0 (Open-Meteo data; free tier is non-commercial)",
+    attribution: "Weather data by Open-Meteo.com; ERA5 from the Copernicus Climate Change Service",
   },
   {
-    sourceId: "gadm",
-    name: "GADM boundaries",
+    sourceId: "geoboundaries",
+    name: "geoBoundaries gbOpen PHL ADM3",
     evidence: "geography",
-    purpose: "Administrative polygons for map layers.",
-    status: "planned",
-    resolution: "Region → barangay (version-dependent)",
-    updateBehavior: "Versioned releases",
-    provenance: "GADM version and gid",
-    accessMethod: "Bulk download",
+    purpose: "Display polygons for the HDX reporting units on the SIGMA map.",
+    status: "connected",
+    resolution: "Municipality/city (ADM3, 2020), simplified, dissolved into the 126 reporting units",
+    updateBehavior: "Pinned commit of a versioned release; rebuilt by scripts/geo/build-boundaries.mjs",
+    provenance: "GitHub release URL at a pinned commit and SHA-256 in scripts/geo/sources.json",
+    accessMethod: "Bulk download, processed at build time",
+    licence: "CC BY 3.0 IGO",
+    attribution: "geoBoundaries (Runfola et al. 2020); boundaries from NAMRIA, PSA and OCHA Philippines",
+  },
+  {
+    sourceId: "cod-ab-phl",
+    name: "OCHA COD-AB Philippines (v03)",
+    evidence: "geography",
+    purpose: "Reference administrative units and p-codes that the HDX reporting units are matched to.",
+    status: "connected",
+    resolution: "Region → municipality/city (tabular attributes)",
+    updateBehavior: "Pinned file; rebuilt by scripts/geo/build-geo.mjs",
+    provenance: "HDX resource URL and SHA-256 in scripts/geo/sources.json",
+    accessMethod: "Bulk download (HDX), processed at build time",
+    licence: "CC BY-IGO",
+    attribution: "OCHA FISS; source NAMRIA and PSA",
   },
   {
     sourceId: "psa-psgc",
-    name: "PSA PSGC",
+    name: "PSA PSGC (3Q 2026)",
     evidence: "geography",
-    purpose: "Authoritative geographic codes; the cross-system join key.",
-    status: "planned",
+    purpose: "Authoritative geographic codes and city classes, used at build time to check the crosswalk.",
+    status: "connected",
     resolution: "Region → barangay",
-    updateBehavior: "Quarterly PSA publications",
-    provenance: "PSGC publication date and code",
-    accessMethod: "Bulk download",
+    updateBehavior: "Quarterly PSA publications; the file is downloaded by hand (psa.gov.ph blocks scripts)",
+    provenance: "PSGC edition and code, recorded per row in data/reference/geo/hdx_dengue_crosswalk.csv",
+    accessMethod: "Manual download, kept in git-ignored data/raw; only derived codes are committed",
+    licence: "PSA terms of use (file not redistributed)",
+    attribution: "Philippine Statistics Authority, Philippine Standard Geographic Code",
   },
   {
     sourceId: "openstreetmap",
@@ -133,5 +186,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     updateBehavior: "Live tiles",
     provenance: "© OpenStreetMap contributors",
     accessMethod: "Tile server",
+    licence: "ODbL",
+    attribution: "© OpenStreetMap contributors",
   },
 ];

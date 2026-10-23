@@ -78,6 +78,11 @@ export interface SourceRecord {
 export interface NeighborSummary {
   locationId: string;
   locationName: string;
-  status: SignalStatus;
-  changePercent: number;
+  /** The disease the summary describes; neighbours are never mixed across diseases. */
+  disease: string;
+  /** Null when the neighbour has no signal for this disease in the reporting window ("no data", not "normal"). */
+  status: SignalStatus | null;
+  changePercent: number | null;
+  /** Date of the signal summarised, or null with no signal. */
+  date: string | null;
 }

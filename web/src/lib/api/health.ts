@@ -12,10 +12,13 @@ export const HEALTH_VERSION = "0.1.0";
 
 export interface HealthConfig {
   aiProviderConfigured: boolean;
+  /** CHAT_DISABLED / CHAT_PUBLIC_DISABLED is set; the copilot refuses requests even with a key. */
+  chatSwitchedOff?: boolean;
   mapTilesConfigured: boolean;
 }
 
 export function buildHealth(config: HealthConfig): HealthResponse {
+  const chatEnabled = config.aiProviderConfigured && !config.chatSwitchedOff;
   const services: HealthService[] = [
     {
       id: "dengue-observations",
@@ -41,11 +44,13 @@ export function buildHealth(config: HealthConfig): HealthResponse {
     {
       id: "policy-copilot",
       name: "Policy Copilot",
-      status: config.aiProviderConfigured ? "ok" : "disabled",
-      enabled: config.aiProviderConfigured,
-      note: config.aiProviderConfigured
+      status: chatEnabled ? "ok" : "disabled",
+      enabled: chatEnabled,
+      note: chatEnabled
         ? "A model provider key is configured server-side."
-        : "No model provider key is configured, so chat requests are refused rather than answered with a placeholder.",
+        : config.chatSwitchedOff
+          ? "The copilot is switched off on this deployment, so chat requests are refused rather than answered with a placeholder."
+          : "No model provider key is configured, so chat requests are refused rather than answered with a placeholder.",
     },
   ];
 
@@ -63,6 +68,7 @@ export function buildHealth(config: HealthConfig): HealthResponse {
     version: HEALTH_VERSION,
     configuration: {
       aiProviderConfigured: config.aiProviderConfigured,
+      chatEnabled,
       mapTilesConfigured: config.mapTilesConfigured,
     },
     services,

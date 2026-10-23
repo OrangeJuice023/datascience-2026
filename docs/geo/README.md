@@ -86,7 +86,7 @@ the backlog are referenced, not repeated.
 | GEO-1 | Choose one geography id scheme | P1 | Software Eng | Decision recorded in `docs/architecture.md`; other modules map to it | NOT STARTED |
 | GEO-2 | Join EARS / DOH outputs to reporting units for the map | P1 | P0-1, P1-1, P1-3 | Every local result row carries a unit id; regional sums use complete weeks only; suspect and missing weeks shown as "no data" | NOT STARTED |
 | GEO-3 | Simplified unit polygons for the map | P2 | P1-1 | geoBoundaries ADM2/ADM3 dissolved to the 126 units, licence and hash recorded, size suitable for the browser | NOT STARTED |
-| P2-5 | Remove GADM from the source catalog | P2 | — | See backlog (`source-catalog.ts`, `sample/reference.ts`, `lib/api/sources.ts`) | NOT STARTED |
+| P2-5 | Remove GADM from the source catalog | P2 | — | See backlog (`source-catalog.ts`, `sample/reference.ts`, `lib/api/sources.ts`) | DONE (fix/phase1-stabilize: replaced by `geoboundaries`, `cod-ab-phl`; HDX dengue added) |
 | P2-6 | Davao del Sur + Occidental 2016 | P2 | — | See backlog | NOT STARTED |
 | GEO-5 | Compare CCHAIN and Open-Meteo weather on the 12 CCHAIN cities before mixing them | P2 | PR #1 | Weekly CCHAIN vs Open-Meteo per city and variable over shared years; differences reported; decision recorded | NOT STARTED |
 | GEO-4 | Confirm assumptions A1, A2, A5 with DOH-EB or Cirrolytix | P2 | Whole team | Answers recorded in method §4 | BLOCKED (external) |
@@ -101,4 +101,4 @@ the backlog are referenced, not repeated.
 - [ ] App code uses the fixture (GEO-2).
 - [ ] `ml/` output carries unit ids instead of province names (P0-2).
 - [ ] One geography id scheme across modules (GEO-1).
-- [ ] GADM removed from catalogues (P2-5).
+- [x] GADM removed from catalogues (P2-5).

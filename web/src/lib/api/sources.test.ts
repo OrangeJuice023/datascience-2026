@@ -62,3 +62,32 @@ describe("opendengueDescriptor", () => {
     expect(descriptor.license).toBeTruthy();
   });
 });
+
+describe("source catalogue contents", () => {
+  it("never lists GADM, whose licence forbids redistribution", () => {
+    const ids = buildSources().map((s) => s.id.toLowerCase());
+    expect(ids.some((id) => id.includes("gadm"))).toBe(false);
+    expect(JSON.stringify(buildSources())).not.toMatch(/gadm/i);
+  });
+
+  it("lists the dengue data and boundaries the map actually uses, with licence and attribution", () => {
+    const byId = new Map(buildSources().map((s) => [s.id, s]));
+    expect(byId.get("hdx-doh-dengue")).toMatchObject({ status: "connected", licence: "CC BY" });
+    expect(byId.get("hdx-doh-dengue")?.coverage).toMatchObject({ from: "2016-01-10", to: "2021-01-03" });
+    expect(byId.get("geoboundaries")).toMatchObject({ status: "connected", licence: "CC BY 3.0 IGO" });
+    expect(byId.get("cod-ab-phl")).toMatchObject({ status: "connected", licence: "CC BY-IGO" });
+    for (const source of buildSources()) expect(source.attribution.length).toBeGreaterThan(0);
+  });
+
+  it("keeps synthetic stand-ins out of the connected list", () => {
+    const byId = new Map(buildSources().map((s) => [s.id, s]));
+    expect(byId.get("gdelt-doc")?.status).toBe("demo");
+    expect(byId.get("ph-news-rss")?.status).toBe("demo");
+  });
+
+  it("gives the copilot the same sources and statuses as the API", async () => {
+    const { buildPolicyChatContext } = await import("@/lib/policy-chat/context");
+    const context = await buildPolicyChatContext("Dengue", "quezon-city");
+    expect(context.sources.map((s) => [s.name, s.status])).toEqual(buildSources().map((s) => [s.name, s.status]));
+  });
+});

@@ -75,8 +75,11 @@ The endpoint index.
 
 ### `GET /api/v1/health`
 
-Service status and configuration **flags only** — `aiProviderConfigured` and
-`mapTilesConfigured` are booleans. No environment value is ever returned.
+Service status and configuration **flags only** — `aiProviderConfigured`,
+`chatEnabled` and `mapTilesConfigured` are booleans. No environment value is
+ever returned. `chatEnabled` is false when no key is configured *or* when
+`CHAT_DISABLED` / `CHAT_PUBLIC_DISABLED` is `true`, matching what
+`POST /api/v1/chat` will do.
 
 ### `GET /api/v1/sources`
 
@@ -173,7 +176,10 @@ The Policy Copilot.
 ```json
 {
   "message": "What should we check first?",
-  "history": [{ "role": "user", "content": "..." }],
+  "history": [
+    { "role": "user", "content": "..." },
+    { "role": "assistant", "content": "...", "signature": "<replySignature>" }
+  ],
   "disease": "Dengue",
   "locationId": "quezon-city"
 }
@@ -183,6 +189,17 @@ The body is validated before any model call: the message must be present
 and within the length limit, the disease must be supported, and the LGU
 must exist and have data for that disease. History is trimmed to the last
 ten messages.
+
+History is accepted only as complete question/answer pairs. Each reply carries
+the `replySignature` the server returned with it (an HMAC over the disease,
+LGU, question and reply, keyed by `CHAT_HISTORY_SECRET` or a key derived from
+the provider key). A `system` turn, a broken sequence, a trailing unanswered
+question, or a reply the server did not sign for the same disease and LGU is
+rejected with a 400. A client therefore cannot insert words into the model's
+earlier replies, and a Quezon City conversation cannot be carried into Pasig.
+The system prompt is always built on the server and includes a scope rule
+(this disease and LGU, public health only); off-topic refusals rely on the
+model following that rule.
 
 When no model provider is configured the request is refused with
 `not_configured` and a 503. Nothing is returned in place of a real answer.
@@ -230,7 +247,8 @@ simulated data.
 `POST /api/v1/chat` is the only endpoint that reaches a paid external
 service. Its provider key is read from the server environment, is never
 returned to a client and is never exposed in the browser bundle. It is rate
-limited to 30 requests per 60 seconds per IP address, and without a
+limited to 30 requests per 60 seconds per IP address (in memory, per server
+instance; requests without a client address share one bucket), and without a
 configured provider it refuses the request with `not_configured` rather than
 answering with a placeholder. `GET` on the same path is a 405.
 

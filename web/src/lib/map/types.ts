@@ -93,7 +93,8 @@ export interface TimelineSlice {
   label: string;
   /** Short label for the track ends. */
   shortLabel: string;
-  value: number;
+  /** Null when the slice has no data; drawn as a gap and read as "No data", never as 0. */
+  value: number | null;
   /** True when the previous slice is not contiguous (a gap in the record). */
   gapBefore: boolean;
 }
@@ -175,6 +176,7 @@ export interface MapDataBundle {
   lgus: LGU[];
   /** Demo observed-vs-expected series per LGU id (signal index basis). */
   trends: Record<string, TrendPoint[]>;
+  /** Keyed by neighborKey(disease, lguId) (lib/neighbors.ts), so a panel only sees its own disease. */
   neighbors: Record<string, NeighborSummary[]>;
   /** Formal national observations (OpenDengue), weekly rows only, trimmed to what the map draws. */
   nationalWeekly: NationalWeeklyPoint[];
