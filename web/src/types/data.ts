@@ -375,3 +375,99 @@ export interface SimulationScenario {
   parameters: SimulationParameters;
   provenance: Provenance;
 }
+
+// ---------------------------------------------------------------------------
+// 4. Environmental covariates (context, never a health measure)
+// ---------------------------------------------------------------------------
+
+/**
+ * Weather sources. CCHAIN is primary for modeling (12 cities, to 2022);
+ * Open-Meteo (ERA5) extends coverage past 2022 and to LGUs outside CCHAIN.
+ * Their rainfall comes from different products (CHIRPS vs ERA5), so values
+ * from different sources must not be merged into one series.
+ */
+export type WeatherSourceId = "cchain" | "open_meteo";
+
+export type WeatherVariable =
+  /** Total over the week, mm. */
+  | "precipitation_mm"
+  | "temperature_mean_c"
+  /** Mean of daily minima, °C. */
+  | "temperature_min_c"
+  /** Mean of daily maxima, °C. */
+  | "temperature_max_c"
+  | "humidity_mean_pct";
+
+export type WeatherQcFlag =
+  /** Fewer than 7 days of data; weekly values are left empty. */
+  | "incomplete_week"
+  | "range_check_failed"
+  /** Rainfall missing for part of the city (CHIRPS is land-only). */
+  | "rain_partial_area"
+  /** ERA5T preliminary values, revised by ECMWF after about 2–3 months. */
+  | "provisional_era5t";
+
+/** How substitutable Open-Meteo is for CCHAIN, from the overlap comparison. */
+export type WeatherComparability =
+  | "raw_interchangeable"
+  | "anomaly_interchangeable"
+  | "not_interchangeable";
+
+/**
+ * Weekly weather for one geography × week × source (hub ENVIRONMENT row).
+ * Weeks run Sunday–Saturday, the same convention as HealthObservation.
+ */
+export interface EnvironmentalObservation {
+  id: string;
+  /** Canonical geography id, e.g. "davao-city" (data/reference/geo/geography_hub_rows.csv). */
+  geographyId: string;
+  geographicLevel: GeographicLevel;
+  /** Sunday. */
+  periodStart: IsoDate;
+  /** Saturday. */
+  periodEnd: IsoDate;
+  /** MMWR epi year and week. */
+  epiYear: number;
+  epiWeek: number;
+  temporalResolution: "weekly";
+  sourceId: WeatherSourceId;
+  /** Null where the week is incomplete; never zero-filled. */
+  values: Record<WeatherVariable, number | null>;
+  /** Days with every variable present, 0–7. */
+  daysObserved: number;
+  qcFlags: WeatherQcFlag[];
+  confidence: ConfidenceLevel;
+  provenance: Provenance;
+}
+
+/** What one source covers for one geography. */
+export type HdxUnitRelation = "same_area" | "inside_unit";
+
+export interface WeatherCoverage {
+  geographyId: string;
+  geographyName: string;
+  centroid: GeoPoint;
+  /** True when the geography is one of the CCHAIN cities. */
+  inCchain: boolean;
+  /** PSA PSGC 10-digit code. */
+  psgcCode: string;
+  /** HDX DOH-Epi reporting unit containing this geography (SIGMA map id). */
+  hdxUnitId: string;
+  /**
+   * same_area: the HDX unit is this city, so its counts can sit next to this weather.
+   * inside_unit: the city is part of a larger unit; never join this weather to that unit's counts.
+   */
+  hdxUnitRelation: HdxUnitRelation;
+  sourceId: WeatherSourceId;
+  upstreamProduct: string;
+  /** e.g. population-weighted barangay mean vs a single grid cell. */
+  aggregationMethod: string;
+  coverageStart: IsoDate;
+  coverageEnd: IsoDate;
+  weeks: number;
+  /** Weeks with all variables present. */
+  completeWeeks: number;
+  qcFlagCounts: Partial<Record<WeatherQcFlag, number>>;
+  /** Overlap verdict per variable; applies to open_meteo rows. */
+  comparability: Record<WeatherVariable, WeatherComparability>;
+}

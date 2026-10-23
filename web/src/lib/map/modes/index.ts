@@ -27,7 +27,7 @@ const ENVIRONMENT_MODE: MapModeDefinition = {
   filters: [],
   layerToggles: [],
   unavailableReason:
-    "Planned: weekly rainfall and temperature covariates (Open-Meteo). No covariate data is connected yet.",
+    "Planned: weekly city weather (CCHAIN, Open-Meteo) is connected in the data layer for 12 CCHAIN cities; the map layer is not built yet.",
 };
 
 /** Display order follows TRACE → ANALYZE → SIMULATE. */
