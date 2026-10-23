@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Sigi, usePrefersReducedMotion } from "@/components/mascot/sigi";
+import { usePrefersReducedMotion } from "@/components/mascot/sigi";
+import { HeroScan } from "./hero-scan";
 import { PixelMap } from "./pixel-map";
 
 /** Session flag: once a visitor has pressed start, "/" opens straight into the app. */
@@ -120,28 +121,21 @@ export function LandingGate() {
             </nav>
           </header>
 
-          <section className="relative mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-6xl flex-col items-center justify-center px-5 pb-16 text-center sm:px-8">
-            <PixelCross className="entry-float absolute left-[6%] top-[14%] hidden h-10 w-10 text-[#d97a5c]/50 md:block" />
-            <PixelCross className="entry-float absolute right-[8%] top-[22%] hidden h-14 w-14 text-[var(--entry-green)]/25 md:block" />
-            <PixelCross className="entry-float absolute bottom-[18%] left-[12%] hidden h-8 w-8 text-[var(--entry-leaf)]/40 md:block" />
+          <section className="relative flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-center px-5 pb-16 text-center sm:px-8">
+            <HeroScan />
 
-            <Sigi state="greeting" size={112} className="pixel-image" label="Sigi, the SIGMA companion, waving hello" />
-
-            <h1 id="sigma-entry-title" className="font-pixel entry-title mt-4 text-[clamp(4.5rem,17vw,11rem)] leading-[0.9] tracking-tight">
+            <h1 id="sigma-entry-title" className="font-pixel entry-title relative text-[clamp(4.5rem,17vw,11rem)] leading-[0.9] tracking-tight">
               SIGMA
             </h1>
-            <p className="mt-3 text-lg font-semibold text-[var(--entry-green-deep)] sm:text-xl">
+            <p className="entry-legible relative mt-3 text-lg font-semibold text-[var(--entry-green-deep)] sm:text-xl">
               Spatial Intelligence &amp; Geographic Modeling for Action
             </p>
-            <p className="font-pixel mt-6 text-balance text-2xl text-[var(--entry-ink)] sm:text-3xl">
-              Every week a pixel. Every pixel a place.
-            </p>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--entry-ink)] sm:text-lg">
+            <p className="entry-legible relative mt-6 max-w-2xl text-base leading-relaxed text-[var(--entry-ink)] sm:text-lg">
               A dengue early-warning prototype for Philippine LGU health offices. It checks 126 reporting
               units week by week against EARS and DOH thresholds, on surveillance data from 2016 to 2021.
             </p>
 
-            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+            <div className="relative mt-10 flex flex-col items-center gap-4 sm:flex-row">
               <button
                 type="button"
                 onClick={start}
@@ -159,7 +153,7 @@ export function LandingGate() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
-            <p className="font-pixel mt-6 hidden text-sm text-[var(--entry-ink)]/70 sm:block">
+            <p className="font-pixel relative mt-6 hidden text-sm text-[var(--entry-ink)]/70 sm:block">
               Press Enter<span className="entry-blink">_</span>
             </p>
           </section>
@@ -241,11 +235,3 @@ export function LandingGate() {
   );
 }
 
-/** The medical cross, drawn on a 5x5 pixel grid. */
-function PixelCross({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 5 5" className={className} shapeRendering="crispEdges" aria-hidden="true">
-      <path d="M2 0h1v2h2v1H3v2H2V3H0V2h2z" fill="currentColor" />
-    </svg>
-  );
-}
