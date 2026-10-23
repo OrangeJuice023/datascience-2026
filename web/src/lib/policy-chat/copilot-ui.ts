@@ -1,4 +1,4 @@
-import type { SigiState } from "@sigma/contracts";
+import type { ChatMessage, SigiState } from "@sigma/contracts";
 import type { PolicyEvidenceRecord, PolicyEvidenceTopic } from "@/lib/policy-evidence/types";
 
 /**
@@ -31,6 +31,36 @@ export function copilotSigiState(input: {
 /** Whether an API error code means the copilot is unavailable rather than broken. */
 export function isCopilotUnavailable(code: string | null): boolean {
   return code !== null && UNAVAILABLE_CODES.has(code);
+}
+
+/** Matches LIMITS.maxHistory on the server; even, so it keeps whole pairs. */
+export const MAX_HISTORY = 10;
+
+/**
+ * The history a request carries: complete exchanges only, each a question
+ * followed by the reply the server signed for it. A failed question (about to
+ * be retried, or abandoned) is never included, so a retry cannot send the
+ * same question twice, and the server rejects unsigned replies anyway.
+ */
+export function historyForRequest(turns: ChatMessage[], max = MAX_HISTORY): ChatMessage[] {
+  const pairs: ChatMessage[] = [];
+  for (let i = 0; i + 1 < turns.length; i++) {
+    const question = turns[i];
+    const reply = turns[i + 1];
+    if (question.role === "user" && reply.role === "assistant" && reply.signature) {
+      pairs.push(
+        { role: "user", content: question.content },
+        { role: "assistant", content: reply.content, signature: reply.signature },
+      );
+      i++;
+    }
+  }
+  return pairs.slice(-max);
+}
+
+/** The key that gives each disease and LGU its own conversation (see PolicyView). */
+export function copilotConversationKey(disease: string, locationId: string): string {
+  return JSON.stringify([disease, locationId]);
 }
 
 /**

@@ -41,7 +41,8 @@ export default function OverviewScreen() {
       subtitle="Surveillance context and access indicators for public-health review."
       status={health.meta?.status}
       onRefresh={refresh}
-      refreshing={health.refreshing}>
+      refreshing={health.refreshing}
+      staleError={health.stale ? health.error?.message : null}>
       {loading ? <LoadingState label="Contacting the API…" /> : null}
       {failed && health.error ? (
         <ErrorState message={health.error.message} onRetry={refresh} />

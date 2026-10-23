@@ -109,6 +109,7 @@ Reproduce from `ml/`:
 
 ```
 python -m environment.fetch       # HDX files -> data/raw/<source>/ + manifest.json
+                                  # (--record-pins once, then commit ml/environment/input_pins.json)
 python -m environment.geography   # geography.csv (ids, centroids, HDX names)
 python -m environment.open_meteo  # ERA5 per city-year -> data/raw/open_meteo/ + manifest.json
 python -m environment.build       # city_weekly_dengue.csv, city_weekly_weather.csv, quality_report.json
@@ -118,6 +119,14 @@ python -m environment.export --hub ../DATASCIENCE_MASTER_DATA_HUB.xlsx
                                   # hub_environment.csv, hub ENVIRONMENT tab, web JSON
 python -m environment.validate    # 36 checks; non-zero exit on failure
 ```
+
+Input identity: each raw file's SHA-256 is pinned in the committed
+`ml/environment/input_pins.json` (the per-source manifests stay git-ignored
+with the raw files). Every step checks its inputs against the pins and stops
+on a mismatch. `--force` re-downloads but refuses a file whose hash changed
+and keeps the old one; `--force --accept-changed` replaces it and keeps the
+old hash in the manifest's `previous` list and the pin history. The pin file
+is empty until someone with the inputs runs `--record-pins` (hand-off).
 
 The first Open-Meteo fetch is 240 requests (12 cities × 20 years) and took
 about 6 minutes on 2026-10-20 without hitting the rate limit. Cached chunks are
@@ -158,7 +167,12 @@ rest of SIGMA instead of the other way round.
   sharing 6 of its 7 days), **HDX Sunday − 14 days** (empirical, below). The
   original CCHAIN label is kept in `source_week_label`.
 - `crosscheck` re-derives the HDX offset on canonical weeks every run and
-  fails if it no longer matches the configured one.
+  reports it; it no longer fails on a mismatch, because the meaning of the HDX
+  date is unconfirmed and the highest correlation is not a definition
+  ([dengue-pipeline.md](dengue-pipeline.md#hdx-week-convention-known-vs-unconfirmed)).
+  HDX suspected cases/deaths swap rows are excluded from it (no data, not
+  zero). The r values below were measured before that exclusion and need a
+  re-run.
 
 The remaining uncertainty is about the *meaning* of a label, not the
 convention. Matching the 10 shared cities over 2016–2020, the best alignment

@@ -9,6 +9,7 @@ import { Sigi } from "@/components/mascot/sigi";
 import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
 import {
   copilotSigiState,
+  historyForRequest,
   isCopilotUnavailable,
   referencedEvidence,
   suggestedQuestions,
@@ -18,6 +19,8 @@ import { cn } from "@/lib/utils";
 interface Turn {
   role: "user" | "assistant";
   content: string;
+  /** The server's signature for an assistant reply; sent back with the history. */
+  signature?: string;
   /** What the API said about an assistant reply: model, scope, limitations. */
   meta?: Pick<ChatResponseData, "model" | "contextScope" | "limitations">;
   cited?: PolicyEvidenceRecord[];
@@ -44,6 +47,10 @@ interface PolicyCopilotProps {
  * selected LGU. The request goes to POST /api/v1/chat; the provider key and
  * the system prompt stay on the server. Every reply is shown with what the
  * API says it was based on, and with any curated records it refers to.
+ *
+ * One instance holds one conversation: PolicyView keys it by disease and LGU
+ * (copilotConversationKey), so switching LGU starts a new conversation and a
+ * reply still in flight for the old one is discarded with it.
  */
 export function PolicyCopilot({ disease, locationId, locationName, hasSignal, evidence }: PolicyCopilotProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -72,7 +79,8 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
   async function send(text: string) {
     const question = text.trim();
     if (!question || sending) return;
-    const history = turns.map(({ role, content }) => ({ role, content }));
+    // Signed, answered exchanges only: an earlier failed question is left out.
+    const history = historyForRequest(turns);
     setTurns((current) => [...current, { role: "user", content: question }]);
     setDraft("");
     setError(null);
@@ -102,6 +110,7 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
         {
           role: "assistant",
           content: data.reply,
+          signature: data.replySignature,
           meta: { model: data.model, contextScope: data.contextScope, limitations: data.limitations },
           cited: referencedEvidence(data.reply, evidence),
         },
@@ -116,7 +125,8 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
   function retry() {
     if (!error) return;
     const question = error.question;
-    // Drop the unanswered question so it is not sent twice in the history.
+    // Drop the unanswered question from the log; send() re-adds it once.
+    // historyForRequest never includes it, so it is not sent twice.
     setTurns((current) => (current.at(-1)?.role === "user" ? current.slice(0, -1) : current));
     void send(question);
   }
@@ -187,12 +197,10 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
             )}
           >
             <p className="min-w-0 flex-1">{error.message}</p>
-            {!unavailable && (
-              <Button variant="ghost" onClick={retry} className="h-8 px-2 text-xs">
-                <RotateCcw className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                Try again
-              </Button>
-            )}
+            <Button variant="ghost" onClick={retry} className="h-8 px-2 text-xs">
+              <RotateCcw className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+              {unavailable ? "Check again" : "Try again"}
+            </Button>
           </div>
         )}
 

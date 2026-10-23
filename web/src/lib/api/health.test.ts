@@ -11,7 +11,7 @@ describe("buildHealth", () => {
   it("reports configuration as flags only", () => {
     const health = buildHealth({ aiProviderConfigured: true, mapTilesConfigured: false });
 
-    expect(health.configuration).toEqual({ aiProviderConfigured: true, mapTilesConfigured: false });
+    expect(health.configuration).toEqual({ aiProviderConfigured: true, chatEnabled: true, mapTilesConfigured: false });
     expect(JSON.stringify(health)).not.toMatch(/GROQ|sk-|API_KEY/i);
   });
 

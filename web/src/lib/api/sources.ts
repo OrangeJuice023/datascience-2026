@@ -19,7 +19,9 @@ const COVERAGE: Record<string, { from: string | null; to: string | null; geograp
   "doh-weekly": { from: null, to: null, geographicLevel: "national_or_regional" },
   "ritm-surveillance": { from: null, to: null, geographicLevel: "national_or_regional" },
   "open-meteo": { from: null, to: null, geographicLevel: "point" },
-  gadm: { from: null, to: null, geographicLevel: "region_to_barangay" },
+  "hdx-doh-dengue": { from: "2016-01-10", to: "2021-01-03", geographicLevel: "doh_reporting_unit" },
+  geoboundaries: { from: null, to: null, geographicLevel: "municipality_city" },
+  "cod-ab-phl": { from: null, to: null, geographicLevel: "region_to_municipality" },
   "psa-psgc": { from: null, to: null, geographicLevel: "region_to_barangay" },
   openstreetmap: { from: null, to: null, geographicLevel: "tiles" },
 };
@@ -38,7 +40,10 @@ const SCOPE: Record<string, string> = {
     "Laboratory-confirmed counts for cross-validation. Today nothing is ingested from it.",
   "open-meteo":
     "Environmental covariates for models. Never an epidemiological finding on its own.",
-  gadm: "Administrative boundaries for map rendering only.",
+  "hdx-doh-dengue":
+    "Retrospective weekly counts per DOH reporting unit, 2016–2021. A province remainder is not the whole province, swap rows and missing weeks are no data, and the date column's meaning is unconfirmed. Not live surveillance.",
+  geoboundaries: "Display polygons only. Not health data and not an official boundary determination.",
+  "cod-ab-phl": "Reference units and p-codes for matching places. Not health data.",
   "psa-psgc": "Authoritative area codes for joining systems, not health data.",
   openstreetmap: "Basemap tiles only. No analytical content.",
 };
@@ -64,6 +69,8 @@ function toApiSource(entry: SourceCatalogEntry): ApiSource {
     },
     provenance: entry.provenance,
     accessMethod: entry.accessMethod,
+    licence: entry.licence,
+    attribution: entry.attribution,
   };
 }
 

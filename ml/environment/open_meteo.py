@@ -1,7 +1,9 @@
 """Fetch daily ERA5 weather from the Open-Meteo archive for each geography.
 
     python -m environment.open_meteo           # fetch missing year-chunks only
-    python -m environment.open_meteo --force   # re-fetch everything
+    python -m environment.open_meteo --force   # re-fetch everything; refuses a changed chunk
+    python -m environment.open_meteo --force --accept-changed   # replace it, keeping the old hash
+    python -m environment.open_meteo --record-pins              # pin present chunks (commit input_pins.json)
 
 One request per geography x calendar year, cached as raw JSON in
 data/raw/open_meteo/<geography_id>_<year>.json with a manifest entry
@@ -15,6 +17,7 @@ the fetch waits and retries, so a full first run takes a while.
 """
 
 import argparse
+import hashlib
 import json
 import time
 import urllib.error
@@ -25,7 +28,7 @@ from datetime import datetime, timezone
 import pandas as pd
 
 from . import geography
-from .paths import REPO, manifest_path, raw_dir, sha256
+from .paths import REPO, accept_download, manifest_path, raw_dir, record_pin, sha256
 from .sources import OPEN_METEO
 
 SOURCE = "open_meteo"
@@ -66,7 +69,7 @@ def get(params: dict) -> bytes:
     raise SystemExit("Open-Meteo still rate limiting; re-run later (cached chunks are kept)")
 
 
-def fetch(force: bool = False) -> None:
+def fetch(force: bool = False, accept_changed: bool = False, record_pins: bool = False) -> None:
     geo = geography.load()
     out_dir = raw_dir(SOURCE)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -80,13 +83,22 @@ def fetch(force: bool = False) -> None:
             entry = manifest.get(name)
             path = out_dir / name
             if not force and path.exists() and entry and entry["request"] == params:
+                if record_pins:
+                    record_pin(SOURCE, name, entry["sha256"], reason="recorded with --record-pins")
                 continue
             print(f"fetching {name}", flush=True)
             body = get(params)
             payload = json.loads(body)
             if payload.get("error"):
                 raise SystemExit(f"{name}: {payload.get('reason')}")
+            # Same request, different bytes: refuse unless accepted (ERA5 can be revised).
+            if entry and entry["request"] == params:
+                accept_download(SOURCE, name, hashlib.sha256(body).hexdigest(), manifest, accept_changed)
+            previous = list(entry.get("previous", [])) if entry else []
+            if entry and entry["sha256"] != hashlib.sha256(body).hexdigest():
+                previous.append({k: entry.get(k) for k in ("sha256", "retrieved_at", "request")})
             path.write_bytes(body)
+            record_pin(SOURCE, name, sha256(path), reason="fetched")
             manifest[name] = {
                 "geography_id": g.geography_id,
                 "url": OPEN_METEO["url"],
@@ -99,6 +111,7 @@ def fetch(force: bool = False) -> None:
                 "sha256": sha256(path),
                 "license": OPEN_METEO["license"],
                 "attribution": OPEN_METEO["attribution"],
+                "previous": previous,
             }
             mpath.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
             time.sleep(1)
@@ -138,4 +151,7 @@ def load_daily(geo: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true")
-    fetch(parser.parse_args().force)
+    parser.add_argument("--accept-changed", action="store_true")
+    parser.add_argument("--record-pins", action="store_true")
+    args = parser.parse_args()
+    fetch(args.force, args.accept_changed, args.record_pins)

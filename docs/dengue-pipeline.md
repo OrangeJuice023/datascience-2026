@@ -95,10 +95,45 @@ suspect-swap weeks reach the map as "no data", never as zero. Local rows only; r
 Full detail, checks and news sources: [dengue_qa_report.pdf](reports/dengue_qa_report.pdf)
 and [dengue_ears_qa_report.pdf](reports/dengue_ears_qa_report.pdf).
 
+## HDX week convention (known vs unconfirmed)
+
+In plain language: the HDX file gives each weekly count a date, but nobody has
+documented what that date means. Different parts of SIGMA currently treat it
+differently. Until DOH-EB or Cirrolytix confirms it, every result that depends
+on exact timing (lead times, weather lags) is uncertain by one to two weeks.
+
+| Where | How the HDX `date` is used | Basis | Status |
+| --- | --- | --- | --- |
+| `ml/clean_dengue.py` → EARS, DOH thresholds, `hdx-dengue-sigma.json` (SIGMA map) | As-is: the date is the Sunday that starts the week (offset 0 d) | Every date is a Sunday; simplest reading | **Assumption**, stated in the export's `meta.weekNote` |
+| `scripts/geo/` (geography track) | Not shifted; used only to group rows into weeks and to find swap blocks | — | No timing claim |
+| `ml/environment/weeks.py` (`hdx_doh_epi`) | Date − 14 d = canonical week | Best mean correlation with CCHAIN PIDSR over 10 cities (r 0.83; −7 d gives 0.81), measured before swap rows were excluded | **Empirical, unconfirmed.** Used only to cross-check HDX against CCHAIN; the climate model's outcome is CCHAIN, not HDX |
+| Geography method A5 | HDX lines up best with OpenDengue shifted 1–2 weeks earlier | Visual / correlation comparison | Unresolved |
+
+**Known:** every HDX date is a Sunday; weeks are 7 days apart; a correlation
+with another extract peaks at −7 to −14 d. **Not known:** whether the date is
+the onset, consultation, report or encoding week, or the start or end of that
+week. The highest correlation is evidence, not a definition, so
+`environment.crosscheck` now reports the best offset without enforcing it, and
+no offset was changed in this pass. Standardising one offset across modules is
+a team decision once the meaning is confirmed (geography method, GEO-4).
+
+Leakage check: the environment features use only the target week and earlier
+weeks (lag windows 0–3, 4–7, 8–12 via `shift(lo)` with lo ≥ 0), and HDX is not
+a model outcome there, so the HDX offset does not leak future weather into a
+model. Swap rows are now excluded from the HDX cross-check
+(`crosscheck.prepare_hdx`); the cross-check has **not** been re-run on this
+machine because the CCHAIN PIDSR input is not present locally, so the
+reported r values above still predate the exclusion.
+
 ## Data
 
 `data/raw/` and `data/processed/` are git-ignored by design. To reproduce, place
 the two raw files above in `data/raw/` and run the pipeline.
+
+The QA report's "sum of 126 local places" (`ml/qa/local_sums.py`) is drawn only
+for weeks where all 126 places have an `ok` value (196 of 261 weeks). Weeks with
+swap rows (15) or missing rows (55) have no total, instead of a partial sum that
+looks like a 12–16% dip against the national series.
 
 ## Known limitations
 

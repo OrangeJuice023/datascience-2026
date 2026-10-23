@@ -115,7 +115,7 @@ export function LocationDetailPanel({
       </div>
 
       <div className="border-t border-slate-200 p-4">
-        <p className="text-xs font-semibold text-slate-600">Nearby activity</p>
+        <p className="text-xs font-semibold text-slate-600">Nearby activity ({signal.disease})</p>
         <ul className="mt-2 space-y-2">
           {neighbors.map((neighbor) => (
             <li
@@ -123,7 +123,11 @@ export function LocationDetailPanel({
               className="flex items-center justify-between text-xs"
             >
               <span className="text-slate-600">{neighbor.locationName}</span>
-              <SignalBadge status={neighbor.status} />
+              {neighbor.status ? (
+                <SignalBadge status={neighbor.status} />
+              ) : (
+                <span className="text-slate-400">No data</span>
+              )}
             </li>
           ))}
         </ul>

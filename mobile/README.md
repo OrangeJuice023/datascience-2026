@@ -72,10 +72,12 @@ account that owns the project:
   example `com.yourorg.sigma`.
 - `eas init` writes the project id into `app.json` under `expo.extra.eas`.
 
-`expo-build-properties` sets `android.usesCleartextTraffic` so the app can
-reach a plain-HTTP API on a local network. If the API is always served over
-HTTPS, remove that block from `app.json` so the release build refuses
-cleartext traffic.
+Cleartext HTTP is off by default (`app.json`). `app.config.js` turns it on
+(Android `usesCleartextTraffic`, iOS `NSAllowsLocalNetworking`) only for the EAS
+`development` profile and for local `expo run` builds, so a development build
+can reach a plain-HTTP API on localhost or the LAN. Preview and production
+builds point at `https://datascience-2026.vercel.app/api/v1` (`eas.json`) and
+refuse cleartext.
 
 ## Layout
 

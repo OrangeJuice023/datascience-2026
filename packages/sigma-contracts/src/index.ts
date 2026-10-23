@@ -95,6 +95,10 @@ export interface ApiSource {
   };
   provenance: string;
   accessMethod: string;
+  /** Licence as recorded at retrieval; null when not verified. */
+  licence: string | null;
+  /** Credit line to show wherever the data is displayed. */
+  attribution: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -119,6 +123,8 @@ export interface HealthResponse {
   configuration: {
     /** A model provider key is configured server-side (true/false only). */
     aiProviderConfigured: boolean;
+    /** The copilot will accept requests: a key is configured and it is not switched off. */
+    chatEnabled: boolean;
     /** Map tiles are configured (true/false only). */
     mapTilesConfigured: boolean;
   };
@@ -270,8 +276,9 @@ export interface AccessArea {
   name: string;
   province: string;
   region: string;
-  latitude: number;
-  longitude: number;
+  /** Null when the area's location is unknown; never 0,0. */
+  latitude: number | null;
+  longitude: number | null;
   facilityCount: number;
 }
 
@@ -385,6 +392,13 @@ export type ChatRole = "user" | "assistant";
 export interface ChatMessage {
   role: ChatRole;
   content: string;
+  /**
+   * Assistant turns only: the `replySignature` the server returned with this
+   * reply. The server rejects an assistant turn without a valid signature, so
+   * a client cannot put words in the model's mouth or carry a conversation
+   * into another disease or LGU.
+   */
+  signature?: string;
 }
 
 export interface ChatRequestBody {
@@ -400,6 +414,8 @@ export interface ChatResponseData {
   /** What the model was given, described in one line. */
   contextScope: string;
   limitations: string[];
+  /** Send back as the `signature` of this reply when it is part of a later request's history. */
+  replySignature: string;
 }
 
 // ---------------------------------------------------------------------------

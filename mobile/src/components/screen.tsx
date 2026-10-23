@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Spacing, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { StatusPill } from '@/components/ui';
+import { Banner, StatusPill } from '@/components/ui';
 
 /**
  * Screen frame + data-status pill + pull-to-refresh.
@@ -21,6 +21,7 @@ export function Screen({
   statusLabel,
   onRefresh,
   refreshing,
+  staleError,
   children,
   footer,
 }: {
@@ -30,6 +31,8 @@ export function Screen({
   statusLabel?: string;
   onRefresh?: () => void;
   refreshing?: boolean;
+  /** Set when a refresh failed and older data is still shown; the message says why. */
+  staleError?: string | null;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
@@ -58,6 +61,12 @@ export function Screen({
           </View>
           {status ? <StatusPill status={status} label={statusLabel} /> : null}
         </View>
+        {staleError ? (
+          <Banner tone="caution" title="Showing older data">
+            The last refresh failed ({staleError}). The figures below are from the previous successful load. Pull
+            down to try again.
+          </Banner>
+        ) : null}
         {children}
         {footer ? <View style={styles.footer}>{footer}</View> : null}
       </ScrollView>

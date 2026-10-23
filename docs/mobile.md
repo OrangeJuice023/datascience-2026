@@ -179,13 +179,16 @@ for Android or iOS.
 | `preview` | **APK** (internal distribution) | TestFlight | Sharing a build with reviewers |
 | `production` | Store build (`autoIncrement`) | Store build | Release (not configured here) |
 
-The `preview` profile bakes in an API address
-(`EXPO_PUBLIC_API_BASE_URL=http://10.60.102.14:3000/api/v1`) that points at a
-development machine on the local network, because the SIGMA API is not
-deployed anywhere public. On a phone that is on the same network it works
-with the web server running; anywhere else, open **Settings** in the app and
-enter an address the phone can reach. The address in use is always shown on
-the Overview screen.
+The `preview` and `production` profiles bake in the deployed API,
+`https://datascience-2026.vercel.app/api/v1`. No private network address ships
+in a build. The `development` profile uses `http://localhost:3000/api/v1`; on a
+device, open **Settings** in the app and enter an address the device can reach.
+The address in use is always shown on the Overview screen.
+
+Cleartext HTTP is allowed only in development (`mobile/app.config.js`: an EAS
+`development` build or a local `expo run` with no EAS profile). Preview and
+production builds refuse `http://` addresses, so pointing one at a LAN server
+needs that server behind HTTPS, or a development build.
 
 Android signing is handled by EAS: the upload keystore is generated and held
 in Expo's credential store, so no key material is in this repository. The
