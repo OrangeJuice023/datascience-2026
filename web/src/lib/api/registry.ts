@@ -233,9 +233,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
           },
         ],
         dataSources: {
-          connected: 2,
+          connected: 4,
           demo: 2,
-          planned: 5,
+          planned: 4,
         },
       },
       meta: {
