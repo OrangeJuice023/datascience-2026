@@ -347,36 +347,6 @@ export interface SpatialRelationship {
 }
 
 // ---------------------------------------------------------------------------
-// Scenarios
-// ---------------------------------------------------------------------------
-
-export interface SimulationParameters {
-  /** 0–1: how strongly activity spreads to neighboring areas. */
-  spatialCoupling: number;
-  /** 0–1 */
-  persistence: number;
-  /** Day index at which an assumed intervention begins. */
-  interventionDay: number;
-  /** 0–1: starting intensity. */
-  intensity: number;
-}
-
-/**
- * A saved scenario definition. Scenario outputs are illustrative and must
- * never be stored or presented as forecasts.
- */
-export interface SimulationScenario {
-  id: string;
-  label: string;
-  diseaseId: string;
-  originGeographyId: string;
-  originGeographicLevel: GeographicLevel;
-  horizonDays: number;
-  parameters: SimulationParameters;
-  provenance: Provenance;
-}
-
-// ---------------------------------------------------------------------------
 // 4. Environmental covariates (context, never a health measure)
 // ---------------------------------------------------------------------------
 

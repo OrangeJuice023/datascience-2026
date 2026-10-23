@@ -29,31 +29,6 @@ export interface Signal {
   status: SignalStatus;
 }
 
-/**
- * State of the Simulate controls. The saved, provenance-carrying form is
- * SimulationScenario in ./data.
- */
-export interface SimulationInputs {
-  disease: string;
-  startingLocation: string;
-  /** Days */
-  horizon: number;
-  /** 0-1 */
-  spatialCoupling: number;
-  /** 0-1 */
-  persistence: number;
-  /** Day index at which an intervention is assumed to begin */
-  interventionTiming: number;
-  /** 0-1 */
-  intensity: number;
-}
-
-export interface SimulationResultPoint {
-  day: number;
-  intensity: number;
-  areasReached: number;
-}
-
 export type AssessmentStatus = "for-assessment" | "monitoring";
 
 export interface PolicyInsight {

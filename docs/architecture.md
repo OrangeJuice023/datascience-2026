@@ -1,18 +1,17 @@
 # SIGMA — Architecture
 
 > Hackathon prototype. One real formal data source (OpenDengue, national,
-> historical) flows through the app; open-source signals, anomaly outputs and
-> simulations are still demo data. Nothing here is a validated public-health
+> historical) flows through the app; open-source signals and anomaly outputs
+> are still demo data. Nothing here is a validated public-health
 > claim.
 
 ## Overview
 
-SIGMA is organized around four conceptual modules:
+SIGMA is organized around three conceptual modules:
 
 1. **TRACE** — find and organize public-health signals.
 2. **ANALYZE** — understand trends, anomalies and spatial patterns.
-3. **SIMULATE** — explore assumption-driven scenarios.
-4. **ACT** — support verification and LGU/public-health decision-making.
+3. **ACT** — support verification and LGU/public-health decision-making.
 
 | Route       | Page            | Evidence shown today                                   |
 | ----------- | --------------- | ------------------------------------------------------ |
@@ -20,7 +19,6 @@ SIGMA is organized around four conceptual modules:
 | `/explore`  | Signal Explorer | Analytical map: formal readout, demo signals/model     |
 | `/lab`      | SIGMA Lab       | Real OpenDengue national series; demo LGU signal tabs  |
 | `/access`   | ACCESS          | Demo medicine availability, search demand, access gaps |
-| `/simulate` | Simulate        | Demo scenario model                                    |
 | `/policy`   | Policy          | Demo assessment areas                                  |
 
 ## Evidence categories (never mixed)
