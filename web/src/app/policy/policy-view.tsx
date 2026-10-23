@@ -16,6 +16,7 @@ import {
 } from "@/data/demo-signals";
 import { getLguById } from "@/data/demo-lgus";
 import type { AccessAssessment } from "@/lib/access/assessments";
+import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
 import {
   DEMO_EVIDENCE_SUMMARY,
   DEMO_POLICY_INSIGHTS,
@@ -55,7 +56,7 @@ function statusTone(s: string): "info" | "warning" | "neutral" {
 export function PolicyView({ accessAssessments }: { accessAssessments: AccessAssessment[] }) {
   const [disease, setDisease] = useState("Dengue");
   const [locationId, setLocationId] = useState("quezon-city");
-  const [evidence, setEvidence] = useState<any[]>([]);
+  const [evidence, setEvidence] = useState<PolicyEvidenceRecord[]>([]);
   const [evidenceLoading, setEvidenceLoading] = useState(false);
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
   const comparison = useMemo(() => getComparison(), []);
@@ -89,8 +90,8 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
         if (!res.ok) throw new Error("Failed to load evidence");
         const json = await res.json();
         if (!cancelled) setEvidence(json?.data?.records || []);
-      } catch (e: any) {
-        if (!cancelled) setEvidenceError(e?.message || "Failed to load evidence");
+      } catch (e: unknown) {
+        if (!cancelled) setEvidenceError(e instanceof Error ? e.message : "Failed to load evidence");
       } finally {
         if (!cancelled) setEvidenceLoading(false);
       }
@@ -102,7 +103,7 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
   }, [effectiveLocationId]);
 
   const grouped = useMemo(() => {
-    const out: Record<string, any[]> = {};
+    const out: Record<string, PolicyEvidenceRecord[]> = {};
     for (const g of TOPIC_GROUPS) out[g.key] = [];
     for (const r of evidence) {
       if (out[r.topic]) out[r.topic].push(r);
@@ -162,7 +163,7 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
                 <div key={g.key}>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{g.label}</h3>
                   <div className="flex flex-col gap-2">
-                    {items.map((r: any) => (
+                    {items.map((r) => (
                       <Card key={r.evidenceId} className="p-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-medium text-slate-800">{r.claim}</p>
