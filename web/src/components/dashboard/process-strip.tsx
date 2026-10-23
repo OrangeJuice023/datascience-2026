@@ -1,38 +1,34 @@
 import Link from "next/link";
-import { Radar, LineChart, Waypoints, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const STEPS = [
-  { key: "TRACE", title: "Find the signal.", href: "/lab", icon: Radar },
-  { key: "ANALYZE", title: "Understand the pattern.", href: "/explore", icon: LineChart },
-  { key: "SIMULATE", title: "Explore the trajectory.", href: "/simulate", icon: Waypoints },
-  { key: "ACT", title: "Support verification and decision-making.", href: "/policy", icon: ShieldCheck },
+  { key: "Trace", title: "Find the signal.", href: "/lab", page: "Lab" },
+  { key: "Analyze", title: "Understand the pattern.", href: "/explore", page: "Explore" },
+  { key: "Simulate", title: "Explore the trajectory.", href: "/simulate", page: "Simulate" },
+  { key: "Act", title: "Support verification and decision-making.", href: "/policy", page: "Policy" },
 ] as const;
 
+/** The four steps of SIGMA's workflow, each linking to the page that does it. Order is the reading order. */
 export function ProcessStrip() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {STEPS.map((step, i) => {
-        const Icon = step.icon;
-        return (
+    <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-[var(--radius-card)] border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+      {STEPS.map((step) => (
+        <li key={step.key} className="bg-sheet">
           <Link
-            key={step.key}
             href={step.href}
-            className="group flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-slate-300 hover:shadow-sm"
+            className="group flex h-full flex-col gap-1 px-4 py-3.5 transition-colors hover:bg-slate-50"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-teal-50 text-accent">
-              <Icon className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                {String(i + 1).padStart(2, "0")} · {step.key}
-              </p>
-              <p className="mt-0.5 text-sm font-medium text-slate-800 group-hover:text-slate-900">
-                {step.title}
-              </p>
-            </div>
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-ink">{step.key}</span>
+              <span className="flex items-center gap-1 text-xs text-slate-500 group-hover:text-accent">
+                {step.page}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="text-[13px] text-slate-600">{step.title}</span>
           </Link>
-        );
-      })}
-    </div>
+        </li>
+      ))}
+    </ol>
   );
 }

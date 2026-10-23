@@ -86,7 +86,6 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Act"
         title="LGU Decision Support"
         subtitle="Ask about an LGU's evidence, then check the sources. SIGMA points to what to verify; it does not prescribe policy."
       />

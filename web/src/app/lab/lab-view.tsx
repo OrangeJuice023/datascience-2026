@@ -64,7 +64,6 @@ export function LabView({ load }: { load: NationalLoad }) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Trace"
         title="SIGMA Lab"
         subtitle="Investigate the pattern behind the signal."
       />

@@ -1,19 +1,66 @@
 @import "tailwindcss";
 
+/*
+ * SIGMA design tokens.
+ *
+ * The palette comes from the Sigi character sheet (docs/brand/sigi-mascot-guide.png):
+ * leaf green #747D59, warm brown #B66D4D, sand cream #F4F0E6, cobalt blue #2468C9 and
+ * ink #22231F. Their roles in the app:
+ *
+ * - Sand cream tints the app frame (sidebar and top bar). The work sits on a white
+ *   sheet, so data is always read on white.
+ * - Ink is the text colour and the one filled button.
+ * - Cobalt is the data hue: the main series in a chart, links, focus and the selected tab.
+ * - Leaf green marks model output and the brand mark. Warm brown is left to Sigi.
+ *
+ * Every text grey reaches 4.5:1 on white and on the frame.
+ */
 :root {
   color-scheme: light;
 
-  --background: #f6f7f9;
-  --surface: #ffffff;
-  --foreground: #0f172a;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
+  /* Surfaces */
+  --frame: #f2f1ed;
+  --frame-active: #e5e3dd;
+  --sheet: #ffffff;
+  --raised: #f7f7f4;
+  --background: var(--frame);
+  --surface: var(--sheet);
 
-  --accent: #0d9488;
-  --accent-foreground: #f0fdfa;
-  --accent-soft: #f0fdfa;
+  /* Lines, in three steps: rule < border < control */
+  --rule: #efede8;
+  --border: #e4e2dc;
+  --control: #cfccc4;
 
-  --focus-ring: #0d9488;
+  /* Text */
+  --foreground: #22231f;
+  --muted-foreground: #5f5d56;
+  --faint: #6f6d66;
+
+  /* Brand and data */
+  --ink: #22231f;
+  --accent: #2468c9;
+  --accent-foreground: #ffffff;
+  --accent-soft: #eef4fc;
+  --leaf: #747d59;
+  --leaf-ink: #535b3e;
+  --brown: #b66d4d;
+  --cream: #f4f0e6;
+
+  /* Status (text-safe on white) */
+  --positive: #247b50;
+  --negative: #c4242a;
+
+  /* Charts */
+  --chart-1: #2468c9;
+  --chart-grid: #ebe8e1;
+  --chart-tick: #6f6d66;
+  --chart-muted: #c9c5bb;
+
+  --focus-ring: #2468c9;
+
+  --radius-sheet: 16px;
+  --radius-card: 10px;
+  --radius-control: 8px;
 }
 
 @theme inline {
@@ -25,8 +72,73 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-soft: var(--accent-soft);
+  --color-frame: var(--frame);
+  --color-frame-active: var(--frame-active);
+  --color-sheet: var(--sheet);
+  --color-raised: var(--raised);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--ink);
+  --color-leaf: var(--leaf);
+  --color-leaf-ink: var(--leaf-ink);
+  --color-cream: var(--cream);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * The components were written against Tailwind's slate, teal and violet scales.
+ * Rather than touch every class, those scales are redefined here:
+ * - slate becomes a warm neutral built on Sigi's ink, and its text steps
+ *   (400 and up) all reach 4.5:1 on white;
+ * - teal (the old accent) becomes cobalt;
+ * - violet and indigo (model output) become leaf green.
+ * New code should use the semantic tokens above (bg-frame, text-ink, border-rule…).
+ */
+@theme {
+  /* Secondary text: 13px, the floor for data and labels people read. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+
+  --color-slate-50: #f7f7f4;
+  --color-slate-100: #efeeea;
+  --color-slate-200: #e4e2dc;
+  --color-slate-300: #cfccc4;
+  --color-slate-400: #6f6d66;
+  --color-slate-500: #5f5d56;
+  --color-slate-600: #4a4943;
+  --color-slate-700: #383833;
+  --color-slate-800: #2b2b27;
+  --color-slate-900: #22231f;
+  --color-slate-950: #161613;
+
+  --color-teal-50: #eef4fc;
+  --color-teal-100: #d9e6f8;
+  --color-teal-200: #b5cdf0;
+  --color-teal-300: #86ade4;
+  --color-teal-400: #4f88d6;
+  --color-teal-500: #2f74cf;
+  --color-teal-600: #2468c9;
+  --color-teal-700: #1d55a6;
+  --color-teal-800: #1a4785;
+  --color-teal-900: #183b6b;
+
+  --color-violet-50: #f3f4ee;
+  --color-violet-100: #e6e8dc;
+  --color-violet-200: #cdd1bb;
+  --color-violet-300: #aeb592;
+  --color-violet-400: #8a9370;
+  --color-violet-500: #747d59;
+  --color-violet-600: #5f6748;
+  --color-violet-700: #535b3e;
+  --color-violet-800: #434a33;
+  --color-violet-900: #363b29;
+  --color-indigo-50: var(--color-violet-50);
+  --color-indigo-100: var(--color-violet-100);
+  --color-indigo-200: var(--color-violet-200);
+  --color-indigo-500: var(--color-violet-500);
+  --color-indigo-600: var(--color-violet-600);
+  --color-indigo-700: var(--color-violet-700);
 }
 
 html {
@@ -34,9 +146,13 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: var(--frame);
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01" off;
+  -webkit-tap-highlight-color: transparent;
+  /* Figures line up in tables, legends and stat strips. */
+  font-variant-numeric: tabular-nums;
 }
 
 * {
@@ -48,6 +164,11 @@ body {
   outline-offset: 2px;
 }
 
+::selection {
+  background: #d9e6f8;
+  color: var(--ink);
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
@@ -55,6 +176,17 @@ body {
 h1,
 h2 {
   text-wrap: balance;
+}
+
+/* Horizontal scroll rows (tabs, segmented controls) scroll inside themselves
+   without a visible bar; the row still scrolls with touch, wheel and keys. */
+.scroll-row {
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
 }
 
 /* A reader who asks the system for less motion gets none: transitions and
@@ -72,7 +204,12 @@ h2 {
 }
 
 .maplibregl-ctrl-attrib {
-  font-size: 10px;
+  font-size: 11px;
+}
+
+.maplibregl-ctrl-group {
+  border-radius: var(--radius-control) !important;
+  box-shadow: 0 0 0 1px var(--control) !important;
 }
 
 /* ---------------------------------------------------------------------

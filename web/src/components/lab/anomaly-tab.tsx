@@ -17,7 +17,7 @@ export function AnomalyTab({ signal, trend }: { signal: Signal; trend: TrendPoin
   return (
     <div className="flex flex-col gap-4">
       <Card className="p-5">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] font-medium text-slate-400">
           Anomaly score
         </p>
         <p className="mt-1 text-3xl font-semibold tabular-nums text-slate-900">

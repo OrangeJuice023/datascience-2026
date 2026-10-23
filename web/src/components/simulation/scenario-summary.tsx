@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/ui/stat-card";
+import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { summarizeTrajectory } from "@/data/demo-simulations";
 import type { SimulationResultPoint, SimulationInputs } from "@/types";
 
@@ -22,7 +22,7 @@ export function ScenarioSummary({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <StatStrip columns={2}>
         <StatCard label="Starting signal" value="Elevated" hint="Demo assumption" />
         <StatCard label="Simulation horizon" value={`${scenario.horizon} days`} />
         <StatCard
@@ -35,7 +35,7 @@ export function ScenarioSummary({
           value={`${summary.maxIntensity.toFixed(2)}x`}
           hint={`Demo result · day ${summary.peakDay}`}
         />
-      </div>
+      </StatStrip>
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function ComparisonTab({
           <Card className="overflow-x-auto p-4">
             <table className="w-full min-w-[420px] text-left text-sm">
               <thead>
-                <tr className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                <tr className="text-xs font-medium text-slate-400">
                   <th className="py-2">Metric</th>
                   <th className="py-2">{lgu.name}</th>
                   <th className="py-2">{compareLgu.name}</th>

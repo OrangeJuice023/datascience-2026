@@ -35,12 +35,12 @@ export function EpiYearChart({ weeks }: { weeks: WeeklyPoint[] }) {
             key={w.periodStart}
             x1={w.epiWeek}
             x2={w.epiWeek}
-            fill="#cbd5e1"
+            fill="#c9c5bb"
             fillOpacity={0.45}
             ifOverflow="extendDomain"
           />
         ))}
-        <Tooltip content={<WeeklyTooltip />} cursor={{ fill: "#f1f5f9" }} />
+        <Tooltip content={<WeeklyTooltip />} cursor={{ fill: "#f2f1ed" }} />
         <Bar dataKey="value" name="Reported cases" fill={OBSERVED} radius={[3, 3, 0, 0]} isAnimationActive={false} />
       </BarChart>
     </ResponsiveContainer>

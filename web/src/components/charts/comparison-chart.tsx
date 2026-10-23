@@ -35,17 +35,17 @@ export function ComparisonChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={merged} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-        <CartesianGrid stroke="#e2e8f0" vertical={false} />
+        <CartesianGrid stroke="#ebe8e1" vertical={false} />
         <XAxis
           dataKey="date"
           tickFormatter={formatShortDate}
-          tick={{ fontSize: 11, fill: "#64748b" }}
-          axisLine={{ stroke: "#e2e8f0" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
+          axisLine={{ stroke: "#ebe8e1" }}
           tickLine={false}
           minTickGap={32}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#64748b" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
           axisLine={false}
           tickLine={false}
           width={32}
@@ -56,14 +56,14 @@ export function ComparisonChart({
         />
         <Line
           dataKey={labelA}
-          stroke="#0d9488"
+          stroke="#2468c9"
           strokeWidth={2}
           dot={false}
           isAnimationActive={false}
         />
         <Line
           dataKey={labelB}
-          stroke="#2563eb"
+          stroke="#9a978e"
           strokeWidth={2}
           strokeDasharray="4 3"
           dot={false}

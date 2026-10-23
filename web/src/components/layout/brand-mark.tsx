@@ -21,13 +21,13 @@ export function BrandMark({ size = 32, src }: { size?: number; src?: string | nu
   }
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-md font-semibold"
+      className="flex shrink-0 items-center justify-center rounded-[28%] font-semibold"
       style={{
         width: size,
         height: size,
         fontSize: size * 0.55,
-        background: "#4f6b58",
-        color: "#f6efe0",
+        background: "var(--leaf-ink)",
+        color: "var(--cream)",
       }}
       aria-hidden="true"
     >

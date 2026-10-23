@@ -13,9 +13,9 @@ import {
 import { formatCount, formatIsoDate } from "@/lib/map/format";
 import { epiWeek, type WeeklyPoint } from "@/lib/national-observations";
 
-export const OBSERVED = "#0d9488";
-export const AXIS_TICK = { fontSize: 11, fill: "#64748b" };
-export const GRID = "#e2e8f0";
+export const OBSERVED = "#2468c9";
+export const AXIS_TICK = { fontSize: 11, fill: "#6f6d66" };
+export const GRID = "#ebe8e1";
 
 export function compactCount(value: number) {
   return value >= 1000 ? `${Math.round(value / 100) / 10}k` : String(value);
@@ -45,7 +45,7 @@ export function WeeklyTooltip({
             <span className="font-semibold tabular-nums text-slate-900">{formatCount(point.value)}</span>
           </p>
           {point.sourceRecordId && (
-            <p className="mt-0.5 text-[10px] text-slate-400">Record {point.sourceRecordId}</p>
+            <p className="mt-0.5 text-[11px] text-slate-400">Record {point.sourceRecordId}</p>
           )}
         </>
       )}
@@ -74,7 +74,7 @@ export function WeeklyHistoryChart({ series }: { series: WeeklyPoint[] }) {
           minTickGap={16}
         />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
-        <Tooltip content={<WeeklyTooltip />} cursor={{ stroke: "#94a3b8", strokeWidth: 1 }} />
+        <Tooltip content={<WeeklyTooltip />} cursor={{ stroke: "#9a978e", strokeWidth: 1 }} />
         <Line
           dataKey="value"
           name="Reported cases"
@@ -88,7 +88,7 @@ export function WeeklyHistoryChart({ series }: { series: WeeklyPoint[] }) {
         <Brush
           dataKey="periodStart"
           height={26}
-          stroke="#94a3b8"
+          stroke="#9a978e"
           travellerWidth={8}
           tickFormatter={(d: string) => d.slice(0, 7)}
         />

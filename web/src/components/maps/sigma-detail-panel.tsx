@@ -108,7 +108,7 @@ export function SigmaDetailPanel({
       {w && (
         <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] font-medium text-slate-400">
               Week of {formatIsoDate(w.week)}
             </p>
             <EvidenceBadge kind="model" />
@@ -163,7 +163,7 @@ export function SigmaDetailPanel({
             <Scatter dataKey="alarm" name="EARS alarm" fill={SIGMA_HEX.alarm} shape="circle" isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
-        <p className="px-2 text-[10px] leading-snug text-slate-400">
+        <p className="px-2 text-[11px] leading-snug text-slate-400">
           Breaks in the line are missing or suspect weeks (no data). Red dots: EARS alarm weeks. Dashed: DOH alert and
           epidemic thresholds (from 2019); the axis is scaled to reported cases, so higher thresholds run off the top.
         </p>

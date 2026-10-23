@@ -234,8 +234,8 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
   };
 
   const modeSummary = (
-    <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+    <div className="border-b border-rule bg-slate-50 px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">
         {mode.label} · {slice?.label ?? "No time slice"}
       </p>
       {selectedFeature ? (
@@ -247,8 +247,8 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
           <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             {selectedFeature.rows.map((row) => (
               <div key={row.label}>
-                <dt className="text-slate-400">{row.label}</dt>
-                <dd className="font-medium text-slate-700">{row.value}</dd>
+                <dt className="text-slate-500">{row.label}</dt>
+                <dd className="font-medium tabular-nums text-slate-800">{row.value}</dd>
               </div>
             ))}
           </dl>
@@ -264,21 +264,24 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Analyze"
         title="Signal Explorer"
         subtitle="Explore formal observations, EARS and DOH threshold results, weather and access across space and time. Every layer states what kind of evidence it shows."
       />
 
       {mode.filters.length > 0 && (
-        <Card className="flex flex-wrap items-end gap-3 p-4">
+        <div
+          role="group"
+          aria-label={`${mode.label} filters`}
+          className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] bg-slate-50 p-3 sm:px-4"
+        >
           {mode.filters.map((key) => filterControls[key])}
-          <Button variant="ghost" onClick={resetFilters}>
+          <Button variant="ghost" onClick={resetFilters} className="min-h-10 md:min-h-9">
             Reset filters
           </Button>
-        </Card>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card className="min-w-0">
           <AnalyticalMap
             modes={MAP_MODES}
@@ -299,7 +302,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
           />
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4 xl:sticky xl:top-4">
           {mode.id === "access" && selectedId ? (
             <Card className="overflow-hidden">
               <AccessDetailPanel
@@ -313,16 +316,16 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
             </Card>
           ) : mode.availability === "planned" ? (
             <Card className="p-5">
-              <p className="text-sm font-semibold text-slate-900">{mode.label}: not connected</p>
+              <h2 className="text-sm font-semibold text-ink">{mode.label}: not connected</h2>
               <p className="mt-1 text-sm text-slate-600">{mode.unavailableReason}</p>
-              <p className="mt-3 text-xs text-slate-400">
+              <p className="mt-3 text-xs text-slate-500">
                 Nothing is drawn for this mode rather than showing placeholder values.
               </p>
             </Card>
           ) : mode.id === "disease" ? (
             <Card className="p-5">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-slate-900">National formal observations</p>
+                <h2 className="text-sm font-semibold text-ink">National formal observations</h2>
                 <EvidenceBadge kind="formal" />
               </div>
               <p className="mt-1 text-sm text-slate-600">
@@ -331,18 +334,18 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
               {nationalCoverage ? (
                 <dl className="mt-3 space-y-1 text-xs">
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Weekly records</dt>
-                    <dd className="text-right text-slate-700">{formatCount(nationalCoverage.count)}</dd>
+                    <dt className="text-slate-500">Weekly records</dt>
+                    <dd className="text-right tabular-nums text-slate-800">{formatCount(nationalCoverage.count)}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Coverage</dt>
-                    <dd className="text-right text-slate-700">
+                    <dt className="text-slate-500">Coverage</dt>
+                    <dd className="text-right tabular-nums text-slate-800">
                       {formatIsoDate(nationalCoverage.first)} – {formatIsoDate(nationalCoverage.last)}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Gaps in the record</dt>
-                    <dd className="text-right text-slate-700">
+                    <dt className="text-slate-500">Gaps in the record</dt>
+                    <dd className="text-right tabular-nums text-slate-800">
                       {nationalCoverage.missingWeeks} weeks in {nationalCoverage.gaps} gaps
                     </dd>
                   </div>
@@ -397,14 +400,14 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
             <Card className="overflow-hidden">
               <div className="flex items-start justify-between border-b border-slate-200 p-4">
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400">{selectedLgu.province}</p>
-                  <h3 className="text-base font-semibold text-slate-900">{selectedLgu.name}</h3>
+                  <p className="text-xs text-slate-500">{selectedLgu.province}</p>
+                  <h2 className="text-base font-semibold text-ink">{selectedLgu.name}</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedId(undefined)}
                   aria-label="Close panel"
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100"
+                  className="-mr-1 -mt-1 flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-ink"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -416,35 +419,37 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
             </Card>
           ) : (
             <Card className="overflow-hidden">
-              <div className="border-b border-slate-200 px-4 py-3">
-                <p className="text-sm font-semibold text-slate-900">Areas in view</p>
+              <div className="border-b border-rule px-4 py-3">
+                <h2 className="text-sm font-semibold text-ink">Areas in view</h2>
                 <p className="text-xs text-slate-500">
                   {slice ? `${slice.label} · ` : ""}
                   {ranked.length} area{ranked.length === 1 ? "" : "s"}. Select one for detail.
                 </p>
               </div>
               {ranked.length > 0 ? (
-                <ul className="max-h-[28rem] divide-y divide-slate-100 overflow-y-auto">
+                <ul className="max-h-[28rem] divide-y divide-rule overflow-y-auto xl:max-h-[calc(100vh-9rem)]">
                   {ranked.map((feature) => (
                     <li key={feature.id}>
                       <button
                         type="button"
                         onClick={() => setSelectedId(feature.id)}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50"
+                        className="flex min-h-11 w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-slate-50 focus-visible:bg-slate-50"
                       >
                         <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ background: rgb(feature) }}
                           aria-hidden="true"
                         />
-                        <span className="flex-1 text-sm text-slate-700">{feature.name}</span>
-                        <span className="text-xs text-slate-500">{feature.classLabel}</span>
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="text-sm text-ink">{feature.name}</span>
+                          <span className="text-xs text-slate-500">{feature.classLabel}</span>
+                        </span>
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="px-4 py-6 text-center text-xs text-slate-400">
+                <p className="px-4 py-6 text-center text-[13px] text-slate-500">
                   No areas match the current filters at this time.
                 </p>
               )}

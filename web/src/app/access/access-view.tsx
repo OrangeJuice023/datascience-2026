@@ -60,7 +60,6 @@ export function AccessView({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Access"
         title="ACCESS"
         subtitle="Explore medicine availability, search demand, and potential access gaps."
       />

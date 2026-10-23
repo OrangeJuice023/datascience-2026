@@ -89,7 +89,6 @@ export default function SimulatePage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Simulate"
         title="Scenario Simulation"
         subtitle="Explore how a public-health signal could evolve under different assumptions. This is scenario analysis, not outbreak prediction."
       />

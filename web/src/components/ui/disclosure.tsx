@@ -29,9 +29,9 @@ export function Disclosure({
   return (
     <details
       open={defaultOpen}
-      className={cn("group rounded-lg border border-slate-200 bg-white", className)}
+      className={cn("group rounded-[var(--radius-card)] border border-border bg-sheet", className)}
     >
-      <summary className="flex cursor-pointer list-none items-start gap-3 rounded-lg px-4 py-3 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-start gap-3 rounded-[var(--radius-card)] px-4 py-3 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
         <ChevronRight
           className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-90 motion-reduce:transition-none"
           aria-hidden="true"
@@ -44,7 +44,7 @@ export function Disclosure({
           {summary && <span className="text-xs text-slate-500">{summary}</span>}
         </span>
       </summary>
-      <div className="border-t border-slate-100 px-4 py-4">{children}</div>
+      <div className="border-t border-rule px-4 py-4">{children}</div>
     </details>
   );
 }

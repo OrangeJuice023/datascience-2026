@@ -87,7 +87,7 @@ export function AskDataPanel() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] text-left text-sm">
               <thead>
-                <tr className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                <tr className="text-xs font-medium text-slate-400">
                   <th className="px-3 py-2">Location</th>
                   <th className="px-3 py-2">Signal</th>
                   <th className="px-3 py-2">Change</th>

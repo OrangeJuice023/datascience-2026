@@ -73,8 +73,8 @@ export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
             <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
             <Tooltip content={<ChartTooltip />} />
             <Area dataKey="bandBase" stackId="band" stroke="none" fill="transparent" isAnimationActive={false} />
-            <Area dataKey="bandRange" stackId="band" name="Expected range" stroke="none" fill="#7c3aed" fillOpacity={0.1} isAnimationActive={false} />
-            <Line dataKey="expected" name="Expected" stroke="#7c3aed" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            <Area dataKey="bandRange" stackId="band" name="Expected range" stroke="none" fill="#747d59" fillOpacity={0.1} isAnimationActive={false} />
+            <Line dataKey="expected" name="Expected" stroke="#747d59" strokeWidth={1.5} dot={false} isAnimationActive={false} />
             <Line dataKey="threshold" name="Alert threshold" stroke="#b91c1c" strokeWidth={1} dot={false} isAnimationActive={false} />
             <Line dataKey="observed" name="Observed" stroke={OBSERVED} strokeWidth={2} dot={false} isAnimationActive={false} />
           </ComposedChart>
@@ -92,7 +92,7 @@ export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
       <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {ROADMAP.map((step) => (
           <li key={step.level} className="rounded-md border border-slate-200 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <p className="text-[11px] font-semibold text-slate-400">
               Level {step.level} · Not started
             </p>
             <p className="mt-0.5 text-sm font-medium text-slate-800">{step.name}</p>

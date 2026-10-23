@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/stat-card";
+import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { TrendChart } from "@/components/charts/trend-chart";
 import { consecutiveElevatedPeriods } from "@/lib/anomaly";
 import { formatMultiplier, formatSignedPercent } from "@/lib/utils";
@@ -17,7 +17,7 @@ export function TrendTab({ signal, trend }: { signal: Signal; trend: TrendPoint[
         <TrendChart data={trend} height={300} />
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <StatStrip columns={4}>
         <StatCard
           label="Current signal"
           value={formatMultiplier(signal.signalLevel)}
@@ -39,7 +39,7 @@ export function TrendTab({ signal, trend }: { signal: Signal; trend: TrendPoint[
           value={String(signal.sourceCount)}
           hint="Demo value"
         />
-      </div>
+      </StatStrip>
     </div>
   );
 }

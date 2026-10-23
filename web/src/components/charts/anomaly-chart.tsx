@@ -26,21 +26,21 @@ export function AnomalyChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={buckets} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke="#e2e8f0" vertical={false} />
+        <CartesianGrid stroke="#ebe8e1" vertical={false} />
         <XAxis
           dataKey="bucket"
-          tick={{ fontSize: 10, fill: "#64748b" }}
-          axisLine={{ stroke: "#e2e8f0" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
+          axisLine={{ stroke: "#ebe8e1" }}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#64748b" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
           axisLine={false}
           tickLine={false}
           width={36}
           allowDecimals={false}
         />
-        <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f1f5f9" }} />
+        <Tooltip content={<ChartTooltip />} cursor={{ fill: "#f2f1ed" }} />
         {currentBucket && (
           <ReferenceLine
             x={currentBucket.bucket}
@@ -50,7 +50,7 @@ export function AnomalyChart({
               value: "Current signal",
               position: "top",
               fill: "#e11d48",
-              fontSize: 10,
+              fontSize: 11,
             }}
           />
         )}
@@ -63,7 +63,7 @@ export function AnomalyChart({
           {buckets.map((bucket) => (
             <Cell
               key={bucket.bucket}
-              fill={bucket.isCurrent ? "#e11d48" : "#cbd5e1"}
+              fill={bucket.isCurrent ? "#e11d48" : "#c9c5bb"}
             />
           ))}
         </Bar>
