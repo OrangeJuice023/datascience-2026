@@ -36,26 +36,54 @@ export function isCopilotUnavailable(code: string | null): boolean {
 /** Matches LIMITS.maxHistory on the server; even, so it keeps whole pairs. */
 export const MAX_HISTORY = 10;
 
+/** Matches LIMITS.maxReplyLength on the server: a longer turn would be refused. */
+export const MAX_TURN_LENGTH = 8000;
+
+/**
+ * Bytes the history may take in the request body. The server refuses bodies
+ * over 16 KB (LIMITS.maxBodyBytes); this leaves room for the new question
+ * (up to 2,000 characters, escaped) and the other fields.
+ */
+export const HISTORY_BYTE_BUDGET = 10 * 1024;
+
 /**
  * The history a request carries: complete exchanges only, each a question
  * followed by the reply the server signed for it. A failed question (about to
  * be retried, or abandoned) is never included, so a retry cannot send the
  * same question twice, and the server rejects unsigned replies anyway.
+ *
+ * The newest exchanges that fit `budget` bytes are kept and older ones are
+ * dropped, so a long conversation never grows into a body the server refuses
+ * (which would otherwise fail every retry the same way).
  */
-export function historyForRequest(turns: ChatMessage[], max = MAX_HISTORY): ChatMessage[] {
-  const pairs: ChatMessage[] = [];
+export function historyForRequest(
+  turns: ChatMessage[],
+  max = MAX_HISTORY,
+  budget = HISTORY_BYTE_BUDGET,
+): ChatMessage[] {
+  const pairs: [ChatMessage, ChatMessage][] = [];
   for (let i = 0; i + 1 < turns.length; i++) {
     const question = turns[i];
     const reply = turns[i + 1];
     if (question.role === "user" && reply.role === "assistant" && reply.signature) {
-      pairs.push(
-        { role: "user", content: question.content },
-        { role: "assistant", content: reply.content, signature: reply.signature },
-      );
+      if (question.content.length <= MAX_TURN_LENGTH && reply.content.length <= MAX_TURN_LENGTH) {
+        pairs.push([
+          { role: "user", content: question.content },
+          { role: "assistant", content: reply.content, signature: reply.signature },
+        ]);
+      }
       i++;
     }
   }
-  return pairs.slice(-max);
+  const kept: ChatMessage[] = [];
+  let bytes = 2; // the surrounding [ ]
+  for (let p = pairs.length - 1; p >= 0 && kept.length + 2 <= max; p--) {
+    const size = new TextEncoder().encode(JSON.stringify(pairs[p])).length + 1;
+    if (bytes + size > budget) break;
+    bytes += size;
+    kept.unshift(...pairs[p]);
+  }
+  return kept;
 }
 
 /** The key that gives each disease and LGU its own conversation (see PolicyView). */

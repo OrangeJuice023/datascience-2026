@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@sigma/contracts';
 
-import { conversationKey, historyForRequest } from './chat-history';
+import { HISTORY_BYTE_BUDGET, conversationKey, historyForRequest } from './chat-history';
 
 describe('historyForRequest', () => {
   const q1: ChatMessage = { role: 'user', content: 'Q1' };
@@ -43,5 +43,26 @@ describe('conversationKey', () => {
     expect(conversationKey('https://a/api/v1', 'Dengue', 'pasig')).not.toBe(base);
     expect(conversationKey('https://a/api/v1', 'Measles', 'quezon-city')).not.toBe(base);
     expect(conversationKey('https://b/api/v1', 'Dengue', 'quezon-city')).not.toBe(base);
+  });
+});
+
+describe('history size', () => {
+  const exchange = (n: number, length: number): ChatMessage[] => [
+    { role: 'user', content: `Q${n}` },
+    { role: 'assistant', content: `A${n} `.padEnd(length, 'x'), signature: `s${n}` },
+  ];
+
+  it('keeps the newest exchanges that fit the byte budget', () => {
+    const history = historyForRequest([1, 2, 3, 4, 5].flatMap((n) => exchange(n, 3000)));
+
+    expect(new TextEncoder().encode(JSON.stringify(history)).length).toBeLessThanOrEqual(HISTORY_BYTE_BUDGET);
+    expect(history.at(-1)?.content.startsWith('A5')).toBe(true);
+    expect(history[0].content).not.toBe('Q1');
+  });
+
+  it('drops an exchange the server would refuse for length', () => {
+    const history = historyForRequest([...exchange(1, 200), ...exchange(2, 9000)]);
+
+    expect(history.map((t) => t.content.slice(0, 2))).toEqual(['Q1', 'A1']);
   });
 });
