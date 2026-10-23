@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DEMO_DISEASES, getLocationIdsForDisease, getSignal } from "@/data/demo-signals";
 import { getLguById } from "@/data/demo-lgus";
 import type { AccessAssessment } from "@/lib/access/assessments";
+import { copilotConversationKey } from "@/lib/policy-chat/copilot-ui";
 import { DEMO_EVIDENCE_SUMMARY, DEMO_POLICY_INSIGHTS, SIGMA_DOES_NOT } from "@/data/demo-policy";
 import { getComparison } from "@/data/policy-evidence/comparator";
 import type { PolicyEvidenceRecord, PolicyEvidenceTopic, VerificationStatus } from "@/lib/policy-evidence/types";
@@ -113,6 +114,7 @@ export function PolicyView({ accessAssessments }: { accessAssessments: AccessAss
 
       <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <PolicyCopilot
+          key={copilotConversationKey(disease, effectiveLocationId)}
           disease={disease}
           locationId={effectiveLocationId}
           locationName={lgu?.name}

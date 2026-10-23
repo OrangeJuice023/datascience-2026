@@ -7,11 +7,23 @@ the cities they share tells us (a) which week label offset lines them up and
 Output: data/processed/environment/crosscheck.json
 
     python -m environment.crosscheck
+
+HDX rows flagged as suspected cases/deaths swaps (clean_dengue.mark_suspect_swaps,
+the same rule as the SIGMA map and the geography track) are no data here: their
+`cases` is probably the week's death count, so it is set to NaN before any
+comparison rather than compared as a real count.
+
+The best-correlating offset is reported, not enforced. What the HDX `date`
+means is undocumented (docs/dengue-pipeline.md, "HDX week convention"), so the
+highest correlation is evidence, not a definition; a mismatch with the
+configured offset is printed for review.
 """
 
 import json
 
 import pandas as pd
+
+from clean_dengue import mark_suspect_swaps
 
 from . import weeks
 from .geography import load_crosswalk
@@ -31,9 +43,15 @@ def load() -> tuple[pd.DataFrame, pd.DataFrame]:
     pidsr = pd.read_csv(RAW / "disease_pidsr_totals.csv")
     pidsr = pidsr[pidsr["disease_common_name"] == "DENGUE FEVER"]
     pidsr = pidsr.assign(date=weeks.from_source_label(pidsr["date"], "cchain_pidsr"))
-    hdx = pd.read_csv(HDX, skiprows=[1])  # row 2 is HXL tags
-    hdx = hdx.assign(loc=hdx["loc"].str.strip(), date=pd.to_datetime(hdx["date"], format="%m/%d/%Y"))
+    hdx = prepare_hdx(pd.read_csv(HDX, skiprows=[1]))  # row 2 is HXL tags
     return pidsr, hdx
+
+
+def prepare_hdx(raw: pd.DataFrame) -> pd.DataFrame:
+    """Parse dates and blank the cases of suspected swap rows. Needs the source row order."""
+    hdx = raw.assign(loc=raw["loc"].str.strip(), date=pd.to_datetime(raw["date"], format="%m/%d/%Y"))
+    swap = mark_suspect_swaps(hdx)
+    return hdx.assign(suspect_swap=swap, cases=hdx["cases"].where(~swap))
 
 
 def compare(a: pd.Series, b: pd.Series, offset: int) -> dict:
@@ -74,6 +92,7 @@ def main() -> None:
         "week_convention": "canonical Sun-Sat; CCHAIN label offset "
                            f"{weeks.SOURCE_WEEK_OFFSET_DAYS['cchain_pidsr']} d",
         "hdx_weekday": sorted(hdx["date"].dt.day_name().unique().tolist()),
+        "hdx_swap_rows_excluded": int(hdx["suspect_swap"].sum()),
         "best_offset_days": best,
         "configured_offset_days": weeks.SOURCE_WEEK_OFFSET_DAYS["hdx_doh_epi"],
         "by_offset": by_offset,
@@ -86,7 +105,9 @@ def main() -> None:
     for c, p in province.items():
         print(f"{c}: vs city {by_offset[best]['cities'][c]} | vs province {p}")
     if best != weeks.SOURCE_WEEK_OFFSET_DAYS["hdx_doh_epi"]:
-        raise SystemExit(f"best HDX offset {best} d differs from weeks.SOURCE_WEEK_OFFSET_DAYS; review it")
+        print(f"note: best-correlating HDX offset is {best} d; configured "
+              f"{weeks.SOURCE_WEEK_OFFSET_DAYS['hdx_doh_epi']} d. The date's meaning is unconfirmed, "
+              "so this is for review, not an automatic change.")
 
 
 if __name__ == "__main__":

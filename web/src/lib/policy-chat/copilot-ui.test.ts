@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
-import { copilotSigiState, isCopilotUnavailable, referencedEvidence, suggestedQuestions } from "./copilot-ui";
+import {
+  HISTORY_BYTE_BUDGET,
+  copilotSigiState,
+  historyForRequest,
+  isCopilotUnavailable,
+  referencedEvidence,
+  suggestedQuestions,
+} from "./copilot-ui";
 
 function record(evidenceId: string, topic: PolicyEvidenceRecord["topic"], sourceIds: string[] = []): PolicyEvidenceRecord {
   return {
@@ -79,5 +86,28 @@ describe("suggested questions", () => {
 
   it("does not refer to a signal when there is none", () => {
     expect(suggestedQuestions([], false).join(" ")).not.toMatch(/this signal/);
+  });
+});
+
+describe("history size", () => {
+  const exchange = (n: number, length: number) => [
+    { role: "user" as const, content: `Q${n}` },
+    { role: "assistant" as const, content: `A${n} `.padEnd(length, "x"), signature: `s${n}` },
+  ];
+
+  it("keeps the newest exchanges that fit the byte budget", () => {
+    const turns = [1, 2, 3, 4, 5].flatMap((n) => exchange(n, 3000));
+    const history = historyForRequest(turns);
+
+    expect(new TextEncoder().encode(JSON.stringify(history)).length).toBeLessThanOrEqual(HISTORY_BYTE_BUDGET);
+    expect(history.at(-1)?.content.startsWith("A5")).toBe(true);
+    expect(history[0].content).not.toBe("Q1");
+    expect(history.length % 2).toBe(0);
+  });
+
+  it("drops an exchange the server would refuse for length", () => {
+    const history = historyForRequest([...exchange(1, 200), ...exchange(2, 9000)]);
+
+    expect(history.map((t) => t.content.slice(0, 2))).toEqual(["Q1", "A1"]);
   });
 });

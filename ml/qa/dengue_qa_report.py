@@ -2,6 +2,7 @@
 
 Run from anywhere: python ml/qa/dengue_qa_report.py
 """
+import sys
 import tempfile
 from pathlib import Path
 
@@ -20,6 +21,9 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (Image, KeepTogether, PageBreak, Paragraph,
                                 SimpleDocTemplate, Spacer, Table, TableStyle)
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from local_sums import complete_local_sum, excluded_weeks, national_vs_local, valid_values  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "docs" / "reports" / "dengue_qa_report.pdf"
@@ -73,10 +77,14 @@ for r in loc[(loc.epi_year >= 2019) & loc.doh_note.isna()].itertuples():
     if abs(a - r.alert_threshold) > 0.06 or abs(e - r.epidemic_threshold) > 0.06 or st != r.doh_status:
         mism += 1
 
+# Only "ok" rows are observations. Swap rows (value is probably the death
+# count, mostly 0) and missing weeks are no data here, never zeros.
+loc["valid"] = valid_values(loc)
+
 # suspicious zero runs: >= 4 consecutive zeros in a place that normally reports >= 10/week
-typ = loc[loc.value > 0].groupby("geography_name").value.median()
+typ = loc[loc.valid > 0].groupby("geography_name").valid.median()
 loc["typ"] = loc.geography_name.map(typ)
-z = loc.value == 0
+z = loc.valid == 0
 grp = (z != z.groupby(loc.geography_name).shift()).cumsum()
 loc["run"] = z.groupby(grp).transform("sum") * z
 sus = loc[loc.data_flag == "possible non-reporting"]
@@ -97,8 +105,11 @@ n_isolated = int((spk.x_nb >= 4).sum())
 # small counts
 sd0 = int(((loc.epidemic_threshold == loc.alert_threshold) & loc.alert_threshold.notna()).sum())
 epi_small = loc[(loc.doh_status == "epidemic") & (loc.value <= 5)]
-zero_share = loc.groupby("geography_name").value.apply(lambda s: (s == 0).mean())
-local_sum = loc.groupby("period_start").value.sum(min_count=1)
+zero_share = loc.groupby("geography_name").valid.apply(lambda s: (s == 0).sum() / s.notna().sum())
+# Summed only in weeks where all 126 places have a valid value; otherwise no total.
+local_sum = complete_local_sum(loc)
+excluded = excluded_weeks(loc)
+agree = national_vs_local(nat.set_index("period_start").value, local_sum)
 
 # ======================= figures =======================
 def fig_national():
@@ -125,7 +136,8 @@ def fig_national():
 def fig_compare():
     n = nat.set_index("period_start").value
     fig, ax = plt.subplots(figsize=(7.2, 2.4), dpi=200)
-    ax.plot(local_sum.index, local_sum.values, color=ORANGE, lw=1.2, label="Sum of 126 local places")
+    ax.plot(local_sum.index, local_sum.values, color=ORANGE, lw=1.2,
+            label="Sum of 126 local places (complete weeks only)")
     ax.plot(n.index, n.values, color=BLUE, lw=1.2, label="National (OpenDengue)")
     ax.set_ylabel("cases / week")
     ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
@@ -250,12 +262,19 @@ story += [para("2. Checks passed", H2),
                  ["DOH thresholds recomputed independently", f"{checked:,} rows, {mism} mismatches", badge("PASS" if mism == 0 else "FAIL")],
                  ["data_flag only on reported (“ok”) weeks", f"{int((loc.data_flag.notna() & (loc.data_quality != 'ok')).sum())} on non-ok rows", badge("PASS")],
                  ["No blank doh_status cells", "every row has a status + note where needed", badge("PASS")],
-                 ["National vs local totals agree", f"correlation 0.95; national ≈ 0.93× local sum", badge("PASS")]],
+                 ["National vs local totals agree",
+                  f"correlation {agree['corr']:.2f}; national ≈ {agree['ratio']:.2f}× local sum "
+                  f"({agree['weeks']} complete weeks)", badge("PASS" if agree["corr"] >= 0.9 else "WARN")]],
                 [80, 72, 22]),
           Spacer(1, 4),
           Image(str(f2), width=174 * mm, height=174 * mm * 2.4 / 7.2),
           para("Figure 1. National series against the sum of all local places. They track closely except at "
-               "year-end (national fades out, then jumps) and during the 2019 epidemic peak.", CAP)]
+               "year-end (national fades out, then jumps) and during the 2019 epidemic peak. The local sum is "
+               f"drawn only for the {int(local_sum.notna().sum())} weeks where all 126 places have a valid value: "
+               f"{int(excluded.get('suspect swap', pd.Series(dtype=int)).gt(0).sum())} weeks with suspected "
+               f"cases/deaths swap rows and {int(excluded.get('missing', pd.Series(dtype=int)).gt(0).sum())} weeks "
+               "with missing rows have no total, rather than a partial sum that would look like a dip. "
+               "The excluded rows stay in the workbook, marked by data_quality.", CAP)]
 
 story += [para("3. Findings", H2),
           para("Ranked by how much they affect EARS. The status after the latest rebuild is shown on each finding.", SM)]

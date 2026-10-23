@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { ChatMessage, ChatResponseData } from "@sigma/contracts";
 import {
   buildPolicyChatContext,
@@ -18,7 +19,12 @@ import { LIMITS } from "./query";
  *   canned reply that could be mistaken for a real answer;
  * - bounds the request (message length, history depth, tokens);
  * - never forwards upstream error text to the client;
- * - states in every response what context the model actually received.
+ * - states in every response what context the model actually received;
+ * - accepts history only as complete user/assistant pairs whose assistant
+ *   reply carries the signature this server issued for that disease and LGU,
+ *   so a client cannot inject an "assistant" turn or reuse another LGU's
+ *   conversation. The system prompt is always built here, never taken from
+ *   the request.
  */
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
@@ -42,13 +48,67 @@ function isString(value: unknown): value is string {
   return typeof value === "string";
 }
 
-function normalizeMessage(value: unknown): ChatMessage | null {
-  if (!value || typeof value !== "object") return null;
-  const obj = value as Record<string, unknown>;
-  const role = obj.role;
-  const content = obj.content;
-  if ((role !== "user" && role !== "assistant") || !isString(content)) return null;
-  return { role, content: content.slice(0, LIMITS.maxMessageLength) };
+/**
+ * Validates the history shape: an array of complete pairs, user then
+ * assistant, oldest first, each assistant turn carrying a signature. Any
+ * other role (including "system"), an empty turn, an over-long turn, a
+ * missing signature or a broken sequence is a client error, not something to
+ * repair silently. Signatures are checked later, against the server secret.
+ */
+function parseHistory(value: unknown): ChatMessage[] {
+  if (value === undefined || value === null) return [];
+  const invalid = (reason: string) =>
+    ApiError.badRequest(`"history" is invalid: ${reason}.`, { history: [reason] });
+  if (!Array.isArray(value)) throw invalid("must be an array");
+  if (value.length % 2 !== 0) throw invalid("must hold complete question/answer pairs");
+
+  return value.map((item, index): ChatMessage => {
+    if (!item || typeof item !== "object") throw invalid(`entry ${index} is not an object`);
+    const { role, content, signature } = item as Record<string, unknown>;
+    const expected = index % 2 === 0 ? "user" : "assistant";
+    if (role !== expected) throw invalid(`entry ${index} must have role "${expected}"`);
+    if (!isString(content) || !content.trim()) throw invalid(`entry ${index} has no content`);
+    if (content.length > LIMITS.maxReplyLength) throw invalid(`entry ${index} is too long`);
+    if (role === "user") return { role: "user", content };
+    if (!isString(signature) || !signature) throw invalid(`entry ${index} is an unsigned assistant turn`);
+    return { role: "assistant", content, signature };
+  });
+}
+
+/**
+ * The signature binding one exchange (question and reply) to a disease and
+ * LGU. HMAC-SHA256 over a JSON array so no field can bleed into another.
+ */
+export function signExchange(
+  secret: string,
+  scope: { disease: string; locationId: string },
+  question: string,
+  reply: string,
+): string {
+  return createHmac("sha256", secret)
+    .update(JSON.stringify(["sigma-chat-v1", scope.disease, scope.locationId, question, reply]))
+    .digest("base64url");
+}
+
+function signatureMatches(expected: string, given: string): boolean {
+  const a = Buffer.from(expected);
+  const b = Buffer.from(given);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** Rejects the request unless every assistant turn was issued by this server for this disease and LGU. */
+export function verifyHistory(request: ParsedChatRequest, secret: string): void {
+  for (let i = 1; i < request.history.length; i += 2) {
+    const question = request.history[i - 1].content;
+    const reply = request.history[i];
+    const expected = signExchange(secret, request, question, reply.content);
+    if (!reply.signature || !signatureMatches(expected, reply.signature)) {
+      throw ApiError.badRequest(
+        "\"history\" contains a reply this server did not issue for this disease and LGU. Start a new conversation.",
+        { history: ["unverified assistant turn"] },
+      );
+    }
+  }
 }
 
 /** Validates the request body and the disease/LGU pairing. */
@@ -87,12 +147,11 @@ export function parseChatRequest(body: unknown): ParsedChatRequest {
     });
   }
 
-  const history = Array.isArray(raw.history)
-    ? raw.history.map(normalizeMessage).filter((m): m is ChatMessage => m !== null)
-    : [];
+  const history = parseHistory(raw.history);
 
   return {
     message: message.slice(0, LIMITS.maxMessageLength),
+    // maxHistory is even, so the most recent turns are still whole pairs.
     history: history.slice(-LIMITS.maxHistory),
     disease,
     locationId,
@@ -102,6 +161,37 @@ export function parseChatRequest(body: unknown): ParsedChatRequest {
 export interface ChatProviderConfig {
   apiKey: string | undefined;
   model: string | undefined;
+  /** Key for history signatures. Defaults to one derived from the API key. */
+  historySecret?: string | undefined;
+}
+
+export interface ChatEnvironment {
+  apiKey: string | undefined;
+  model: string | undefined;
+  historySecret: string | undefined;
+  /** CHAT_DISABLED or CHAT_PUBLIC_DISABLED is "true": requests are refused. */
+  switchedOff: boolean;
+  /** A key is configured and the copilot is not switched off. */
+  enabled: boolean;
+}
+
+/** Reads the chat settings once, so the chat route and /health agree. */
+export function chatEnvironment(env: Record<string, string | undefined> = process.env): ChatEnvironment {
+  const apiKey = env.GROQ_API_KEY?.trim() || undefined;
+  const switchedOff = env.CHAT_DISABLED === "true" || env.CHAT_PUBLIC_DISABLED === "true";
+  return {
+    apiKey,
+    model: env.GROQ_MODEL,
+    historySecret: env.CHAT_HISTORY_SECRET?.trim() || undefined,
+    switchedOff,
+    enabled: Boolean(apiKey) && !switchedOff,
+  };
+}
+
+/** The signing key: CHAT_HISTORY_SECRET, or a key derived from the provider key (which never leaves the server). */
+export function historySecret(config: ChatProviderConfig): string {
+  if (config.historySecret) return config.historySecret;
+  return createHmac("sha256", config.apiKey ?? "").update("sigma-chat-history").digest("base64url");
 }
 
 export function resolveModel(config: ChatProviderConfig): string {
@@ -122,12 +212,15 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
     );
   }
 
+  const secret = historySecret(input.config);
+  verifyHistory(input.request, secret);
+
   const context = await buildPolicyChatContext(input.request.disease, input.request.locationId);
   const model = resolveModel(input.config);
 
   const messages = [
     { role: "system" as const, content: buildSystemPrompt(context) },
-    ...input.request.history,
+    ...input.request.history.map(({ role, content }) => ({ role, content })),
     { role: "user" as const, content: input.request.message },
   ];
 
@@ -190,13 +283,35 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
     model,
     contextScope: `Demo evidence for ${input.request.disease} in ${context.lgu?.name ?? input.request.locationId}, plus the source catalogue and stated limitations.`,
     limitations: [...CHAT_LIMITATIONS],
+    replySignature: signExchange(secret, input.request, input.request.message, content),
   };
 }
 
+/**
+ * Per-client request limit. In memory, so it holds per server instance only
+ * (a serverless deployment can run several); it slows abuse of the public
+ * endpoint, it is not a quota. Expired entries are pruned so the map cannot
+ * grow without bound.
+ */
 export const rateLimitMap = new Map<string, { count: number; reset: number }>();
+
+const MAX_TRACKED_CLIENTS = 10_000;
+
+function pruneRateLimits(now: number) {
+  for (const [key, entry] of rateLimitMap) {
+    if (entry.reset < now) rateLimitMap.delete(key);
+  }
+  // Still full of live entries: drop the oldest rather than grow.
+  while (rateLimitMap.size >= MAX_TRACKED_CLIENTS) {
+    const oldest = rateLimitMap.keys().next().value;
+    if (oldest === undefined) break;
+    rateLimitMap.delete(oldest);
+  }
+}
 
 export function checkRateLimit(ip: string, limit = 30, windowMs = 60000) {
   const now = Date.now();
+  if (rateLimitMap.size >= MAX_TRACKED_CLIENTS) pruneRateLimits(now);
   const entry = rateLimitMap.get(ip);
   if (!entry || entry.reset < now) {
     rateLimitMap.set(ip, { count: 1, reset: now + windowMs });
@@ -209,7 +324,7 @@ export function checkRateLimit(ip: string, limit = 30, windowMs = 60000) {
   return null;
 }
 
+/** A request with no client address shares one bucket instead of going unlimited. */
 export function rateLimited(ip: string | null | undefined) {
-  if (!ip) return null;
-  return checkRateLimit(ip, 30, 60000);
+  return checkRateLimit(ip || "unknown-client", 30, 60000);
 }

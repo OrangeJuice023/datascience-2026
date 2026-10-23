@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { fetchAccessMetrics } from '@/api/endpoints';
+import { shareLabel } from '@/components/format';
 import { Screen } from '@/components/screen';
 import { SigiNote, sigiStateForData } from '@/components/sigi';
 import { Banner, Card, ChipGroup, ErrorState, FactRow, LoadingState, SectionTitle, StatusPill } from '@/components/ui';
@@ -64,7 +65,8 @@ export default function AccessScreen() {
       status={access.meta?.status}
       statusLabel="Prototype"
       onRefresh={refresh}
-      refreshing={access.refreshing}>
+      refreshing={access.refreshing}
+      staleError={access.stale ? access.error?.message : null}>
       {loading ? <LoadingState label="Loading access metrics…" /> : null}
       {failed && access.error ? (
         <ErrorState message={access.error.message} onRetry={refresh} />
@@ -115,7 +117,14 @@ export default function AccessScreen() {
                 <FactRow label="Access gap" value={latestMetric.accessGapLabel} tone={gapTone(latestMetric.accessGap)} />
                 <FactRow label="Confidence" value={latestMetric.confidence} />
                 <FactRow label="Facilities in area" value={String(latestMetric.facilities)} />
-                <FactRow label="Reporting coverage" value={`${Math.round(latestMetric.facilityCoverage * 100)}%`} />
+                <FactRow
+                  label="Reporting coverage"
+                  value={
+                    latestMetric.facilities > 0
+                      ? `${Math.round(latestMetric.facilityCoverage * 100)}%`
+                      : 'No facilities in this area'
+                  }
+                />
                 <FactRow label="Confirmed available" value={String(latestMetric.confirmedAvailable)} />
                 <FactRow label="Reported unavailable" value={String(latestMetric.reportedUnavailable)} />
                 <FactRow label="Stale reports" value={String(latestMetric.staleInventory)} />
@@ -123,9 +132,11 @@ export default function AccessScreen() {
                 <FactRow label="Search events" value={String(latestMetric.searchDemand)} />
                 <FactRow
                   label="Searches finding nothing nearby"
-                  value={`${latestMetric.notFoundSearches} (${Math.round(
-                    latestMetric.searchDemand ? (latestMetric.notFoundSearches / latestMetric.searchDemand) * 100 : 0
-                  )}%)`}
+                  value={
+                    latestMetric.searchDemand > 0
+                      ? `${latestMetric.notFoundSearches} (${shareLabel(latestMetric.notFoundSearches, latestMetric.searchDemand, '')})`
+                      : 'No searches this week'
+                  }
                 />
                 <FactRow label="Demand vs area baseline" value={`${latestMetric.demandRatio.toFixed(2)}x`} />
                 {latestMetric.reasons.map((reason) => (

@@ -29,7 +29,8 @@ export interface PolicyChatContext {
   lgu: LGU | undefined;
   signal: Signal | undefined;
   trendPoints: number;
-  neighbors: { name: string; status: string; changePercent: number }[];
+  /** Same disease only; a null status/change means no signal in the window, not "normal". */
+  neighbors: { name: string; status: string | null; changePercent: number | null; date: string | null }[];
   formalSource: { name: string; version: string; period: string } | null;
   sources: { name: string; status: string; purpose: string }[];
   policyEvidence: Array<{
@@ -57,10 +58,11 @@ export async function buildPolicyChatContext(
   const lgu = getLguById(locationId);
   const signal = getSignal(disease, locationId);
   const trend = getTrendSeries(locationId);
-  const neighbors = getNeighborSummaries(locationId).map((n) => ({
+  const neighbors = getNeighborSummaries(locationId, disease, { asOf: signal?.date }).map((n) => ({
     name: n.locationName,
     status: n.status,
     changePercent: n.changePercent,
+    date: n.date,
   }));
 
   let formalSource: PolicyChatContext["formalSource"] = null;
@@ -81,6 +83,7 @@ export async function buildPolicyChatContext(
     // ignore
   }
 
+  // The same catalogue GET /api/v1/sources serves, so the copilot and the API agree.
   const sources = SOURCE_CATALOG.map((s) => ({
     name: s.name,
     status: s.status,

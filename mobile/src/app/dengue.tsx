@@ -43,7 +43,7 @@ export default function DengueScreen() {
     const points = summary.data?.weekly.points ?? [];
     const sliced = windowKey === 'all' ? points : points.slice(-Number(windowKey));
     return sliced.map((point, index) => ({
-      label: point.periodStart.slice(5),
+      label: point.periodStart,
       value: point.value,
       highlight: index === sliced.length - 1,
     }));
@@ -63,7 +63,8 @@ export default function DengueScreen() {
       subtitle="National reported case counts, weekly."
       status={summary.meta?.status}
       onRefresh={refresh}
-      refreshing={summary.refreshing}>
+      refreshing={summary.refreshing}
+      staleError={summary.stale ? summary.error?.message : null}>
       {loading ? <LoadingState label="Loading the national series…" /> : null}
       {failed && summary.error ? (
         <ErrorState message={summary.error.message} onRetry={refresh} />

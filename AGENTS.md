@@ -1,6 +1,6 @@
-# Instructions for AI coding agents (Claude, GPT/Codex, Kilo, Cursor, …)
+# Instructions for AI coding agents (GPT/Codex, Kilo, Cursor, …)
 
-These rules apply to every AI agent working in this repository. `CLAUDE.md` points here.
+These rules apply to every AI agent working in this repository.
 `web/AGENTS.md` adds Next.js rules for the frontend; read it before touching `web/`.
 
 SIGMA is a hackathon public-health project (PJDSC 2026): dengue early-warning (EARS vs DOH
@@ -10,9 +10,13 @@ a human can review quickly.
 
 ## 1. Hard rules
 
-- **Never request, approve, merge or close a pull request.** Do not add reviewers, approve
-  reviews or enable auto-merge, via `gh` or anything else. PRs are for human review. You may
-  push branches and **draft** PR text for a human to paste or open.
+- **Never approve, merge or close a pull request on your own initiative.** Do not add
+  reviewers, approve reviews or enable auto-merge, via `gh` or anything else. You may push
+  branches and open or draft PRs.
+  - **Merging on request:** you may merge a specific PR when a team member explicitly asks
+    you to merge that PR, and only after its CI checks pass and it has no conflicts with
+    `main`. Say which PR you merged and who asked, in your hand-off notes. A general
+    "merge things" or an earlier approval does not count for a different PR.
 - **Never force-push, rewrite published history, or delete branches** unless a human asks for
   that specific action.
 - **Never commit data that is git-ignored or not licensed for redistribution.** `data/raw/` and
