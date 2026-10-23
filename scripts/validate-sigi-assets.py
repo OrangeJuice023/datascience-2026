@@ -19,8 +19,9 @@ for state in manifest["states"]:
     web_gif = os.path.join(WEB, name + ".gif")
     mobile_gif = os.path.join(MOBILE, name + ".gif")
     web_png = os.path.join(WEB, name + ".png")
-    mobile_png = os.path.join(MOBILE, name + ".png")
     frames_dir = os.path.join(MOBILE, "frames", name)
+    # Mobile's reduced-motion still is the first frame of the sequence.
+    mobile_png = os.path.join(frames_dir, "frame_00.png")
 
     image = Image.open(web_gif)
     rendered = [f.convert("RGBA").tobytes() for f in ImageSequence.Iterator(image)]
@@ -29,7 +30,7 @@ for state in manifest["states"]:
     still = Image.open(web_png)
     on_disk = len(os.listdir(frames_dir)) if os.path.isdir(frames_dir) else 0
     same_gif = hashlib.md5(open(web_gif, "rb").read()).hexdigest() == hashlib.md5(open(mobile_gif, "rb").read()).hexdigest()
-    same_png = hashlib.md5(open(web_png, "rb").read()).hexdigest() == hashlib.md5(open(mobile_png, "rb").read()).hexdigest()
+    same_png = Image.open(web_png).convert("RGBA").tobytes() == Image.open(mobile_png).convert("RGBA").tobytes()
 
     good = (
         len(rendered) == state["frames"]
