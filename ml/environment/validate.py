@@ -51,8 +51,16 @@ def main() -> None:
     ids = set(geo["geography_id"])
 
     print("-- geography")
-    check(geo["geography_id"].map(lambda s: bool(re.fullmatch(r"PH\d{9}", s))).all(),
-          "geography_id is a COD-AB pcode (PH + 9 digits)")
+    hub = pd.read_csv(geography.GEO_REFERENCE / "geography_hub_rows.csv", dtype=str).set_index("geography_id")
+    check(geo["geography_id"].map(lambda s: bool(re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", s))).all(),
+          "geography_id is a canonical slug id (not a pcode)")
+    same = geo[geo["hdx_unit_relation"] == "same_area"]
+    check(set(same["geography_id"]) <= set(hub.index)
+          and (same["psgc_code"].values == hub.loc[same["geography_id"], "psgc_code"].values).all(),
+          "same_area cities resolve in geography_hub_rows.csv with the same psgc_code")
+    check(set(geo.loc[geo["in_cchain"], "cchain_adm3_pcode"])
+          == set(pd.read_csv(geography.GEO_REFERENCE / "cchain_city_crosswalk.csv")["cchain_adm3_pcode"]),
+          "every CCHAIN city keeps its CCHAIN pcode and matches cchain_city_crosswalk.csv")
     check(not geo["geography_id"].duplicated().any(), "geography_id unique")
     check(geo[["latitude", "longitude"]].notna().all().all()
           and geo["latitude"].between(4.5, 21.5).all() and geo["longitude"].between(116, 127).all(),

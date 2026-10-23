@@ -4,6 +4,7 @@ import type {
   ConfidenceLevel,
   EnvironmentalObservation,
   GeographicLevel,
+  HdxUnitRelation,
   IsoDate,
   WeatherComparability,
   WeatherCoverage,
@@ -42,6 +43,9 @@ interface EnvironmentBundle {
     latitude: number;
     longitude: number;
     inCchain: boolean;
+    psgcCode: string;
+    hdxUnitId: string;
+    hdxUnitRelation: HdxUnitRelation;
   }>;
   comparability: Record<WeatherVariable, WeatherComparability>;
   series: Array<{
@@ -148,6 +152,9 @@ export function getWeatherCoverage(): WeatherCoverage[] {
       geographyName: g?.name ?? s.geographyId,
       centroid: { latitude: g?.latitude ?? NaN, longitude: g?.longitude ?? NaN },
       inCchain: g?.inCchain ?? false,
+      psgcCode: g?.psgcCode ?? "",
+      hdxUnitId: g?.hdxUnitId ?? "",
+      hdxUnitRelation: g?.hdxUnitRelation ?? "inside_unit",
       sourceId: s.sourceId,
       upstreamProduct: BUNDLE.sources[s.sourceId].upstreamProduct,
       aggregationMethod: BUNDLE.sources[s.sourceId].aggregationMethod,
