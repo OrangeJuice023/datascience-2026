@@ -32,9 +32,9 @@ SIGMA explores three questions on that data:
 ## Workflow and modules
 
 ```
-TRACE (Lab) ──► ANALYZE (Explore) ──► SIMULATE ──► ACT (Policy)
- signals          anomalies, maps       scenarios     areas for assessment
-                         └──────── ACCESS (medicine access) ───────┘
+TRACE (Lab) ──► ANALYZE (Explore) ──► ACT (Policy)
+ signals          anomalies, maps       areas for assessment
+                         └── ACCESS (medicine access) ──┘
 ```
 
 | Module | Route | What it does | Data behind it |
@@ -43,7 +43,6 @@ TRACE (Lab) ──► ANALYZE (Explore) ──► SIMULATE ──► ACT (Policy
 | Explore | `/explore` | Signal Explorer map: dengue cases, DOH thresholds and EARS results per reporting unit, weekly city weather (Environment), plus signal, anomaly and scenario layers | **Real** HDX DOH dengue 2016–2021 (retrospective export) and **real** weather for 12 CCHAIN cities; other layers demo |
 | Lab | `/lab` | Investigate the pattern behind a signal | **Real** OpenDengue national weekly series |
 | ACCESS | `/access` | Medicine availability, search demand and potential access gaps | **Demo** (simulated facilities, inventory and searches) |
-| Simulate | `/simulate` | Scenario analysis of how a signal could evolve under assumptions | **Demo** deterministic curve, not a fitted model |
 | Policy | `/policy` | LGU decision support: areas for verification and assessment, Policy Copilot | Demo evidence; Copilot needs a server-side model key |
 | Documentation | `/documentation` | Rendered API reference | Generated from the API registry |
 
@@ -169,7 +168,7 @@ curl "https://datascience-2026.vercel.app/api/v1/access/metrics?medicineId=<id>&
 | EARS / DOH results on the map | **Implemented** as a static retrospective export on Explore |
 | EARS in the API (`/dengue/signals`) | **Not connected**: returns `not_connected`, not "no outbreak" |
 | ACCESS gap rule | **Implemented**, rule-based and illustrative, on **demo** data only |
-| Simulate | **Demo** curve; no fitted epidemiological model |
+| Simulate page | **Removed** (was a demo curve, not a fitted model) |
 | Forecasting models (SARIMA, gradient boosting, Bayesian spatial) | **Not started**; proposed in [planning/SIGMA_RESEARCH.md](planning/SIGMA_RESEARCH.md) |
 | Signal ingestion (GDELT, news) | **Demo** stand-ins; no live ingestion |
 

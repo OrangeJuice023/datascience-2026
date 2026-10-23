@@ -50,7 +50,7 @@ export function OverviewView({ formal }: { formal: FormalSummary | null }) {
       <PageHeader
         eyebrow="Public health intelligence"
         title="SIGMA"
-        subtitle="Trace signals across space and time. Investigate patterns. Explore scenarios. Support verification."
+        subtitle="Trace signals across space and time. Investigate patterns. Support verification."
       />
 
       <ProcessStrip />
