@@ -40,7 +40,7 @@ TRACE (Lab) ──► ANALYZE (Explore) ──► SIMULATE ──► ACT (Policy
 | Module | Route | What it does | Data behind it |
 | --- | --- | --- | --- |
 | Overview | `/` | Landing dashboard and entry point to the modules | Mixed real and demo; see the module rows below |
-| Explore | `/explore` | Signal Explorer map: dengue cases, DOH thresholds and EARS results per reporting unit, plus signal, anomaly and scenario layers | **Real** HDX DOH dengue 2016–2021 (retrospective export); other layers demo |
+| Explore | `/explore` | Signal Explorer map: dengue cases, DOH thresholds and EARS results per reporting unit, weekly city weather (Environment), plus signal, anomaly and scenario layers | **Real** HDX DOH dengue 2016–2021 (retrospective export) and **real** weather for 12 CCHAIN cities; other layers demo |
 | Lab | `/lab` | Investigate the pattern behind a signal | **Real** OpenDengue national weekly series |
 | ACCESS | `/access` | Medicine availability, search demand and potential access gaps | **Demo** (simulated facilities, inventory and searches) |
 | Simulate | `/simulate` | Scenario analysis of how a signal could evolve under assumptions | **Demo** deterministic curve, not a fitted model |
@@ -108,8 +108,10 @@ commit the real file.
 | HDX Philippine Dengue Cases and Deaths (DOH Epidemiology Bureau data, via Cirrolytix), CC BY | Processed offline | 126 reporting units, weekly, 10/01/2016 – 03/01/2021 | EARS, DOH thresholds, Explore map |
 | COD-AB / geoBoundaries (CC BY-IGO), PSA PSGC | Geography reference | Region → reporting unit | Joining dengue units to boundaries and codes |
 | OpenStreetMap | Connected | Basemap tiles only | Map background |
+| [Project CCHAIN](https://data.humdata.org/dataset/project-cchain) climate (CC BY 4.0) | Processed offline | 12 cities, weekly, 2003 – 2022 | Explore → Environment; weather covariates |
+| [Open-Meteo](https://open-meteo.com/) historical weather, ERA5 (CC BY 4.0; free tier non-commercial) | Processed offline | Same 12 cities, weekly, 2008 – Oct 2026 | Explore → Environment; extends CCHAIN past 2022 |
 | GDELT, Philippine news / RSS | Demo | — | Signal layers (synthetic stand-ins) |
-| DOH reports, RITM, Open-Meteo weather | Planned | — | Not ingested |
+| DOH reports, RITM | Planned | — | Not ingested |
 
 **Known quality limitations** (detail in [docs/dengue-pipeline.md](docs/dengue-pipeline.md)
 and [docs/geo/](docs/geo/README.md)):
@@ -205,8 +207,9 @@ and mobile lint, typecheck and tests, the web build, and a Python compile check.
   ([docs/access-data-model.md](docs/access-data-model.md#implementation-status-and-open-decisions)).
 - Live signal ingestion (GDELT, Philippine news) and the Data Sources page
   (shown disabled in the navigation).
-- Weather covariates (Open-Meteo / Project CCHAIN) and the fitted forecasting
-  models from the research plan.
+- Weather for reporting units beyond the 12 CCHAIN cities, CHIRPS rainfall past
+  2022, and the fitted forecasting models from the research plan
+  ([docs/environmental-covariates.md](docs/environmental-covariates.md)).
 - A database (Supabase is planned but not configured).
 
 ## Documentation
@@ -217,6 +220,7 @@ and mobile lint, typecheck and tests, the web build, and a Python compile check.
 | [docs/api.md](docs/api.md) | API endpoints, envelopes, limits and errors |
 | [docs/dengue-pipeline.md](docs/dengue-pipeline.md) | Cleaning, DOH thresholds and EARS ([QA reports](docs/reports/)) |
 | [docs/geo/](docs/geo/README.md) | Reporting units, geography method and data quality |
+| [docs/environmental-covariates.md](docs/environmental-covariates.md) | Weather sources (CCHAIN, Open-Meteo), comparability, covariate plan |
 | [docs/access-data-model.md](docs/access-data-model.md) | ACCESS data model, status and open decisions |
 | [docs/mobile.md](docs/mobile.md) | Expo client, API address, EAS builds |
 | [AGENTS.md](AGENTS.md) | Rules for contributors and AI agents |

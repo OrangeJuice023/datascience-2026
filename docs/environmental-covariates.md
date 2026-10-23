@@ -36,6 +36,17 @@
 > is unchanged; only the key changed. `environment.validate` now runs 36
 > checks, all passing.
 >
+> **Update, 2026-10-23. Environment map mode.** The Explore page's Environment
+> tab is live (`web/src/lib/map/modes/environment.ts`,
+> `web/src/components/maps/environment-detail-panel.tsx`). It shows the 12
+> CCHAIN cities, one weather variable and **one source at a time**, on a weekly
+> timeline. The two sources are never spliced. Incomplete weeks are drawn as no
+> data, and provisional ERA5T weeks are faded. Selecting a city shows both
+> sources side by side and a 3-year chart with one line per source. Palayan and
+> Legazpi carry a warning not to compare their weather with their province's
+> HDX counts. The weather JSON is a separate chunk loaded only when the tab
+> opens.
+>
 > Nothing here establishes that weather causes dengue. Every relationship this
 > track estimates is a conditional association in observational data.
 
@@ -429,8 +440,8 @@ evidence_type, is_sample, notes`
   `environment.export`). Evidence category C, badge CONTEXT, `Provenance.method
   = "ingested"`. Sources are separate records, and every coverage record
   carries the comparability verdicts so a chart can warn before overlaying
-  rainfall from two sources. No UI uses it yet; the Environment map mode is
-  still "planned".
+  rainfall from two sources. The Environment map mode (Explore page) reads
+  the same JSON on the client: see the 2026-10-23 update at the top.
 - `CovariateAssociation` (category E, MODEL): `runId, geographyId, variable,
   lagWindow, rateRatioPerUnit, lower, upper, intervalLevel, nWeeks,
   evaluation: {logScoreGain, maeRatio, coverage, passedGate}`.

@@ -46,6 +46,8 @@ export function AccessView({
       medicine: medicineId,
       accessMetric: metric,
       sigmaLayer: "ears",
+      envVariable: "precipitation_mm",
+      envSource: "cchain",
     }),
     [medicineId, metric],
   );

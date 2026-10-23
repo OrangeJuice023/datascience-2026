@@ -82,3 +82,18 @@ export const SIGMA_HEX = {
   noData: "#e2e8f0",
   cases: OBSERVED_HEX,
 } as const;
+
+/**
+ * ENVIRONMENT: one-hue sequential ramp for weekly weather values, low → high
+ * (light end clears the basemap). Incomplete weeks use the SIGMA no-data
+ * neutral, which is paler than the lightest step so it never reads as "low".
+ */
+export const ENVIRONMENT_RAMP = ["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"] as const;
+export const ENVIRONMENT_NO_DATA_HEX = SIGMA_HEX.noData;
+
+/** ENVIRONMENT chart: one hue per weather source (validated pair), provisional weeks in neutral. */
+export const WEATHER_SOURCE_HEX = {
+  cchain: "#2a78d6",
+  open_meteo: "#eb6834",
+  provisional: "#a8a29e",
+} as const;
