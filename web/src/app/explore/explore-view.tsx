@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -21,7 +21,6 @@ import { SIGMA_DATA_URL, type SigmaData } from "@/lib/sigma/data";
 import { AccessDetailPanel } from "@/components/access/access-detail-panel";
 import { ACCESS_METRIC_LABEL, type AccessMetricView } from "@/lib/access/bundle";
 import { MAP_MODES, getMapMode } from "@/lib/map/modes";
-import { applySignalFilters } from "@/lib/map/modes/signals";
 import type {
   FilterKey,
   MapDataBundle,
@@ -37,11 +36,6 @@ import { daysBetweenIso, formatCount, formatIsoDate } from "@/lib/map/format";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 
 const DEFAULT_FILTERS: MapFilters = {
-  disease: "all",
-  geography: "all",
-  status: "all",
-  confidence: "all",
-  window: "7",
   medicine: "oral-rehydration-salts",
   accessMetric: "gap",
   sigmaLayer: "ears",
@@ -56,16 +50,8 @@ function rgb(feature: MapFeature) {
   return `rgb(${feature.color[0]} ${feature.color[1]} ${feature.color[2]})`;
 }
 
-export function ExploreView({
-  bundle,
-  diseases,
-  provinces,
-}: {
-  bundle: MapDataBundle;
-  diseases: string[];
-  provinces: string[];
-}) {
-  const [modeId, setModeId] = useState<MapModeId>("signals");
+export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
+  const [modeId, setModeId] = useState<MapModeId>("sigma");
   const [filters, setFilters] = useState<MapFilters>(DEFAULT_FILTERS);
   const [view, setView] = useState<MapViewMode>("2d");
   const [toggleOverrides, setToggleOverrides] = useState<Partial<Record<MapModeId, MapLayerToggles>>>({});
@@ -73,22 +59,20 @@ export function ExploreView({
   const [playing, setPlaying] = useState(false);
   // The timeline position belongs to one mode; switching modes starts at that mode's latest slice.
   const [time, setTime] = useState<{ modeId: MapModeId; index: number } | null>(null);
-  // SIGMA results (~1 MB) are fetched only when the mode is first opened.
-  const [sigma, setSigma] = useState<{ data?: SigmaData; error?: string; requested: boolean }>({ requested: false });
+  // SIGMA is the default mode, so its results (~1 MB) are fetched on first render.
+  const [sigma, setSigma] = useState<{ data?: SigmaData; error?: string }>({});
 
-  function loadSigma() {
-    if (sigma.requested) return;
-    setSigma({ requested: true });
+  useEffect(() => {
     fetch(SIGMA_DATA_URL)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<SigmaData>;
       })
-      .then((data) => setSigma({ data, requested: true }))
+      .then((data) => setSigma({ data }))
       .catch((error: unknown) =>
-        setSigma({ error: error instanceof Error ? error.message : "unknown error", requested: true }),
+        setSigma({ error: error instanceof Error ? error.message : "unknown error" }),
       );
-  }
+  }, []);
 
   // City weather (~0.9 MB) is a separate chunk, imported only when the mode is first opened.
   const [environment, setEnvironment] = useState<{ data?: EnvironmentBundle; error?: string; requested: boolean }>({
@@ -134,13 +118,12 @@ export function ExploreView({
   const selectedFeature = selectedId ? frame.features.find((f) => f.id === selectedId) : undefined;
   const selectedSignal = useMemo(() => {
     if (!selectedId) return undefined;
-    const pool = modeId === "signals" ? applySignalFilters(bundle, filters) : bundle.signals;
-    return pool
+    return bundle.signals
       .filter((s) => s.locationId === selectedId)
       .sort(
         (a, b) => SEVERITY_ORDER[b.status] - SEVERITY_ORDER[a.status] || b.date.localeCompare(a.date),
       )[0];
-  }, [bundle, filters, modeId, selectedId]);
+  }, [bundle, selectedId]);
 
   const nationalCoverage = useMemo(() => {
     const weeks = bundle.nationalWeekly;
@@ -169,7 +152,6 @@ export function ExploreView({
   );
 
   function changeMode(next: MapModeId) {
-    if (next === "sigma") loadSigma();
     if (next === "environment") loadEnvironment();
     setPlaying(false);
     setModeId(next);
@@ -182,52 +164,6 @@ export function ExploreView({
   }
 
   const filterControls: Record<FilterKey, ReactNode> = {
-    disease: (
-      <SelectFilter
-        key="disease"
-        label="Disease/Event"
-        value={filters.disease}
-        onChange={(v) => updateFilter("disease", v)}
-        options={[{ value: "all", label: "All diseases" }, ...diseases.map((d) => ({ value: d, label: d }))]}
-      />
-    ),
-    geography: (
-      <SelectFilter
-        key="geography"
-        label="Geography"
-        value={filters.geography}
-        onChange={(v) => updateFilter("geography", v)}
-        options={[{ value: "all", label: "All areas" }, ...provinces.map((p) => ({ value: p, label: p }))]}
-      />
-    ),
-    status: (
-      <SelectFilter
-        key="status"
-        label="Signal status"
-        value={filters.status}
-        onChange={(v) => updateFilter("status", v)}
-        options={[
-          { value: "all", label: "All statuses" },
-          { value: "elevated", label: "Elevated" },
-          { value: "watch", label: "Watch" },
-          { value: "normal", label: "Normal" },
-        ]}
-      />
-    ),
-    confidence: (
-      <SelectFilter
-        key="confidence"
-        label="Source confidence"
-        value={filters.confidence}
-        onChange={(v) => updateFilter("confidence", v)}
-        options={[
-          { value: "all", label: "All confidence" },
-          { value: "high", label: "High confidence" },
-          { value: "medium", label: "Medium confidence" },
-          { value: "low", label: "Low confidence" },
-        ]}
-      />
-    ),
     medicine: (
       <SelectFilter
         key="medicine"
@@ -286,20 +222,6 @@ export function ExploreView({
         }))}
       />
     ),
-    window: (
-      <SelectFilter
-        key="window"
-        label="Time window"
-        value={filters.window}
-        onChange={(v) => updateFilter("window", v)}
-        options={[
-          { value: "7", label: "7 days" },
-          { value: "14", label: "14 days" },
-          { value: "30", label: "30 days" },
-          { value: "all", label: "All time" },
-        ]}
-      />
-    ),
   };
 
   const modeSummary = (
@@ -335,7 +257,7 @@ export function ExploreView({
       <PageHeader
         eyebrow="Analyze"
         title="Signal Explorer"
-        subtitle="Explore signals, formal observations, anomalies and scenarios across space and time. Every layer states what kind of evidence it shows."
+        subtitle="Explore formal observations, EARS and DOH threshold results, weather and access across space and time. Every layer states what kind of evidence it shows."
       />
 
       {mode.filters.length > 0 && (
@@ -421,8 +343,8 @@ export function ExploreView({
               )}
               <p className="mt-2 text-xs text-slate-500">
                 Sub-national case maps are not drawn because no sub-national formal data is
-                connected. Open-source signals stay in the Signals mode and are never shown as
-                case counts.
+                connected here. Reporting-unit results are in the SIGMA mode, and open-source
+                signals are never shown as case counts.
               </p>
               <Link href="/lab" className="mt-4 block">
                 <Button variant="secondary" className="w-full">

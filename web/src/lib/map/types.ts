@@ -1,6 +1,6 @@
 import type { HealthObservation } from "@/types/data";
 import type { AccessBundle } from "@/lib/access/bundle";
-import type { LGU, NeighborSummary, SimulationInputs, Signal, TrendPoint } from "@/types";
+import type { LGU, NeighborSummary, Signal, TrendPoint } from "@/types";
 import type { SigmaData } from "@/lib/sigma/data";
 import type { EnvironmentBundle } from "@/lib/environment/bundle";
 import type { WeatherSourceId, WeatherVariable } from "@/types/data";
@@ -8,13 +8,10 @@ import type { WeatherSourceId, WeatherVariable } from "@/types/data";
 export type MapViewMode = "2d" | "3d" | "globe";
 
 export type MapModeId =
-  | "signals"
   | "disease"
-  | "anomaly"
   | "sigma"
   | "environment"
-  | "access"
-  | "simulation";
+  | "access";
 
 /**
  * What kind of evidence a mode draws. Kept explicit so the UI can never
@@ -138,11 +135,6 @@ export interface LegendSpec {
 }
 
 export type FilterKey =
-  | "disease"
-  | "geography"
-  | "status"
-  | "confidence"
-  | "window"
   | "medicine"
   | "accessMetric"
   | "sigmaLayer"
@@ -150,12 +142,6 @@ export type FilterKey =
   | "envSource";
 
 export interface MapFilters {
-  disease: string;
-  geography: string;
-  status: string;
-  confidence: string;
-  /** Trailing window in days, or "all". */
-  window: string;
   /** ACCESS: selected medicine id. */
   medicine: string;
   /** ACCESS: which indicator the map encodes. */
@@ -192,7 +178,6 @@ export interface MapDataBundle {
   neighbors: Record<string, NeighborSummary[]>;
   /** Formal national observations (OpenDengue), weekly rows only, trimmed to what the map draws. */
   nationalWeekly: NationalWeeklyPoint[];
-  scenario: SimulationInputs;
   /** ACCESS demo bundle (aggregated on the server). */
   access: AccessBundle;
   /** SIGMA reporting-unit results; fetched on the client when the mode opens. */

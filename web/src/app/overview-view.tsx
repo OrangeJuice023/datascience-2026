@@ -156,8 +156,8 @@ export function OverviewView({ formal }: { formal: FormalSummary | null }) {
             <EvidenceBadge kind="signal" />
             <span className="text-xs text-slate-400">Demo data</span>
           </div>
-          <Link href="/explore" className="text-xs font-medium text-accent hover:underline">
-            View in Explore →
+          <Link href="/lab" className="text-xs font-medium text-accent hover:underline">
+            View in Lab →
           </Link>
         </div>
         <SignalTable signals={RECENT_SIGNALS} />

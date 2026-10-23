@@ -1,7 +1,6 @@
 import "server-only";
 
 import { dataProvider } from "@/data/opendengue-provider";
-import { DEFAULT_SCENARIO } from "@/data/demo-simulations";
 import { loadAccessBundle } from "@/lib/access/load";
 import type { MapDataBundle } from "./types";
 
@@ -31,7 +30,6 @@ export async function loadMapBundle(): Promise<MapDataBundle> {
     trends: Object.fromEntries(perLgu.map((entry) => [entry.id, entry.trend])),
     neighbors: Object.fromEntries(perLgu.map((entry) => [entry.id, entry.neighbors])),
     nationalWeekly: weekly.map(({ periodStart, periodEnd, value }) => ({ periodStart, periodEnd, value })),
-    scenario: DEFAULT_SCENARIO,
     access,
   };
 }
@@ -45,7 +43,6 @@ export async function loadAccessMapBundle(): Promise<MapDataBundle> {
     trends: {},
     neighbors: {},
     nationalWeekly: [],
-    scenario: DEFAULT_SCENARIO,
     access,
   };
 }

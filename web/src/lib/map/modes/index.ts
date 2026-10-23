@@ -10,24 +10,18 @@ export const EVIDENCE_KIND: Record<ModeEvidence, EvidenceKind> = {
   context: "context",
 };
 import { ACCESS_MODE } from "./access";
-import { ANOMALY_MODE } from "./anomaly";
 import { DISEASE_MODE } from "./disease";
 import { ENVIRONMENT_MODE } from "./environment";
 import { SIGMA_MODE } from "./sigma";
-import { SIGNALS_MODE } from "./signals";
-import { SIMULATION_MODE } from "./simulation";
 
-/** Display order follows TRACE → ANALYZE → SIMULATE. */
+/** Display order follows TRACE → ANALYZE. */
 export const MAP_MODES: MapModeDefinition[] = [
-  SIGNALS_MODE,
   DISEASE_MODE,
-  ANOMALY_MODE,
   SIGMA_MODE,
   ENVIRONMENT_MODE,
   ACCESS_MODE,
-  SIMULATION_MODE,
 ];
 
 export function getMapMode(id: MapModeId): MapModeDefinition {
-  return MAP_MODES.find((mode) => mode.id === id) ?? SIGNALS_MODE;
+  return MAP_MODES.find((mode) => mode.id === id) ?? SIGMA_MODE;
 }
