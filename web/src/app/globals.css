@@ -124,6 +124,14 @@ html:not([data-sigma-entered]) body:has(#sigma-entry) {
   filter: drop-shadow(0.06em 0.06em 0 rgb(29 79 63 / 0.18));
 }
 
+/* Text set over the scanned map keeps a halo of paper so it stays legible. */
+.entry-legible {
+  text-shadow:
+    0 0 6px var(--entry-paper),
+    0 0 12px var(--entry-paper),
+    0 0 2px var(--entry-paper);
+}
+
 .pixel-image {
   image-rendering: pixelated;
 }
@@ -162,6 +170,38 @@ html:not([data-sigma-entered]) body:has(#sigma-entry) {
 }
 .entry-float {
   animation: entry-float 4s steps(4) infinite;
+}
+
+/* The hero's scanned map (components/entry/hero-scan.tsx): faint pixels,
+   real alarms in the SIGMA alarm red, flashing as the scan line passes. */
+.entry-scan-cell {
+  fill: rgb(47 122 95 / 0.09);
+}
+.entry-scan-alarm {
+  fill: #d03b3b;
+  opacity: 0.3;
+  animation: entry-scan-ping var(--scan-ms) steps(6) infinite;
+}
+@keyframes entry-scan-ping {
+  0% {
+    opacity: 0.95;
+  }
+  30%,
+  100% {
+    opacity: 0.3;
+  }
+}
+.entry-scan-line {
+  fill: rgb(47 122 95 / 0.18);
+  animation: entry-scan-sweep var(--scan-ms) steps(37) infinite;
+}
+@keyframes entry-scan-sweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--scan-rows));
+  }
 }
 
 /* The boot loader: an indeterminate run of pixels, not a progress figure. */
