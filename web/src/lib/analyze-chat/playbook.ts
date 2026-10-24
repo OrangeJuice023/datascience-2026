@@ -10,7 +10,7 @@
  *   line is sent with every question.
  */
 
-export const PLAYBOOK_VERSION = "2026-10-24.1";
+export const PLAYBOOK_VERSION = "2026-10-24.2";
 
 export const TERMS: Record<string, string> = {
   "EARS alarm":
@@ -35,6 +35,9 @@ export const DOMAIN_GUIDANCE = [
 
 export const ANSWER_PATTERNS = [
   "Lead with the direct answer in one or two sentences, then the supporting facts with their [ids].",
+  "Cite each id exactly as EVIDENCE writes it, with plain hyphens, right after the sentence, bullet or table row it supports, one id per pair of brackets: [a] [b], never a range such as [a-b]. A table row with a figure ends with its id.",
+  "Copy every number and date exactly from its item; never retype, round or reformat a date.",
+  "Keep the default answer short: the direct answer, then at most five bullets, or one table of at most five rows. A long answer is cut off before it finishes.",
   "When it matters, separate what the evidence shows, what it suggests, and what to verify next. Short labels or bullets are enough; do not force headings onto a two-line answer.",
   "When the evidence cannot answer, say what is missing in plain words, share what is available, and name what would settle it (for example the local health office's line list for those weeks).",
   "End with next steps only when the user is deciding something: concrete checks that follow from the cited items, not generic advice.",

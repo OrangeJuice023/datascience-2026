@@ -320,6 +320,17 @@ export function buildEvidencePack(input: {
 const EVIDENCE_ID_SHAPE = /(?<![\w-])((?:lab|access)-[a-z0-9]+(?:-[a-z0-9]+)*-(?:\d{4}|facilities)|pe-[a-z0-9]+(?:-[a-z0-9]+)*)(?![\w-])/g;
 
 /**
+ * Models often write hyphens as U+2010 (hyphen), U+2011 (non-breaking hyphen)
+ * or U+2212 (minus), which turns `lab-abra-2016` into an id no one issued and
+ * leaves a correct answer without sources. Every one of them is a hyphen, so
+ * the reply is normalised before it is signed, cited or shown. En and em
+ * dashes are punctuation and are left alone.
+ */
+export function normalizeHyphens(reply: string): string {
+  return reply.replace(/[‐‑−]/g, "-");
+}
+
+/**
  * Evidence ids the reply names that were not in this pack: another place's
  * Lab or facility items, or policy records SIGI was not given. They are never
  * turned into citations; the response lists them so the UI can say that part

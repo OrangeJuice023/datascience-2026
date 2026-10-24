@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { ChatMessage, ChatResponseData } from "@sigma/contracts";
-import { citedItems, foreignEvidenceIds } from "@/lib/analyze-chat/evidence";
+import { citedItems, foreignEvidenceIds, normalizeHyphens } from "@/lib/analyze-chat/evidence";
 import { loadEvidencePack, resolveChatUnit } from "@/lib/analyze-chat/load";
 import { buildAnalyzePrompt } from "@/lib/analyze-chat/prompt";
 import { ApiError } from "./envelope";
@@ -285,10 +285,11 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
     throw ApiError.upstreamUnavailable("The model provider request failed.");
   }
 
-  const content = payload.choices?.[0]?.message?.content;
-  if (!isString(content) || !content.trim()) {
+  const raw = payload.choices?.[0]?.message?.content;
+  if (!isString(raw) || !raw.trim()) {
     throw ApiError.upstreamUnavailable("The model provider returned an empty response.");
   }
+  const content = normalizeHyphens(raw);
 
   return {
     reply: content,
