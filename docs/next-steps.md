@@ -20,6 +20,8 @@ SIGMA now has three main tabs (Overview, Explore, Analyze), shows only real data
 - [x] Design system from #15 (tokens, StatStrip, PageHeader, segmented control, responsive shell). (#16)
 - [x] Epi (MMWR) years used everywhere results are grouped by year. (#16)
 
+- [x] Spatial analysis of the EARS signals (method doc §4.2 steps 3–7 and the §4.4 validation): neighbour weights, weekly Moran's I, local Moran / Gi*, Knox space-time test, local vs aggregate lead time; results in `docs/geo/spatial-analysis-report.md`, meaning in `docs/geo/spatial-assessment-and-method.md` §6.2. (`feat/spatial-analysis`)
+
 ## In progress
 
 - [ ] Mobile app rebuilt on the three-tab structure and real data (Overview, Explore by reporting unit, Analyze: ACCESS / SIGI / Lab).
@@ -31,6 +33,7 @@ SIGMA now has three main tabs (Overview, Explore, Analyze), shows only real data
 - [ ] Policy coverage: only Quezon City, Pasig, Davao City and Bacolod City have local records. Add verified local issuances for more units, starting with the highest-burden ones.
 - [ ] National DOH issuances behind doh.gov.ph's Cloudflare block (AO 2018-0021 Enhanced 4S, the dengue programme AO): obtain official copies and add them.
 - [ ] Connect EARS results to `/api/v1/dengue/signals` (still `not_connected`).
+- [ ] Map cluster layer: only if a local cluster class is made stable across neighbour definitions (today κ 0.11–0.23 between W1 and W2/W3; see `docs/geo/spatial-assessment-and-method.md` §6.2). The weekly Moran's I and Knox results can be shown as national context now.
 - [ ] End-to-end browser tests in CI (navigation, Analyze subtabs, SIGI empty/error states).
 - [ ] Confirm the meaning of the HDX `date` column and pick one week offset for the map and the environment track (GEO-4).
 - [ ] Re-run `environment.crosscheck` with swap rows excluded; seed `ml/environment/input_pins.json`.

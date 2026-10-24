@@ -97,7 +97,7 @@ End PR descriptions with the attribution line your tool requires, if any.
 | Path | What | Run / check |
 | --- | --- | --- |
 | `web/` | Next.js + TypeScript + Tailwind frontend (MapLibre, deck.gl, Recharts). Read `web/AGENTS.md`. | `cd web && npm ci && npm run lint && npx tsc --noEmit && npm run build` |
-| `ml/` | Python dengue pipeline: `clean_dengue.py` → `ears.py` → `export_sigma_web.py` (map data), QA reports in `ml/qa/` → `docs/reports/`. Docs: `docs/dengue-pipeline.md`. | `pip install -r ml/requirements.txt`, `python -m compileall -q ml` |
+| `ml/` | Python dengue pipeline: `clean_dengue.py` → `ears.py` → `export_sigma_web.py` (map data), QA reports in `ml/qa/` → `docs/reports/`; spatial analysis of the EARS signals in `ml/spatial/` (`python -m spatial.run && python -m spatial.report` from `ml/`). Docs: `docs/dengue-pipeline.md`, `docs/geo/spatial-assessment-and-method.md`. | `pip install -r ml/requirements.txt`, `python -m compileall -q ml`, `python -m unittest discover -s ml/tests` |
 | `scripts/geo/` | Geography track (Node ≥ 20, no npm deps): HDX dengue reporting units → COD-AB / PSA PSGC. Docs: `scripts/geo/README.md`, `docs/geo/`. | `node scripts/geo/fetch-sources.mjs && node scripts/geo/build-geo.mjs && node scripts/geo/build-boundaries.mjs` |
 | `data/reference/` | Small committed reference tables (crosswalks, hub rows, curated decisions). | |
 | `data/sample/` | Small sample data safe to commit. | |
@@ -117,7 +117,8 @@ Run the checks for every area you touched before you commit, and report the resu
   `web/public/geo/hdx-reporting-units.geojson` (`scripts/geo/build-boundaries.mjs`),
   `web/public/data/sigma/hdx-dengue-sigma.json` (`ml/export_sigma_web.py`),
   `web/src/data/landing/pixel-map.json` (`web/scripts/build-landing-pixels.mjs`),
-  `docs/reports/*.pdf`, and the OpenDengue fixture built by `web/scripts/build-opendengue.mjs`.
+  `docs/reports/*.pdf`, `docs/geo/spatial-analysis-report.md` and `docs/geo/figures/spatial-*.png`
+  (`ml/spatial/report.py`), and the OpenDengue fixture built by `web/scripts/build-opendengue.mjs`.
 - **Hand-curated, logged decisions:** `data/reference/geo/{name_overrides,source_region_labels,city_classes}.csv`.
   Every row needs a `reason`/`basis`.
 - Build scripts are deterministic and hash-check their inputs. If a hash check fails, the

@@ -1,6 +1,9 @@
 # Spatial assessment and proposed method — HDX DOH-Epi dengue 2016–2021
 
 Owner: Physics 2 (spatial analysis & geographic modeling). Status: proposal for team review, 2026-10-17.
+**Implemented 2026-10-24** in `ml/spatial/` (steps 3–7 and the §4.4 validation); choices made in
+implementation are in §4.6, results in the generated
+[spatial-analysis-report.md](spatial-analysis-report.md), and what they mean in §6.2.
 
 Evidence for every number here is in the generated
 [geo-data-quality-report.md](geo-data-quality-report.md). The mapping itself is in
@@ -163,6 +166,47 @@ The design has to work without population denominators.
 - **Retrospective only.** No outbreak labels and no real-time updates exist. Results show agreement
   with DOH thresholds, not detection of confirmed outbreaks.
 
+### 4.6 Implementation choices (fixed before the results were computed, 2026-10-24)
+
+The steps above left some details open. These were fixed in `ml/spatial/run.py` before any
+result was looked at. Week coverage was checked first, because it is a data property, not a
+result.
+
+- **Which weeks.** A week is analysed only when at least 80% of units have C2. Coverage is either
+  full (116–126 units) or 78–83 units in the swap-row weeks of Sep–Dec 2016, 2017 and 2020, where
+  the missing units are whole regions. Those weeks are skipped in the primary run and covered by
+  the "swapped back" check.
+- **Missing neighbours.** A neighbour without C2 that week is dropped, not replaced. A unit left
+  with no neighbours is left out of that week.
+- **Cluster classes.** Local Moran on C2 (row-standardised W), conditional permutation (999), BH
+  FDR over units within a week. "High-signal cluster" = significant HH, "isolated high signal" =
+  significant HL. Both also need the unit's own C2 > 1, the excess cut-off C3 uses, so that a unit
+  only just above a low weekly mean is not called high. Gi* (binary W, self included) is reported
+  alongside.
+- **Moran's I outliers.** C2 is heavy-tailed (99th percentile 9.7, maximum 94.7), so global
+  Moran's I is also run on the ranks of C2 as a check.
+- **Episodes for Knox.** An episode is a run of EARS alarm weeks, with one-week gaps merged.
+  Closeness is neighbours under the weights (symmetrised) and starts within 2 weeks. The null
+  permutes start weeks across all weeks (as specified) and, more strictly, within each epi year.
+- **Province level (MAUP).** 83 units: the 81 provinces with their cities, NCR as one unit and
+  Zamboanga City on its own (neither has a province).
+- **Lead time (step 7).**
+  - An aggregate threshold episode is 2+ consecutive weeks at the DOH epidemic level (or at alert
+    or above), as in `ml/qa/ears_analysis.py`.
+  - The onset counts only when the week before it was evaluated and below the threshold.
+    Thresholds start in 2019, and 2019-01-06 is missing for every unit, so many January 2019
+    "onsets" were never observed.
+  - The search window is the 8 weeks before onset through the episode's end.
+  - Three local rules are compared: any member unit alarming; 2+ members in the same week; and
+    more members than in 95% of off-season (Dec–May) weeks of 2016–2018 (the "calibrated
+    count"). The calibration uses only 2016–2018.
+  - Each rule's rate in 9-week windows that touch no episode is reported, so an "early warning"
+    can be weighed against how often the same rule fires anyway.
+  - The national sum's own threshold onset is censored, so the national comparison uses DOH's
+    announcements (alert 15/07/2019, epidemic 06/08/2019).
+- **Out of time.** No parameter was tuned on any period. Every result is reported separately for
+  2016–2018 and 2019–2021.
+
 ## 5. How results may be shown on the map
 
 The SIGMA map mode draws **points** for every layer, and optional **area fills** (geoBoundaries
@@ -200,7 +244,7 @@ PR #2 (`ml/clean_dengue.py`, `ml/ears.py`, [docs/dengue-pipeline.md](../dengue-p
 | Missing weeks (2019-01-06; Davao Occidental 2016) | Complete weekly grid, null rows, never zero-filled | Agrees |
 | Name typos (Basilig, Viscaya, Sisquijor) | Fixed in `LOC_FIXES` | Agrees. Join `geography_name` to the new crosswalk column `ml_geography_name`; all 126 match. |
 | Province rows exclude cities (A1) | National ≈ 0.93 × sum of local | Agrees with the 1.02–1.15× ratio here; still unproven |
-| Swap rows (A4) | Not handled; `deaths` is dropped, so the swap cannot be seen | **Open; tracked as a separate fix to `clean_dengue.py`** (agreed in review of the geography PR, 2026-10-21). 611 of the 665 rows hold 0 cases and are kept as `ok`. Only 13 get a `data_flag` (the blocks alternate weeks, so the 4-zero-week rule rarely fires). |
+| Swap rows (A4) | Not handled; `deaths` is dropped, so the swap cannot be seen | **Fixed 2026-10-21** (`clean_dengue.mark_suspect_swaps`; the 665 rows are `data_quality = "suspect swap"`, so the warning below no longer applies). Originally tracked as a separate fix to `clean_dengue.py`, agreed in review of the geography PR. 611 of the 665 rows hold 0 cases and are kept as `ok`. Only 13 get a `data_flag` (the blocks alternate weeks, so the 4-zero-week rule rarely fires). |
 | Date semantics (A5) | `date` taken as the week start | Open. National lead times use OpenDengue and are not affected; local timing may shift by 1–2 weeks. |
 | Davao del Sur + Occidental merge | Davao Occidental 2016 is null | Acceptable; merge still needed for any 2016 map |
 
@@ -210,6 +254,7 @@ PR #2 (`ml/clean_dengue.py`, `ml/ears.py`, [docs/dengue-pipeline.md](../dengue-p
 
 The 2019 national findings are not affected. Proposed fix for `clean_dengue.py`: mark the rows as `data_quality = "suspect swap"` before `deaths` is dropped. Use the rule in `scripts/geo/build-geo.mjs`: a row out of date order in a week where at least 10 units have one.
 
+*(Historical; the fix landed on 2026-10-21 and the EARS workbook has been rebuilt since.)*
 **Until that fix lands, do not rely on local (reporting-unit) EARS results for 2016, 2017, 2020 and
 January 2021, or on any local DOH-threshold result** (these start in 2019, and their 3-year
 baselines include 2016, 2017 or 2020; report §5.1). National results are not affected.
@@ -218,6 +263,68 @@ baselines include 2016, 2017 or 2020; report §5.1). National results are not af
 with deaths > cases. 581 of them are swap rows; the other 5 are isolated rows outside the blocks.
 That rule would miss 84 of the 665 swap rows (those with deaths ≤ cases), so the fix should use the
 swap-block rule above.
+
+### 6.2 Results and what they mean (2026-10-24)
+
+Numbers are from [spatial-analysis-report.md](spatial-analysis-report.md) (seed 20261024; a
+rebuild is byte-identical). Hackathon prototype; these are findings about reported signals, not
+validated public-health claims.
+
+**In plain language.** Dengue warning signals do bunch up on the map, and alarms in neighbouring
+places tend to start in the same few weeks. Both results survive every check. Pinpointing *which*
+places form a cluster in a given week is not reliable yet: it depends too much on how
+"neighbour" is defined. Watching the 126 places one by one did not warn earlier than watching
+each region's total, once the local rule is held to the same false-alarm rate. Nationally it was
+one week earlier.
+
+1. **Global clustering is real and robust.**
+   - Weekly Moran's I of C2 is significant (FDR) in 61% of the 212 analysable weeks under W1, 57%
+     under W3 and 46% under W2. W2's 270 km band gives a median of 35 neighbours and dilutes it.
+   - It also holds on ranks (78%), with swap rows swapped back (64%), without 2016 (63%) and at
+     province level (56%; weekly series correlation 0.75).
+   - Shuffling unit locations removes it: 0% of weeks significant after FDR, 5% at raw p ≤ 0.05.
+   - **It is not specific to 2019.** The 2019 June–November season is about as clustered as other
+     seasons (77% vs 78% of weeks; median I 0.20 vs 0.18). The epidemic declaration week has
+     I = 0.23, q = 0.003. Clustering is a normal feature of the dengue season and does not single
+     out an epidemic on its own.
+2. **Local clusters are not stable enough to put on the map.**
+   - Under W1 only 120 of 26,465 unit-weeks are a high-signal cluster.
+   - W1 and W3 agree on 20 of them (κ 0.23). W2 calls 1,254 (κ 0.11 with W1), because its huge
+     neighbourhoods behave like regional averages.
+   - Gi* hot spots almost all coincide with W1 clusters (75 of 75), so the instability comes from
+     the weights, not from the choice of statistic.
+   - The June–September 2019 W1 clusters are in Western Visayas (Panay, Negros Occidental) and
+     around Metro Manila / Central Luzon. They match where the epidemic was declared only loosely:
+     14% of units in the four "epidemic" regions of 15/07/2019 were in a cluster before that date,
+     5.5% in "alert" regions and 0% elsewhere.
+   - **Decision for the map (§5):** do not add a per-unit cluster layer yet. If one is added later,
+     show only classes that agree under W1 and W3, and label them as in §5.
+3. **Alarm starts are space-time clustered.**
+   - Knox ratio 1.22 under W1 (p = 0.001), and 1.17 when start weeks are permuted only within the
+     same epi year. It holds in 2016–2018 and 2019–2021, under W3 (1.30) and at province level
+     (1.24), with swap rows swapped back and without 2016.
+   - Under W2 it is weak in 2019–2021 (1.05, p = 0.06).
+   - Shuffled locations give 1.01 (range 0.94–1.10).
+   - This is consistent with spread, or with shared drivers such as weather, between neighbouring
+     units. The test cannot tell the two apart.
+4. **Local versus aggregate lead time: the proposal's claim is not supported at regional scale.**
+   - "Any member unit alarmed" does come earlier than the regional series in 17 of 37 comparable
+     epidemic episodes. But it fires in 71% of quiet 9-week windows, so it is not a usable warning.
+   - With the calibrated count, which fires in 27% of quiet windows against the regional series'
+     own 34%, local signals came first in 4 episodes, at the same time in 19 and later in 13.
+     Pooling units into a regional total gains power; it does not hide timing.
+   - Nationally, units crossed the calibrated count (24 units in the same week) on 2019-06-02, one
+     week before the national sum's first alarm (2019-06-09). That is 6 weeks before DOH's alert
+     and 9 weeks before the epidemic declaration.
+   - Every one of these results is the same in the swapped-back and no-2016 variants.
+   - All timings carry the HDX `date` uncertainty (A5): 1–2 weeks either way.
+
+**Consequences for other modules.**
+- Map (`web/`): no cluster layer for now (point 2).
+- `docs/dengue-pipeline.md` key findings: the EARS-vs-DOH lead time is unaffected. Add that
+  local-first alerting gives no regional gain (point 4).
+- `/api/v1/dengue/signals`: the weekly Moran's I and Knox results could be served as national
+  context once EARS is connected.
 
 ## 7. Geography for the environment track (PR #1, CCHAIN)
 
