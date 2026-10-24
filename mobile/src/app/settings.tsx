@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { fetchHealth } from '@/api/endpoints';
 import { validateBaseUrl } from '@/api/config';
-import { Screen } from '@/components/screen';
+import { CloseButton, Screen } from '@/components/screen';
 import { Banner, Card, FactRow, SectionTitle, StatusPill } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -70,7 +70,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <Screen title="Settings" subtitle="Where this app looks for the SIGMA API.">
+    <Screen title="Settings" subtitle="Where this app looks for the SIGMA API." headerAction={<CloseButton />}>
       <Card>
         <SectionTitle>API address</SectionTitle>
         <Text style={[styles.note, { color: theme.textSecondary }]}>
@@ -78,6 +78,7 @@ export default function SettingsScreen() {
           address below.
         </Text>
         <TextInput
+          accessibilityLabel="API address"
           value={value}
           onChangeText={(next) => {
             setDraft(next);
@@ -128,9 +129,10 @@ export default function SettingsScreen() {
       </Card>
 
       <Banner title="About">
-        SIGMA mobile is a read-only client for the SIGMA API. It shows the same data, with the same
-        provenance rules, as the web client: every screen states whether its data is live, simulated, or not
-        connected, and no screen presents a model output as a finding.
+        SIGMA mobile is a read-only client for the SIGMA API. It shows the same historical records, with the
+        same provenance rules, as the web client: every screen says where its data comes from and how old it
+        is, missing weeks stay missing, and no screen presents a method&apos;s output or SIGI&apos;s answer as a
+        finding.
       </Banner>
     </Screen>
   );

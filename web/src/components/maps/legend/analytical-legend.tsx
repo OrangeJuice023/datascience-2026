@@ -28,12 +28,12 @@ export function AnalyticalLegend({
   return (
     <div className={cn("text-xs text-slate-600", className)}>
       <div className="flex items-baseline justify-between gap-3">
-        <p className="font-semibold text-slate-800">{spec.title}</p>
-        <p className="shrink-0 text-[11px] text-slate-400">
+        <p className="font-semibold text-ink">{spec.title}</p>
+        <p className="shrink-0 text-slate-500">
           {CLASSIFICATION_LABEL[spec.classification]}
         </p>
       </div>
-      <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{spec.metric}</p>
+      <p className="mt-0.5 leading-snug text-slate-500">{spec.metric}</p>
 
       {spec.classes && (
         <ul className="mt-2 space-y-1">
@@ -45,7 +45,7 @@ export function AnalyticalLegend({
                 aria-hidden="true"
               />
               <span className="flex-1 text-slate-700">{item.label}</span>
-              {item.range && <span className="tabular-nums text-slate-400">{item.range}</span>}
+              {item.range && <span className="tabular-nums text-slate-500">{item.range}</span>}
             </li>
           ))}
         </ul>
@@ -58,7 +58,7 @@ export function AnalyticalLegend({
             style={{ background: `linear-gradient(to right, ${spec.ramp.colors.join(", ")})` }}
             aria-hidden="true"
           />
-          <div className="mt-1 flex justify-between tabular-nums text-slate-400">
+          <div className="mt-1 flex justify-between tabular-nums text-slate-500">
             <span>{spec.ramp.minLabel}</span>
             <span>{spec.ramp.maxLabel}</span>
           </div>
@@ -66,7 +66,7 @@ export function AnalyticalLegend({
       )}
 
       {(spec.size || (showHeight && spec.height) || spec.opacity) && (
-        <ul className="mt-2 space-y-1 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+        <ul className="mt-2 space-y-1 border-t border-rule pt-2 text-slate-500">
           {spec.size && (
             <li className="flex items-center gap-2">
               <span className="flex items-end gap-0.5" aria-hidden="true">
@@ -92,7 +92,7 @@ export function AnalyticalLegend({
       )}
 
       {spec.note && (
-        <p className="mt-2 border-t border-slate-100 pt-2 text-[11px] leading-snug text-slate-400">
+        <p className="mt-2 border-t border-rule pt-2 leading-snug text-slate-500">
           {spec.note}
         </p>
       )}
