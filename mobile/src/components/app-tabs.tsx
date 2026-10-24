@@ -23,8 +23,9 @@ export default function AppTabs() {
   return (
     <NativeTabs
       backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
+      indicatorColor={colors.brandSoft}
+      iconColor={{ default: colors.textSecondary, selected: colors.brand }}
+      labelStyle={{ default: { color: colors.textSecondary }, selected: { color: colors.brand, fontWeight: '600' } }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Overview</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon src={icon('home-variant-outline')} />

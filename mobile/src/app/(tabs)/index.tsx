@@ -1,161 +1,253 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { fetchSummary } from '@/api/endpoints';
-import { formatCount, formatIsoDate, historicalStatusLabel, weeksLabel } from '@/components/format';
-import { Screen, SettingsButton } from '@/components/screen';
-import { SigiNote, sigiStateForData } from '@/components/sigi';
-import { Banner, Card, ErrorState, FactRow, LinkRow, LoadingState, SectionTitle } from '@/components/ui';
+import { SOURCE_LABEL } from '@/api/discovery';
+import { fetchSignals, fetchSummary } from '@/api/endpoints';
+import { BOUNDARIES_ATTRIBUTION } from '@/api/geo';
+import { Donut, WeeklyLineChart } from '@/components/charts';
+import {
+  ALL_HDX,
+  caseRadius,
+  countClasses,
+  HDX_YEARS,
+  nationalStats,
+  rangeLabel,
+  SIGNAL_CLASSES,
+  SIGNAL_LABEL,
+  UNIT_YEARS,
+  unitSignalClasses,
+  unitValue,
+  type SignalClass,
+} from '@/components/dashboard-data';
+import { DashboardScreen, DashCard, LegendRow, Select, SelectRow, StatTile, TileGrid } from '@/components/dashboard';
+import { formatCount, formatIsoDate } from '@/components/format';
+import { ErrorState, LoadingState } from '@/components/ui';
+import { UnitMap } from '@/components/unit-map';
+import { Spacing } from '@/constants/theme';
+import { useBoundaries } from '@/hooks/use-boundaries';
 import { useResource } from '@/hooks/use-resource';
 import { useTheme } from '@/hooks/use-theme';
 import { useSettings } from '@/state/settings-context';
 import { useUnits } from '@/state/units-context';
 
 /**
- * Overview.
- *
- * What SIGMA is, how much data is behind it, and where to go next. Every
- * figure comes from the API: the national series' coverage from
- * /dengue/summary and the reporting-unit record from /dengue/units. Both are
- * historical, and the screen says so before anything else.
+ * Overview: the key figures for the window the reporting-unit data covers
+ * (2016-2021), all from the API.
+ * - Tiles and the line chart: the national OpenDengue weekly series
+ *   (/dengue/summary), cut to the chosen years. A week with no record is a
+ *   gap, and the tiles count it as missing, never as zero cases.
+ * - Cases by reporting unit: /dengue/units, drawn as sized points (counts are
+ *   never filled into areas).
+ * - Recent signals: EARS results for the latest week (/dengue/signals).
+ * Historical records; nothing here describes this week.
  */
+
+type RangeKey = 'all' | `${(typeof HDX_YEARS)[number]}`;
+
+const RANGE_OPTIONS: { value: RangeKey; label: string }[] = [
+  { value: 'all', label: rangeLabel(ALL_HDX) },
+  ...HDX_YEARS.map((y) => ({ value: String(y) as RangeKey, label: String(y) })),
+];
+
 export default function OverviewScreen() {
-  const { baseUrl } = useSettings();
+  const { baseUrl, source } = useSettings();
   const theme = useTheme();
   const { resource: units } = useUnits();
+  const [rangeKey, setRangeKey] = useState<RangeKey>('all');
+  const range = useMemo(() => (rangeKey === 'all' ? ALL_HDX : { from: Number(rangeKey), to: Number(rangeKey) }), [rangeKey]);
+  const unitYears = useMemo(() => UNIT_YEARS.filter((y) => y >= range.from && y <= range.to), [range]);
 
-  // One weekly point is enough here: the coverage block always describes the whole series.
-  const summary = useResource((signal) => fetchSummary(baseUrl, 1, signal), [baseUrl]);
+  const summary = useResource((signal) => fetchSummary(baseUrl, undefined, signal), [baseUrl]);
+  const signals = useResource((signal) => fetchSignals(baseUrl, {}, signal), [baseUrl]);
+  const boundaries = useBoundaries(baseUrl);
 
   const refresh = () => {
     summary.reload();
+    signals.reload();
     units.reload();
+    boundaries.reload();
   };
 
-  const loading = (summary.loading && !summary.data) || (units.loading && !units.data);
-  const failed = Boolean(summary.error && !summary.data && units.error && !units.data);
-  const series = summary.data?.series;
+  const stats = useMemo(() => (summary.data ? nationalStats(summary.data.weekly.points, range) : null), [summary.data, range]);
+
+  const caseMarkers = useMemo(() => {
+    const list = units.data?.units ?? [];
+    const values = list.map((u) => ({ id: u.id, cases: unitValue(u, 'cases', unitYears) }));
+    const max = Math.max(0, ...values.map((v) => v.cases ?? 0));
+    return values.map((v) => ({ id: v.id, color: theme.brand, radius: caseRadius(v.cases, max, 9) }));
+  }, [units.data, theme.brand, unitYears]);
+
+  const signalWeek = signals.data?.signals[0]?.periodStart ?? null;
+  const classCounts = useMemo(() => {
+    if (!signals.data || !units.data) return null;
+    const classes = unitSignalClasses(signals.data.signals, units.data.units.map((u) => u.id));
+    return countClasses(classes.values(), SIGNAL_CLASSES);
+  }, [signals.data, units.data]);
+  const classColor: Record<SignalClass, string> = {
+    none: theme.signalNone,
+    C1: theme.signalC1,
+    C2: theme.signalC2,
+    C3: theme.signalC3,
+    no_result: theme.noResult,
+  };
+
+  const staleError = [summary, signals, units].find((r) => r.stale)?.error?.message ?? null;
   const scope = units.data?.scope;
-  const staleError = (summary.stale ? summary.error?.message : null) ?? (units.stale ? units.error?.message : null);
 
   return (
-    <Screen
-      title="SIGMA"
-      subtitle="Dengue early-warning evidence for the Philippines, from historical surveillance records."
-      status={summary.meta?.status}
-      statusLabel={historicalStatusLabel(summary.meta?.status)}
-      headerAction={<SettingsButton />}
+    <DashboardScreen
+      title="Overview"
+      subtitle="Key dengue indicators for the Philippines."
       onRefresh={refresh}
-      refreshing={summary.refreshing || units.refreshing}
+      refreshing={summary.refreshing || signals.refreshing || units.refreshing}
       staleError={staleError}>
-      <SigiNote state={sigiStateForData({ loading, failed, hasResult: Boolean(series || scope) })}>
-        {series || scope
-          ? 'Sigi is with you. Everything here is a past record: the newest week SIGMA holds is shown below, and nothing describes this week.'
-          : loading
-            ? 'Sigi is contacting the API…'
-            : 'Sigi is waiting for the API. Nothing on this screen describes current conditions.'}
-      </SigiNote>
+      <SelectRow>
+        <Select label="Years" icon="calendar-month-outline" value={rangeKey} options={RANGE_OPTIONS} onChange={setRangeKey} />
+        <Select
+          label="Place"
+          icon="map-marker-outline"
+          value="ph"
+          options={[
+            { value: 'ph', label: 'Philippines (National)' },
+            { value: 'unit', label: 'A reporting unit…', hint: 'Opens Explore, where you can pick one of the 126.' },
+          ]}
+          onChange={(v) => {
+            if (v === 'unit') router.navigate('/explore');
+          }}
+        />
+      </SelectRow>
 
-      <Card>
-        <SectionTitle>What SIGMA is</SectionTitle>
-        <Text style={[styles.body, { color: theme.textSecondary }]}>
-          SIGMA puts weekly dengue reports for each Philippine reporting unit next to two ways of spotting a rise:
-          the CDC EARS early-warning method and the DOH alert and epidemic thresholds. Beside them it shows where
-          care is mapped, what dengue medicines cost public hospitals, and the policy evidence SIGI can cite.
-        </Text>
-        <Text style={[styles.body, { color: theme.textSecondary }]}>
-          It works on historical data, not real-time reports, and it does not declare outbreaks or make decisions.
-        </Text>
-      </Card>
+      {summary.loading && !summary.data ? <LoadingState label="Loading the national series…" /> : null}
+      {summary.error && !summary.data ? <ErrorState message={summary.error.message} onRetry={summary.reload} /> : null}
 
-      {loading ? <LoadingState label="Loading coverage…" /> : null}
-
-      {summary.error && !summary.data ? (
-        <ErrorState message={`National series: ${summary.error.message}`} onRetry={summary.reload} />
-      ) : null}
-      {series && summary.data ? (
-        <Card>
-          <SectionTitle>National series</SectionTitle>
-          <FactRow label="Source" value={series.source.name} />
-          <FactRow label="Coverage" value={`${formatIsoDate(series.coverage.from)} – ${formatIsoDate(series.coverage.to)}`} />
-          <FactRow
-            label="Weeks recorded"
-            value={`${formatCount(series.coverage.recordedWeeks)} of ${formatCount(series.coverage.weeks)}`}
+      {stats ? (
+        <TileGrid>
+          <StatTile
+            label="Total reported cases"
+            value={formatCount(stats.total)}
+            sub={`${rangeLabel(range)} · ${stats.recordedWeeks} of ${stats.expectedWeeks} weeks recorded`}
+            icon="chart-bar"
           />
-          <FactRow
-            label="Weeks missing"
-            value={weeksLabel(series.coverage.weeks - series.coverage.recordedWeeks)}
-            tone="notConnected"
+          <StatTile
+            label="Average weekly cases"
+            value={stats.average === null ? '–' : formatCount(Math.round(stats.average))}
+            sub={`${rangeLabel(range)}, recorded weeks`}
+            icon="chart-line-variant"
           />
-          <FactRow label="Level" value="National, weekly" />
-        </Card>
+          <StatTile
+            label="Peak week"
+            value={stats.peak ? formatCount(stats.peak.value) : '–'}
+            sub={stats.peak ? `Week of ${formatIsoDate(stats.peak.periodStart)}` : 'No recorded week'}
+            icon="chart-bar"
+            tone="alert"
+          />
+          <StatTile
+            label="Reporting units"
+            value={scope ? formatCount(scope.units) : '–'}
+            sub="Provinces, remainders, cities"
+            icon="view-grid-outline"
+          />
+        </TileGrid>
       ) : null}
 
-      {units.error && !units.data ? (
-        <ErrorState message={`Reporting units: ${units.error.message}`} onRetry={units.reload} />
-      ) : null}
-      {scope ? (
-        <Card>
-          <SectionTitle>Reporting units</SectionTitle>
-          <FactRow label="Source" value={scope.source} />
-          <FactRow label="Units" value={formatCount(scope.units)} />
-          <FactRow label="Coverage" value={`${formatIsoDate(scope.period.from)} – ${formatIsoDate(scope.period.to)}`} />
-          <FactRow label="Weeks" value={formatCount(scope.period.weeks)} />
-          <FactRow
-            label="Epi years summarised"
-            value={`${scope.period.epiYears[0]}–${scope.period.epiYears[scope.period.epiYears.length - 1]}`}
+      {stats && summary.data ? (
+        <DashCard
+          title="National weekly dengue cases"
+          onPress={() => router.navigate({ pathname: '/analyze', params: { tab: 'lab' } })}>
+          <WeeklyLineChart
+            points={stats.points}
+            accessibilityLabel={`National weekly reported dengue cases, ${rangeLabel(range)}. Peak ${stats.peak ? formatCount(stats.peak.value) : 'none'}.`}
           />
-          <Text style={[styles.note, { color: theme.textSecondary }]}>
-            A reporting unit is a province, a province remainder (the province minus its separately reported
-            cities), a city or Pateros. Missing and suspect weeks are no data, never zero.
+          <Text style={[styles.caption, { color: theme.textSecondary }]}>
+            {summary.data.series.source.name}, national. Historical records, not a forecast and not a statement that an
+            outbreak is occurring. Gaps are weeks with no record.
           </Text>
-        </Card>
+        </DashCard>
       ) : null}
 
-      <Card>
-        <SectionTitle>Where to go</SectionTitle>
-        <LinkRow
-          title="Explore"
-          description="Pick a reporting unit and see its cases, EARS alarms and DOH-threshold weeks by year."
+      <View style={styles.pair}>
+        <DashCard
+          title="Cases by reporting unit"
+          subtitle={unitYears.length ? `Reported cases, ${rangeLabel({ from: unitYears[0], to: unitYears[unitYears.length - 1] })}` : 'No unit totals for 2021'}
           onPress={() => router.navigate('/explore')}
-        />
-        <LinkRow
-          title="Analyze · ACCESS"
-          description="Mapped hospitals, clinics, pharmacies and labs, and DOH medicine prices."
-          onPress={() => router.navigate({ pathname: '/analyze', params: { tab: 'access' } })}
-        />
-        <LinkRow
-          title="Analyze · Policy"
-          description="Ask SIGI about a unit; every answer lists the evidence it used."
-          onPress={() => router.navigate({ pathname: '/analyze', params: { tab: 'policy' } })}
-        />
-        <LinkRow
-          title="Analyze · Lab"
-          description="The national weekly trend, its coverage and its gaps."
-          onPress={() => router.navigate({ pathname: '/analyze', params: { tab: 'lab' } })}
-        />
-      </Card>
+          style={styles.half}
+          compact>
+          {boundaries.data && units.data && unitYears.length ? (
+            <UnitMap map={boundaries.data} markers={caseMarkers} height={190} interactive={false} />
+          ) : boundaries.error ? (
+            <Text style={[styles.caption, { color: theme.textSecondary }]}>{boundaries.error.message}</Text>
+          ) : unitYears.length ? (
+            <LoadingState label="Loading map…" />
+          ) : (
+            <Text style={[styles.caption, { color: theme.textSecondary }]}>
+              2021 has a single week in the unit data, so there is no total to map.
+            </Text>
+          )}
+          <Text style={[styles.small, { color: theme.textSecondary }]}>
+            Dot area = reported cases, not population-adjusted.
+          </Text>
+        </DashCard>
 
-      <Banner title="What SIGMA does not do">
-        It does not confirm outbreaks, diagnose patients, report medicine stock or prescribe policy. Its counts are
-        a hackathon prototype&apos;s reading of public records, not a validated public-health claim.
-      </Banner>
+        <DashCard
+          title="Recent signals"
+          subtitle={signalWeek ? `Week of ${formatIsoDate(signalWeek)} (latest)` : 'Latest available week'}
+          onPress={() => router.navigate('/explore')}
+          style={styles.half}
+          compact>
+          {signals.error && !signals.data ? (
+            <Text style={[styles.caption, { color: theme.textSecondary }]}>{signals.error.message}</Text>
+          ) : signals.data?.status === 'not_connected' ? (
+            <Text style={[styles.caption, { color: theme.textSecondary }]}>{signals.data.reason}</Text>
+          ) : classCounts ? (
+            <View style={styles.donutBlock}>
+              <Donut
+                size={118}
+                centerLabel={'reporting\nunits'}
+                segments={SIGNAL_CLASSES.map((c) => ({ key: c, value: classCounts[c], color: classColor[c], hollow: c === 'no_result' }))}
+              />
+              <View style={styles.legend}>
+                {SIGNAL_CLASSES.map((c) => (
+                  <LegendRow key={c} color={classColor[c]} label={SIGNAL_LABEL[c]} count={classCounts[c]} hollow={c === 'no_result'} />
+                ))}
+              </View>
+            </View>
+          ) : (
+            <LoadingState label="Loading signals…" />
+          )}
+        </DashCard>
+      </View>
 
-      <Text style={[styles.note, { color: theme.textSecondary }]}>
-        API in use: {baseUrl}. Change it with the gear at the top.
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push('/about')}
+        style={({ pressed }) => [styles.about, { borderColor: theme.border, backgroundColor: theme.backgroundElement, opacity: pressed ? 0.8 : 1 }]}>
+        <MaterialCommunityIcons name="book-open-variant" size={34} color={theme.brand} />
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.aboutTitle, { color: theme.text }]}>About these numbers</Text>
+          <Text style={[styles.caption, { color: theme.textSecondary }]}>
+            Historical surveillance data, 2016 – 2021. Not a forecast.
+          </Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={26} color={theme.text} />
+      </Pressable>
+
+      <Text style={[styles.small, { color: theme.textSecondary }]}>
+        API: {baseUrl} ({SOURCE_LABEL[source]}). {BOUNDARIES_ATTRIBUTION}. Dengue: Cirrolytix / DOH-EB via HDX (CC BY);
+        OpenDengue (CC BY 4.0).
       </Text>
-    </Screen>
+    </DashboardScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  note: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
+  caption: { fontSize: 13, lineHeight: 18 },
+  small: { fontSize: 11.5, lineHeight: 16 },
+  pair: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two + Spacing.one },
+  half: { flexBasis: '47%', flexGrow: 1, minWidth: 160 },
+  donutBlock: { alignItems: 'center', gap: Spacing.two },
+  legend: { alignSelf: 'stretch', gap: 1 },
+  about: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, borderWidth: 1, borderRadius: 14, padding: Spacing.three },
+  aboutTitle: { fontSize: 17, lineHeight: 22, fontWeight: '700' },
 });
