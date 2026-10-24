@@ -139,7 +139,7 @@ export function LocationDetailPanel({
       </div>
 
       <div className="border-t border-slate-200 p-4">
-        <Link href="/lab" className="block">
+        <Link href="/analyze/lab" className="block">
           <Button className="w-full">View in Lab</Button>
         </Link>
       </div>

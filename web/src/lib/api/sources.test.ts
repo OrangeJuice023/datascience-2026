@@ -79,6 +79,19 @@ describe("source catalogue contents", () => {
     for (const source of buildSources()) expect(source.attribution.length).toBeGreaterThan(0);
   });
 
+  it("lists the ACCESS facility and price sources with the licence and credit line recorded with the data", async () => {
+    const { ACCESS_REFERENCE } = await import("@/lib/access/reference");
+    const byId = new Map(buildSources().map((s) => [s.id, s]));
+    const catalogued = new Map(SOURCE_CATALOG.map((s) => [s.sourceId, s]));
+    for (const id of ["hotosm-phl-health-facilities", "doh-dpri-dashboard"]) {
+      const recorded = ACCESS_REFERENCE.meta.sources.find((s) => s.id === id);
+      expect(recorded, id).toBeDefined();
+      expect(byId.get(id)).toMatchObject({ status: "connected", evidence: "context", attribution: recorded?.attribution });
+      expect(recorded?.license.startsWith(byId.get(id)?.licence ?? "missing"), id).toBe(true);
+      expect(catalogued.get(id)?.url, id).toBe(recorded?.url);
+    }
+  });
+
   it("keeps synthetic stand-ins out of the connected list", () => {
     const byId = new Map(buildSources().map((s) => [s.id, s]));
     expect(byId.get("gdelt-doc")?.status).toBe("demo");

@@ -21,7 +21,7 @@ export function Tabs({
     <div
       role="tablist"
       aria-label="Sections"
-      className="flex gap-1 overflow-x-auto border-b border-slate-200"
+      className="scroll-row flex gap-1 border-b border-border"
     >
       {items.map((item) => {
         const isActive = item.id === activeId;
@@ -35,10 +35,10 @@ export function Tabs({
             aria-controls={`panel-${item.id}`}
             onClick={() => onChange(item.id)}
             className={cn(
-              "shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+              "-mb-px min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors md:min-h-10",
               isActive
-                ? "border-slate-900 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-800",
+                ? "border-accent text-ink"
+                : "border-transparent text-slate-500 hover:border-slate-300 hover:text-ink",
             )}
           >
             {item.label}

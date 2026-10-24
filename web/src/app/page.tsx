@@ -1,6 +1,7 @@
 import { LandingGate } from "@/components/entry/landing-gate";
 import { OPENDENGUE_META, dataProvider } from "@/data/opendengue-provider";
 import { summarizeNational } from "@/lib/national-observations";
+import { loadSigmaSummary } from "@/lib/sigma/summary";
 import { OverviewView, type FormalSummary } from "./overview-view";
 
 async function loadFormalSummary(): Promise<FormalSummary | null> {
@@ -29,7 +30,7 @@ export default async function OverviewPage() {
     <>
       {/* Shown when the site's link is opened; hands over to the Overview below. */}
       <LandingGate />
-      <OverviewView formal={await loadFormalSummary()} />
+      <OverviewView formal={await loadFormalSummary()} sigma={await loadSigmaSummary()} />
     </>
   );
 }

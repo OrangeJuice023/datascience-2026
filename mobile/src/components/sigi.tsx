@@ -147,9 +147,9 @@ export function SigiNote({
   const theme = useTheme();
 
   return (
-    <View style={styles.note}>
+    <View style={[styles.note, { backgroundColor: theme.brandWash }]}>
       <Sigi state={state} size={size} />
-      <Text style={[styles.noteText, { color: theme.textSecondary }]}>{children}</Text>
+      <Text style={[styles.noteText, { color: theme.textSecondaryStrong }]}>{children}</Text>
     </View>
   );
 }
@@ -159,10 +159,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
+    borderRadius: 12,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
   },
   noteText: {
     flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

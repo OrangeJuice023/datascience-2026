@@ -7,12 +7,12 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { forwardRef } from 'react';
-import { Pressable, View, useColorScheme, StyleSheet, type PressableInstance, type PressableProps } from 'react-native';
+import { Pressable, View, StyleSheet, type PressableInstance, type PressableProps } from 'react-native';
 
-import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
 
 const TABS = [
   { name: 'overview', href: '/', label: 'Overview', icon: 'shield-check-outline' },
@@ -23,8 +23,10 @@ const TABS = [
 ] as const;
 
 /**
- * The web tab bar. Mirrors the native tab bar so both platforms show the
- * same five destinations.
+ * The web tab bar. Mirrors the native tab bar: the same five destinations in a
+ * full-width bar along the bottom, an icon over a short label, the current tab
+ * marked by ink and a neutral fill. Content scrolls behind it, never under a
+ * floating pill at the top.
  */
 export default function AppTabs() {
   return (
@@ -54,36 +56,39 @@ export const TabButton = forwardRef<PressableInstance, TabButtonProps>(function 
   { children, isFocused, icon, href, ...props },
   ref
 ) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const colors = useTheme();
 
   return (
     <Pressable
       {...props}
       ref={ref}
-      style={({ pressed }) => [pressed && styles.pressed]}>
-      <ThemedView
-        type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
+      accessibilityState={{ selected: Boolean(isFocused) }}
+      style={({ pressed }) => [styles.tab, pressed && styles.pressed]}>
+      <View style={[styles.tabInner, isFocused && { backgroundColor: colors.backgroundSelected }]}>
         <MaterialCommunityIcons
           name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
-          size={16}
+          size={20}
           color={isFocused ? colors.text : colors.textSecondary}
         />
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+        <ThemedText
+          type="small"
+          themeColor={isFocused ? 'text' : 'textSecondary'}
+          style={[styles.label, isFocused && styles.labelActive]}
+          numberOfLines={1}>
           {children}
         </ThemedText>
-      </ThemedView>
+      </View>
     </Pressable>
   );
 });
 
 export function CustomTabList(props: TabListProps) {
+  const colors = useTheme();
   return (
-    <View {...props} style={styles.tabListContainer}>
-      <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        {props.children}
-      </ThemedView>
+    <View
+      {...props}
+      style={[styles.tabListContainer, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+      <View style={styles.innerContainer}>{props.children}</View>
     </View>
   );
 }
@@ -91,31 +96,40 @@ export function CustomTabList(props: TabListProps) {
 const styles = StyleSheet.create({
   tabListContainer: {
     position: 'absolute',
-    width: '100%',
-    padding: Spacing.three,
-    justifyContent: 'center',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopWidth: 1,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.two,
     alignItems: 'center',
-    flexDirection: 'row',
   },
   innerContainer: {
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.five,
     flexDirection: 'row',
-    alignItems: 'center',
-    flexGrow: 1,
-    gap: Spacing.two,
+    width: '100%',
     maxWidth: MaxContentWidth,
+    paddingHorizontal: Spacing.two,
+  },
+  tab: {
+    flex: 1,
+    minWidth: 0,
+  },
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    minHeight: 52,
+    borderRadius: 12,
+    paddingHorizontal: 2,
+  },
+  label: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  labelActive: {
+    fontWeight: '600',
   },
   pressed: {
     opacity: 0.7,
-  },
-  tabButtonView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.three,
   },
 });

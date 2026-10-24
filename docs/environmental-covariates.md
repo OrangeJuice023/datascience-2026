@@ -365,8 +365,8 @@ temperature anomalies over the preceding weeks were X instead of typical?"
 - ONI is shown as context text only, not as an input.
 - Every result carries the label "Illustrative scenario from historical
   associations, 2008–2020, 9 cities. Not a forecast and not causal."
-- If M2 does not pass §7, the tool is not built. The Simulate page keeps its
-  current demo banner, and this document records the negative result.
+- If M2 does not pass §7, the tool is not built. The demo Simulate page has
+  been removed, and this document records the negative result.
 
 ## 7. Evaluation criteria
 

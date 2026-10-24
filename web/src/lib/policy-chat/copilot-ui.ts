@@ -1,5 +1,5 @@
 import type { ChatMessage, SigiState } from "@sigma/contracts";
-import type { PolicyEvidenceRecord, PolicyEvidenceTopic } from "@/lib/policy-evidence/types";
+import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
 
 /**
  * Client-side rules for the Policy Copilot panel. Pure, so they are tested
@@ -102,30 +102,87 @@ export function referencedEvidence(reply: string, records: PolicyEvidenceRecord[
   );
 }
 
-const BASE_QUESTIONS = [
-  "What should the LGU verify before acting on this signal?",
-  "What evidence is missing or unreliable?",
-  "Could this signal be explained by incomplete reporting or a backlog?",
-];
-
-const TOPIC_QUESTIONS: Partial<Record<PolicyEvidenceTopic, string>> = {
-  budget_procurement_fiscal: "What does the budget and procurement evidence show, and what does it not show?",
-  reported_outcomes: "Can the reported outcomes be attributed to the LGU's response?",
-  policy_adoption_mandate: "Which ordinances or mandates are documented, and what remains unverified?",
-  implementation_organizational: "What implementation is documented, and how was it verified?",
-  surveillance_reporting: "What does the evidence say about surveillance and reporting?",
-};
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
- * Suggested questions for the selected context: three general questions,
- * plus one for each evidence topic the copilot actually has records for.
- * With no signal for the combination, "this signal" becomes "this context".
+ * Numbered citation links for the evidence the server says the reply cites
+ * (any kind: Lab, ACCESS, Policy, Method). The server only returns items the
+ * model was actually given, so an invented id stays plain text.
  */
-export function suggestedQuestions(records: PolicyEvidenceRecord[], hasSignal: boolean): string[] {
-  const topics = new Set(records.map((r) => r.topic));
-  const topical = Object.entries(TOPIC_QUESTIONS)
-    .filter(([topic]) => topics.has(topic as PolicyEvidenceTopic))
-    .map(([, question]) => question as string);
-  const all = [...BASE_QUESTIONS, ...topical];
-  return hasSignal ? all : all.map((q) => q.replace("this signal", "this context"));
+export function linkServerCitations<T extends { id: string }>(reply: string, citations: T[]): { text: string; cited: T[] } {
+  if (citations.length === 0) return { text: reply, cited: [] };
+  const byId = new Map(citations.map((c) => [c.id, c]));
+  const ids = [...byId.keys()].sort((a, b) => b.length - a.length);
+  // The prompt asks for [id]; brackets and backticks around an id are consumed with it.
+  const pattern = new RegExp(`\\[?\`?(?<![\\w-])(${ids.map(escapeRegExp).join("|")})(?![\\w-])\`?\\]?`, "g");
+  const cited: T[] = [];
+  const text = reply.replace(pattern, (_match, id: string) => {
+    const item = byId.get(id)!;
+    let n = cited.indexOf(item) + 1;
+    if (n === 0) n = cited.push(item);
+    return `[${n}](#cite-${id})`;
+  });
+  return { text, cited };
+}
+
+export interface SuggestionContext {
+  /** The place's display name. */
+  place: string;
+  /** The place has its own reporting-unit series (Lab). */
+  hasLab: boolean;
+  /** The place has mapped-facility figures (ACCESS). */
+  hasAccess: boolean;
+  /** SIGMA holds at least one local policy record for the place. */
+  hasLocalPolicy: boolean;
+}
+
+export interface SuggestionGroup {
+  label: string;
+  questions: string[];
+}
+
+/**
+ * Starter questions grouped by what SIGI can actually answer for this place.
+ * A group appears only when its evidence exists, and no question implies live
+ * data, current case counts, medicine stock or a policy SIGMA does not hold.
+ */
+export function suggestedQuestionGroups(ctx: SuggestionContext): SuggestionGroup[] {
+  const groups: SuggestionGroup[] = [];
+  if (ctx.hasLab) {
+    groups.push({
+      label: "Understand the data",
+      questions: [
+        `What does the dengue record for ${ctx.place} show from 2016 to 2020?`,
+        "Which weeks are missing or questionable, and why does that matter?",
+      ],
+    });
+    groups.push({
+      label: "Investigate signals",
+      questions: [
+        "Did EARS flag a rise before the DOH threshold was crossed in 2019?",
+        "What should I verify before reading an EARS alarm as a real increase?",
+      ],
+    });
+  }
+  if (ctx.hasAccess) {
+    groups.push({
+      label: "Explore access",
+      questions: [
+        `What hospitals and pharmacies are mapped in ${ctx.place}, and what can't that tell us?`,
+        "What do dengue IV fluids and paracetamol cost public hospitals?",
+      ],
+    });
+  }
+  groups.push({
+    label: "Connect evidence",
+    questions: [
+      ctx.hasLocalPolicy
+        ? `What local and national policy evidence applies to ${ctx.place}?`
+        : `What national rules apply to ${ctx.place}'s dengue response?`,
+      ...(ctx.hasLab ? ["After an unusual rise, what should the LGU check across Lab, ACCESS and Policy?"] : []),
+    ],
+  });
+  return groups;
 }
