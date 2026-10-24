@@ -104,11 +104,11 @@ export function AnalyticalMap({
   return (
     <div className="flex flex-col">
       {/* Modes */}
-      <div className={cn("border-b border-slate-200 px-3 py-2.5 sm:px-4", hideModeTabs && "hidden")}>
+      <div className={cn("border-b border-rule px-3 py-3 sm:px-4", hideModeTabs && "hidden")}>
         <div
           role="radiogroup"
           aria-label="Map mode"
-          className="relative -mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5"
+          className="grid grid-cols-2 gap-1 rounded-[10px] bg-slate-100 p-1 sm:inline-flex sm:max-w-full sm:flex-wrap"
         >
           {modes.map((m) => {
             const active = m.id === mode.id;
@@ -121,12 +121,12 @@ export function AnalyticalMap({
                 title={m.unavailableReason ?? m.question}
                 onClick={() => onModeChange(m.id)}
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors",
+                  "flex min-h-10 items-center justify-center gap-1.5 rounded-[7px] px-3 text-sm font-medium transition-colors sm:min-h-8 sm:justify-start",
                   active
-                    ? "bg-slate-900 text-white"
+                    ? "bg-sheet text-ink ring-1 ring-control"
                     : m.availability === "planned"
-                      ? "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                      ? "text-slate-500 hover:text-slate-700"
+                      : "text-slate-600 hover:bg-sheet/60 hover:text-ink",
                 )}
               >
                 <span
@@ -138,8 +138,8 @@ export function AnalyticalMap({
                 {m.availability === "planned" && (
                   <span
                     className={cn(
-                      "rounded px-1 text-[9px] font-semibold uppercase tracking-wide",
-                      active ? "bg-white/15 text-white/80" : "bg-slate-100 text-slate-400",
+                      "rounded px-1 text-[11px] font-semibold",
+                      active ? "bg-slate-100 text-slate-600" : "bg-sheet/70 text-slate-500",
                     )}
                   >
                     Planned
@@ -164,7 +164,7 @@ export function AnalyticalMap({
             {AVAILABILITY_BADGE[mode.availability].label}
           </span>
           <p className="text-sm font-medium text-slate-800">{mode.question}</p>
-          <p className="text-xs text-slate-400">{mode.evidenceLabel}</p>
+          <p className="text-xs text-slate-500">{mode.evidenceLabel}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -176,8 +176,8 @@ export function AnalyticalMap({
                   <label
                     key={id}
                     className={cn(
-                      "flex items-center gap-1.5 text-xs",
-                      needs3d ? "text-slate-400" : "text-slate-600",
+                      "flex min-h-8 cursor-pointer items-center gap-1.5 text-[13px]",
+                      needs3d ? "cursor-not-allowed text-slate-500" : "text-slate-700",
                     )}
                     title={needs3d ? "Switch to 3D to see extrusion" : undefined}
                   >
@@ -186,10 +186,10 @@ export function AnalyticalMap({
                       checked={toggles[id]}
                       disabled={needs3d}
                       onChange={(event) => onTogglesChange({ ...toggles, [id]: event.target.checked })}
-                      className="h-3.5 w-3.5 accent-slate-900"
+                      className="h-4 w-4 accent-[var(--ink)]"
                     />
                     {TOGGLE_LABEL[mode.id][id]}
-                    {needs3d && <span className="text-[10px]">(3D)</span>}
+                    {needs3d && <span className="text-[11px]">(3D)</span>}
                   </label>
                 );
               })}
@@ -200,7 +200,7 @@ export function AnalyticalMap({
             <div
               role="radiogroup"
               aria-label="Map view"
-              className="flex rounded-md border border-slate-200 bg-slate-50 p-0.5"
+              className="flex rounded-[10px] bg-slate-100 p-1"
             >
               {VIEWS.map(({ id, label, icon: Icon }) => (
                 <button
@@ -210,10 +210,10 @@ export function AnalyticalMap({
                   aria-checked={view === id}
                   onClick={() => onViewChange(id)}
                   className={cn(
-                    "flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                    "flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] font-medium transition-colors",
                     view === id
-                      ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
-                      : "text-slate-500 hover:text-slate-800",
+                      ? "bg-sheet text-ink ring-1 ring-control"
+                      : "text-slate-600 hover:text-ink",
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -224,7 +224,7 @@ export function AnalyticalMap({
             <button
               type="button"
               onClick={() => setResetToken((t) => t + 1)}
-              className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="flex h-10 items-center gap-1.5 rounded-[var(--radius-control)] border border-control bg-sheet px-3 text-[13px] font-medium text-slate-700 hover:bg-slate-50"
               title="Reset view"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
@@ -239,7 +239,7 @@ export function AnalyticalMap({
       <div className="p-3 sm:p-4">
         <div
           className={cn(
-            "relative w-full overflow-hidden rounded-lg border border-slate-200 bg-[#e8ecef]",
+            "relative w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-[#e8ecef]",
             heightClassName,
           )}
           onPointerLeave={() => setHover(null)}
@@ -272,17 +272,17 @@ export function AnalyticalMap({
           )}
 
           {frame.national && (
-            <div className="absolute left-3 top-3 w-64 max-w-[calc(100%-4.5rem)] rounded-lg border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            <div className="absolute left-3 top-3 w-64 max-w-[calc(100%-4.5rem)] rounded-[var(--radius-card)] border border-border bg-sheet p-3 shadow-[0_4px_16px_rgba(34,35,31,0.08)]">
+              <p className="text-xs font-medium text-slate-500">
                 {frame.national.title}
               </p>
               <p className="mt-1 text-xl font-semibold text-slate-900">{frame.national.value}</p>
               <p className="text-xs text-slate-500">{frame.national.period}</p>
-              <dl className="mt-2 space-y-0.5 border-t border-slate-100 pt-2 text-[11px]">
+              <dl className="mt-2 space-y-0.5 border-t border-rule pt-2 text-xs">
                 {frame.national.rows.map((row) => (
                   <div key={row.label} className="flex justify-between gap-2">
-                    <dt className="text-slate-400">{row.label}</dt>
-                    <dd className="text-right text-slate-600">{row.value}</dd>
+                    <dt className="text-slate-500">{row.label}</dt>
+                    <dd className="text-right tabular-nums text-slate-700">{row.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -290,8 +290,8 @@ export function AnalyticalMap({
           )}
 
           {mode.availability === "planned" && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/55 p-6 backdrop-blur-[1px]">
-              <div className="max-w-sm rounded-lg border border-slate-200 bg-white p-4 text-center shadow-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-sheet/70 p-6">
+              <div className="max-w-sm rounded-[var(--radius-card)] border border-border bg-sheet p-4 text-center shadow-[0_4px_16px_rgba(34,35,31,0.08)]">
                 <p className="text-sm font-semibold text-slate-800">{mode.label} layer not connected</p>
                 <p className="mt-1 text-xs text-slate-500">{mode.unavailableReason}</p>
               </div>
@@ -300,13 +300,13 @@ export function AnalyticalMap({
 
           {prepared &&
             (legendOpen ? (
-              <div className="absolute bottom-3 left-3 hidden w-64 rounded-lg border border-slate-200 bg-white/95 p-3 pr-2 shadow-sm backdrop-blur md:block">
+              <div className="absolute bottom-3 left-3 hidden w-64 rounded-[var(--radius-card)] border border-border bg-sheet p-3 pr-2 shadow-[0_4px_16px_rgba(34,35,31,0.08)] md:block">
                 <button
                   type="button"
                   onClick={() => setLegendOpen(false)}
                   aria-label="Hide legend"
                   title="Hide legend"
-                  className="absolute right-1.5 top-2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="absolute right-1.5 top-1.5 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-ink"
                 >
                   <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -316,7 +316,7 @@ export function AnalyticalMap({
               <button
                 type="button"
                 onClick={() => setLegendOpen(true)}
-                className="absolute bottom-3 left-3 hidden items-center gap-1.5 rounded-md border border-slate-200 bg-white/95 px-2.5 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-white md:flex"
+                className="absolute bottom-3 left-3 hidden h-9 items-center gap-1.5 rounded-[var(--radius-control)] border border-border bg-sheet px-3 text-[13px] font-medium text-slate-700 shadow-[0_4px_16px_rgba(34,35,31,0.08)] hover:text-ink md:flex"
               >
                 <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
                 Legend · {prepared.legend.title}
@@ -325,12 +325,12 @@ export function AnalyticalMap({
         </div>
 
         {prepared && (
-          <div className="mt-3 rounded-lg border border-slate-200 p-3 md:hidden">
+          <div className="mt-3 rounded-[var(--radius-card)] border border-border p-3 md:hidden">
             <AnalyticalLegend spec={prepared.legend} showHeight={columnsOnScreen} />
           </div>
         )}
 
-        <p className="mt-2 text-[11px] text-slate-400">
+        <p className="mt-2 text-xs text-slate-500">
           Basemap: {basemap.label}
           {basemap.provider === "osm-fallback" &&
             !issue &&
@@ -340,7 +340,7 @@ export function AnalyticalMap({
       </div>
 
       {prepared && prepared.timeline.slices.length > 0 && (
-        <div className="border-t border-slate-200 p-3 sm:p-4">
+        <div className="border-t border-rule p-3 sm:p-4">
           <MapTimeline
             spec={prepared.timeline}
             index={index}
@@ -375,21 +375,21 @@ function MapTooltip({
   };
   return (
     <div
-      className="pointer-events-none absolute z-10 w-56 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
+      className="pointer-events-none absolute z-10 w-56 rounded-[var(--radius-control)] border border-border bg-sheet px-3 py-2 text-xs shadow-[0_6px_20px_rgba(34,35,31,0.12)]"
       style={style}
       role="tooltip"
     >
-      <p className="font-semibold text-slate-900">{title}</p>
+      <p className="font-semibold text-ink">{title}</p>
       <p className="text-slate-500">{subtitle}</p>
       <dl className="mt-1.5 space-y-0.5">
         {rows.map((row) => (
           <div key={row.label} className="flex justify-between gap-2">
-            <dt className="text-slate-400">{row.label}</dt>
-            <dd className="text-right font-medium text-slate-700">{row.value}</dd>
+            <dt className="text-slate-500">{row.label}</dt>
+            <dd className="text-right font-medium tabular-nums text-slate-700">{row.value}</dd>
           </div>
         ))}
       </dl>
-      <p className="mt-1.5 text-[10px] text-slate-400">Click to open details</p>
+      <p className="mt-1.5 text-[11px] text-slate-500">Click to open details</p>
     </div>
   );
 }

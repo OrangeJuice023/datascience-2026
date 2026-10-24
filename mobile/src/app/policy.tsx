@@ -295,11 +295,11 @@ export default function PolicyScreen() {
           style={({ pressed }) => [
             styles.send,
             {
-              backgroundColor: theme.accent,
-              opacity: sending || unavailable || !draft.trim() ? 0.5 : pressed ? 0.8 : 1,
+              backgroundColor: theme.text,
+              opacity: sending || unavailable || !draft.trim() ? 0.45 : pressed ? 0.8 : 1,
             },
           ]}>
-          <Text style={styles.sendText}>{sending ? 'Sending…' : 'Send'}</Text>
+          <Text style={[styles.sendText, { color: theme.background }]}>{sending ? 'Sending…' : 'Send'}</Text>
         </Pressable>
       </Card>
 
@@ -429,8 +429,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendText: {
-    color: '#ffffff',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

@@ -217,7 +217,6 @@ export default function DataSourcesPage() {
     <div className="flex flex-col gap-8">
       <div>
         <PageHeader
-          eyebrow="Reference"
           title="Data sources"
           subtitle="What SIGMA is built from, where each dataset appears, and how to credit it."
           actions={

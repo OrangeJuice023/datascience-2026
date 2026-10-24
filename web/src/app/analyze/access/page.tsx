@@ -12,7 +12,6 @@ export default function AccessPage() {
     return (
       <div className="flex max-w-3xl flex-col gap-5">
         <PageHeader
-          eyebrow="Analyze"
           title="ACCESS"
           subtitle="Whether people in an area can reach care and dengue medicines."
         />

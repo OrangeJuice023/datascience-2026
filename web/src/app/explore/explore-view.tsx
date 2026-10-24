@@ -163,7 +163,6 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Analyze"
         title="Signal Explorer"
         subtitle="Explore formal observations, EARS and DOH threshold results, weather and access across space and time. Every layer states what kind of evidence it shows."
       />

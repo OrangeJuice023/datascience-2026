@@ -33,17 +33,17 @@ export function TrendChart({
         data={chartData}
         margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
       >
-        <CartesianGrid stroke="#e2e8f0" vertical={false} />
+        <CartesianGrid stroke="#ebe8e1" vertical={false} />
         <XAxis
           dataKey="date"
           tickFormatter={formatShortDate}
-          tick={{ fontSize: 11, fill: "#64748b" }}
-          axisLine={{ stroke: "#e2e8f0" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
+          axisLine={{ stroke: "#ebe8e1" }}
           tickLine={false}
           minTickGap={32}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#64748b" }}
+          tick={{ fontSize: 11, fill: "#6f6d66" }}
           axisLine={false}
           tickLine={false}
           width={32}
@@ -64,14 +64,14 @@ export function TrendChart({
           stackId="band"
           name="Historical range"
           stroke="none"
-          fill="#0d9488"
+          fill="#2468c9"
           fillOpacity={0.1}
           isAnimationActive={false}
         />
         <Line
           dataKey="expected"
           name="Expected baseline"
-          stroke="#94a3b8"
+          stroke="#9a978e"
           strokeDasharray="4 4"
           strokeWidth={1.5}
           dot={false}
@@ -80,7 +80,7 @@ export function TrendChart({
         <Line
           dataKey="observed"
           name="Observed"
-          stroke="#0d9488"
+          stroke="#2468c9"
           strokeWidth={2}
           dot={{ r: 2, strokeWidth: 0 }}
           activeDot={{ r: 4 }}

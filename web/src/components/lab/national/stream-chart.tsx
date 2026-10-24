@@ -36,7 +36,7 @@ function StreamTooltip({ active, payload }: { active?: boolean; payload?: Array<
           <span className="font-semibold tabular-nums text-slate-900">{formatCount(bar.value)}</span>
         </p>
       )}
-      {bar.sourceRecordId && <p className="mt-0.5 text-[10px] text-slate-400">Record {bar.sourceRecordId}</p>}
+      {bar.sourceRecordId && <p className="mt-0.5 text-[11px] text-slate-400">Record {bar.sourceRecordId}</p>}
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function StreamChart({ bars, height = 220 }: { bars: StreamBar[]; height?
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS_TICK} axisLine={{ stroke: GRID }} tickLine={false} minTickGap={16} />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
-        <Tooltip content={<StreamTooltip />} cursor={{ fill: "#f1f5f9" }} />
+        <Tooltip content={<StreamTooltip />} cursor={{ fill: "#f2f1ed" }} />
         <Bar dataKey="value" name="Reported cases" radius={[2, 2, 0, 0]} isAnimationActive={false}>
           {bars.map((bar) => (
             <Cell key={bar.key} fill={OBSERVED} fillOpacity={bar.complete === false ? 0.3 : 1} />

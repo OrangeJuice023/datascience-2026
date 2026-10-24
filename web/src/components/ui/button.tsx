@@ -2,11 +2,12 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const VARIANT_CLASSES = {
-  primary: "bg-slate-900 text-white hover:bg-slate-800",
-  secondary: "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
-  ghost: "text-slate-600 hover:bg-slate-100",
+  primary: "bg-ink text-white hover:bg-slate-800 active:bg-slate-950",
+  secondary: "border border-control bg-sheet text-slate-800 hover:bg-slate-50 active:bg-slate-100",
+  ghost: "text-slate-600 hover:bg-slate-100 hover:text-ink active:bg-slate-200",
 } as const;
 
+/** One filled (ink) button per screen at most; secondary is outlined, ghost is text. */
 export function Button({
   className,
   variant = "primary",
@@ -17,7 +18,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius-control)] px-3.5 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         VARIANT_CLASSES[variant],
         className,
       )}

@@ -40,7 +40,7 @@ export function SliderControl({
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-teal-600"
       />
-      {helperText && <p className="text-xs text-slate-400">{helperText}</p>}
+      {helperText && <p className="text-xs text-slate-500">{helperText}</p>}
     </div>
   );
 }
