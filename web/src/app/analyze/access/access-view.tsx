@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { ExternalLink, Search, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
@@ -280,9 +279,7 @@ export function AccessView() {
           {formatCount(meta.facilityCounts.duplicates)} duplicates). Units are assigned by COD-AB code; the reporting-unit
           boundaries agree for {Math.round((crossCheck.agreed / Math.max(1, crossCheck.checked)) * 1000) / 10}% of
           facilities. Built by <code>scripts/access/build-access.mjs</code>.{" "}
-          <Link href="/analyze/policy" className="font-medium text-accent hover:underline">
-            Ask the Copilot about an LGU →
-          </Link>
+          SIGI, at the top of Analyze, answers questions about any reporting unit from these figures.
         </p>
       </Card>
     </div>

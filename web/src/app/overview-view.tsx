@@ -35,7 +35,7 @@ function nextSteps(accessReady: boolean) {
     {
       href: "/analyze/policy",
       title: "Policy",
-      text: "Ask SIGI about a place's dengue record, access to care and policy evidence, with every source cited.",
+      text: "The policy records, Lab years and ACCESS figures SIGI is given for a place. SIGI itself opens at the top of Analyze.",
     },
     {
       href: "/analyze/lab",
