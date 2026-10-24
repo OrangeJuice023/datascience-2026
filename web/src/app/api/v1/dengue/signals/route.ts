@@ -1,27 +1,24 @@
 import type { NextRequest } from "next/server";
 import { dataProvider } from "@/data/opendengue-provider";
 import { buildSignals } from "@/lib/api/dengue";
+import { earsSignals } from "@/lib/api/dengue-signals";
 import { ApiError } from "@/lib/api/envelope";
 import { assertKnownParams, parseQuery } from "@/lib/api/query";
 import { withErrors } from "@/lib/api/route";
 import { isValidDisease } from "@/lib/policy-chat/context";
+import { readSigmaData } from "@/lib/sigma/summary";
 
-const KNOWN_PARAMS = ["disease", "locationId"] as const;
-
-/**
- * The EARS pipeline is implemented in the Python data track but is not
- * connected to this API. It stays false until a provider is wired in, so the
- * endpoint reports `not_connected` instead of an empty result set that a
- * client could read as "no signal".
- */
-const EARS_CONNECTED = false;
+const KNOWN_PARAMS = ["disease", "locationId", "week"] as const;
 
 /**
  * GET /api/v1/dengue/signals
  *
- * Anomaly results plus the clearly separated open-source signal demo data.
- * While no model is connected, `signals` is empty and `status` is
- * `not_connected`; an empty list never means "no outbreak".
+ * EARS C1/C2/C3 results per HDX reporting unit and week, from the committed
+ * SIGMA export (ml/ears.py -> ml/export_sigma_web.py), plus the clearly
+ * separated open-source signal demo data. Historical records (2016-2021), not
+ * real-time. A week or method with no record had no computable result; an
+ * empty list never means "no outbreak". If the export cannot be read the
+ * status is `not_connected`, never an empty "live" answer.
  */
 export const GET = withErrors(async (request: NextRequest) => {
   const query = parseQuery(request.nextUrl);
@@ -31,27 +28,25 @@ export const GET = withErrors(async (request: NextRequest) => {
   if (!isValidDisease(disease)) {
     throw ApiError.notFound(`No signal series is connected for "${disease}".`);
   }
-  const locationId = query.get("locationId");
+  const locationId = query.get("locationId") ?? undefined;
+  const week = query.get("week") ?? undefined;
 
-  const [anomalies, demoSignals] = await Promise.all([
-    dataProvider.getAnomalyResults("dengue", "ph"),
+  const [sigma, demoSignals] = await Promise.all([
+    readSigmaData(),
     dataProvider.getSignals({ disease, ...(locationId ? { locationId } : {}) }),
   ]);
 
-  const data = buildSignals({
-    anomalyResults: anomalies.map((a) => ({
-      id: a.id,
-      geographyId: a.geographyId,
-      periodStart: a.periodStart,
-      periodEnd: a.periodEnd,
-      method: a.model.name,
-      value: a.score,
-      threshold: a.upperBound,
-      alarm: a.status !== "normal",
-    })),
-    demoSignals,
-    earsConnected: EARS_CONNECTED,
-  });
+  if (sigma && locationId !== undefined && !sigma.units.some((u) => u.id === locationId)) {
+    throw ApiError.badRequest(`Unknown reporting unit "${locationId}".`, { locationId: ["unknown reporting unit"] });
+  }
+  if (sigma && week !== undefined && !sigma.meta.weeks.includes(week)) {
+    throw ApiError.badRequest(`No week starting "${week}" in the series (weeks start on Sunday, 2016-01-10 to 2021-01-03).`, {
+      week: ["not a week start in the series"],
+    });
+  }
+
+  const ears = sigma ? earsSignals(sigma, { unitId: locationId, week }) : { records: [], weeks: [] };
+  const data = buildSignals({ anomalyResults: ears.records, demoSignals, earsConnected: sigma !== null });
 
   return { data, status: data.status === "live" ? ("live" as const) : ("not_connected" as const), isSample: true };
 });

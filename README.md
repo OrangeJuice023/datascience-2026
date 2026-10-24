@@ -66,6 +66,23 @@ search demand, population per unit), SIGMA says "unknown" instead of guessing.
 Also: **Data Sources** (`/data-sources`) lists every dataset with its coverage, licence and
 credit line, and **Documentation** (`/documentation`) renders the API reference.
 
+### Mobile view
+
+The Expo app on an Android emulator (Pixel 7, Android 15), on real data from the API. It
+finds the API by itself: here, the web server on the development machine. Screenshots are
+in [docs/mobile-view/](docs/mobile-view/).
+
+| Overview | Overview, charts | Explore, map |
+| :---: | :---: | :---: |
+| <img src="docs/mobile-view/01-overview.png" width="240" alt="Overview: SIGMA wordmark, year and place filters, four stat tiles for 2016-2021"> | <img src="docs/mobile-view/02-overview-charts.png" width="240" alt="Overview: national weekly cases chart, cases by reporting unit, recent EARS signals donut"> | <img src="docs/mobile-view/03-explore-map.png" width="240" alt="Explore map: EARS alarm weeks per year for the 126 reporting units, 2016-2020"> |
+| **Explore, 2019** | **Explore, one unit** | **Explore, trends** |
+| <img src="docs/mobile-view/04-explore-map-2019.png" width="240" alt="Explore map for 2019: most units over 12 alarm weeks"> | <img src="docs/mobile-view/05-explore-unit.png" width="240" alt="Explore: a selected unit and its EARS alarm weeks"> | <img src="docs/mobile-view/06-explore-trends.png" width="240" alt="Explore trends: a unit's cases, EARS and DOH weeks by epi year"> |
+| **Analyze** | **About these numbers** | **Settings** |
+| <img src="docs/mobile-view/07-analyze.png" width="240" alt="Analyze ACCESS: mapped facilities for a reporting unit"> | <img src="docs/mobile-view/08-about.png" width="240" alt="About these numbers: sources and caveats"> | <img src="docs/mobile-view/09-settings.png" width="240" alt="Settings: the API address, found automatically"> |
+
+On the maps, colour is a signal category and dot size is a count. Areas are never filled by
+case counts, and a unit with no computable result is drawn hollow.
+
 ## How it works
 
 ```mermaid
@@ -151,8 +168,11 @@ You need Node.js 20+ and npm. The data pipeline also needs Python 3.12.
 # Web app and API: http://localhost:3000
 cd web && npm ci && npm run dev
 
-# Mobile app (point it at the API in the app's Settings, or in mobile/.env)
+# Mobile app (finds the API by itself: your dev machine, the emulator host, then the deployed API)
 cd mobile && npm ci && npm start
+
+# MCP server: SIGMA's API as tools for Claude and other MCP clients (see mcp/README.md)
+cd mcp && npm ci && npm start
 
 # Python pipeline (needs the raw files in data/raw/, see docs/dengue-pipeline.md)
 pip install -r ml/requirements.txt
@@ -170,7 +190,8 @@ Copy each `.env.example` and fill in what you need. Never commit the real file.
 | --- | --- | --- |
 | [`web/.env.example`](web/.env.example) → `web/.env.local` | `GROQ_API_KEY` (server only), `GROQ_MODEL`, `CHAT_DISABLED`, `CHAT_PUBLIC_DISABLED` | SIGI answers `not_configured` |
 | | `NEXT_PUBLIC_MAP_STYLE_URL`, `NEXT_PUBLIC_MAPTILER_KEY`, `NEXT_PUBLIC_MAPTILER_STYLE` | Maps use OpenStreetMap raster tiles |
-| [`mobile/.env.example`](mobile/.env.example) → `mobile/.env` | `EXPO_PUBLIC_API_BASE_URL` (bundled into the app, never a secret) | `http://localhost:3000/api/v1` |
+| [`mobile/.env.example`](mobile/.env.example) → `mobile/.env` | `EXPO_PUBLIC_API_BASE_URL` (bundled into the app, never a secret) | Found automatically ([docs/mobile.md](docs/mobile.md#pointing-the-app-at-the-api)) |
+| (shell) | `SIGMA_API_BASE_URL`, for the MCP server | The deployed API |
 | [`ml/.env.example`](ml/.env.example) → `ml/.env` | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` | Unused today (no database yet) |
 
 </details>
@@ -186,6 +207,7 @@ web/                       Next.js 16 (App Router), TypeScript, Tailwind; MapLib
   src/lib/api/             API services and the endpoint registry (feeds /api/v1 and /documentation)
   src/lib/analyze-chat/    SIGI: evidence pack, prompt, playbook
 mobile/                    Expo + React Native client of the API
+mcp/                       MCP server: the read-only API as tools for AI clients
 packages/sigma-contracts/  Request/response types shared by web and mobile
 ml/                        Python pipeline: clean_dengue.py → ears.py → export_sigma_web.py
 scripts/geo/               Geography build: HDX reporting units → COD-AB / PSA PSGC
@@ -214,7 +236,7 @@ says what kind of data it carries.
 | `GET /api/v1/sources` | Source catalogue | `live` |
 | `GET /api/v1/dengue/observations` | National weekly observations (OpenDengue) | `live` |
 | `GET /api/v1/dengue/summary` | National weekly, monthly and yearly aggregates | `live` |
-| `GET /api/v1/dengue/signals` | EARS alarms per reporting unit (being connected) | `not_connected` |
+| `GET /api/v1/dengue/signals` | EARS C1/C2/C3 results per reporting unit and week (`locationId`, `week`) | `live` (historical) |
 | `GET /api/v1/access/units` | Mapped facilities and dengue burden per reporting unit | `live` |
 | `GET /api/v1/access/medicines` | DOH medicine prices and formulary status | `live` |
 | `GET /api/v1/access/metrics` | Retired; answers with empty lists | `not_connected` |
@@ -225,7 +247,12 @@ says what kind of data it carries.
 ```bash
 curl "https://datascience-2026.vercel.app/api/v1/dengue/observations?limit=2"
 curl "https://datascience-2026.vercel.app/api/v1/access/units?unitId=quezon-city"
+curl "https://datascience-2026.vercel.app/api/v1/dengue/signals?locationId=iloilo-city&week=2019-07-14"
 ```
+
+**MCP.** [`mcp/`](mcp/README.md) wraps these endpoints as Model Context Protocol tools
+(`dengue_signals`, `dengue_units`, `access_units`, ...) so Claude and other MCP clients can
+query SIGMA and see the same `meta.status` / `isSample` provenance.
 
 `live` means real records from a connected source, which may still be historical. Full
 reference: [docs/api.md](docs/api.md) and [`/documentation`](https://datascience-2026.vercel.app/documentation).
@@ -249,7 +276,10 @@ reference: [docs/api.md](docs/api.md) and [`/documentation`](https://datascience
 | Part | State |
 | --- | --- |
 | Dengue cleaning, DOH thresholds, EARS C1-C3 | ✅ Run offline on 2016-2021 data, with QA reports ([docs/reports/](docs/reports/)) |
-| EARS and DOH results in the app and API | ✅ Explore and Lab · 🔜 `/dengue/signals` being connected |
+| EARS and DOH results in the app and API | ✅ Explore, Lab and `/dengue/signals` |
+| Spatial analysis of the signals | ✅ Clustering, Knox test, local vs aggregate lead time ([report](docs/geo/spatial-analysis-report.md)) |
+| Mobile app | ✅ Overview and Explore dashboards; finds the API automatically ([screens](#mobile-view)) |
+| MCP server | ✅ The read-only API as MCP tools ([mcp/](mcp/README.md)) |
 | ACCESS | ✅ Real facilities and prices · ⛔ medicine stock has no public source |
 | SIGI | ✅ Evidence pack per unit, server-checked citations · 🔜 answer quality to be live-tested with a model key |
 | Policy coverage | 🔜 Local records for 4 of 126 units so far |
@@ -262,7 +292,8 @@ The full checklist, with what blocks each item, is in [docs/next-steps.md](docs/
 ```bash
 cd web    && npm run lint && npm run typecheck && npm run test && npm run build
 cd mobile && npm run lint && npm run typecheck && npm run test
-python -m compileall -q ml
+cd mcp    && npm test
+python -m compileall -q ml && python -m unittest discover -s ml/tests
 ```
 
 CI ([`validate.yml`](.github/workflows/validate.yml)) runs all of these on every pull request.
@@ -279,7 +310,8 @@ handler, so `/documentation` cannot drift from the code.
 | [docs/geo/](docs/geo/README.md) | Reporting units, geography method and data quality |
 | [docs/environmental-covariates.md](docs/environmental-covariates.md) | Weather sources, comparability, covariate plan |
 | [docs/access-data-model.md](docs/access-data-model.md) | ACCESS data model and open decisions |
-| [docs/mobile.md](docs/mobile.md) | Expo client, API address, EAS builds |
+| [docs/mobile.md](docs/mobile.md) | Expo client, API discovery, EAS builds ([screens](docs/mobile-view/)) |
+| [mcp/README.md](mcp/README.md) | MCP server: tools, and setup for Claude Desktop and Claude Code |
 | [docs/next-steps.md](docs/next-steps.md) | Status, next steps and data gaps |
 | [AGENTS.md](AGENTS.md) | Rules for contributors and AI agents |
 
