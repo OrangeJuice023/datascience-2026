@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { fetchHealth } from '@/api/endpoints';
 import { validateBaseUrl } from '@/api/config';
+import { SOURCE_LABEL } from '@/api/discovery';
 import { CloseButton, Screen } from '@/components/screen';
 import { Banner, Card, FactRow, SectionTitle, StatusPill } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
@@ -19,7 +20,8 @@ import { useSettings } from '@/state/settings-context';
  * whether the app can actually reach it.
  */
 export default function SettingsScreen() {
-  const { baseUrl, defaultBaseUrl, updateBaseUrl, resetBaseUrl } = useSettings();
+  const { baseUrl, source, defaultBaseUrl, updateBaseUrl, resetBaseUrl, rediscover } = useSettings();
+  const [finding, setFinding] = useState(false);
   const theme = useTheme();
 
   const [draft, setDraft] = useState<string | null>(null);
@@ -42,7 +44,8 @@ export default function SettingsScreen() {
   };
 
   const reset = async () => {
-    await resetBaseUrl();
+    setFinding(true);
+    await (source === 'saved' ? resetBaseUrl() : rediscover()).finally(() => setFinding(false));
     setDraft(null);
     setProblem(null);
     setSaved(false);
@@ -74,8 +77,9 @@ export default function SettingsScreen() {
       <Card>
         <SectionTitle>API address</SectionTitle>
         <Text style={[styles.note, { color: theme.textSecondary }]}>
-          The base URL of the SIGMA API, including the version path. The app is currently talking to the
-          address below.
+          The base URL of the SIGMA API, including the version path. The app finds one by itself (your
+          development machine, the emulator host, then the deployed API); save an address here only to
+          override that.
         </Text>
         <TextInput
           accessibilityLabel="API address"
@@ -102,13 +106,17 @@ export default function SettingsScreen() {
           <Pressable
             accessibilityRole="button"
             onPress={reset}
+            disabled={finding}
             style={[styles.secondary, { borderColor: theme.border }]}>
-            <Text style={[styles.secondaryText, { color: theme.textSecondary }]}>Reset to default</Text>
+            <Text style={[styles.secondaryText, { color: theme.textSecondary }]}>
+              {finding ? 'Finding…' : 'Find automatically'}
+            </Text>
           </Pressable>
         </View>
 
-        <FactRow label="Default" value={defaultBaseUrl} />
         <FactRow label="In use" value={baseUrl} />
+        <FactRow label="Found by" value={SOURCE_LABEL[source]} tone={source === 'unreachable' ? 'unavailableText' : undefined} />
+        <FactRow label="Fallback" value={defaultBaseUrl} />
       </Card>
 
       <Card>

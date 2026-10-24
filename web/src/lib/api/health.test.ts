@@ -15,13 +15,21 @@ describe("buildHealth", () => {
     expect(JSON.stringify(health)).not.toMatch(/GROQ|sk-|API_KEY/i);
   });
 
-  it("marks the anomaly engine disabled while EARS is not connected", () => {
+  it("reports the EARS engine as served from the committed export, historical only", () => {
     const health = buildHealth({ aiProviderConfigured: false, mapTilesConfigured: false });
     const engine = health.services.find((s) => s.id === "anomaly-engine");
 
-    expect(engine?.enabled).toBe(false);
-    expect(engine?.status).toBe("disabled");
-    expect(engine?.note).toMatch(/not connected to this API/i);
+    expect(engine?.enabled).toBe(true);
+    expect(engine?.status).toBe("ok");
+    expect(engine?.note).toMatch(/not real-time/i);
+  });
+
+  it("marks the retired stock/search metrics disabled instead of ok", () => {
+    const health = buildHealth({ aiProviderConfigured: false, mapTilesConfigured: false });
+    const metrics = health.services.find((s) => s.id === "access-metrics");
+
+    expect(metrics?.enabled).toBe(false);
+    expect(metrics?.note).toMatch(/no public source/i);
   });
 
   it("disables the copilot when no provider is configured, and says why", () => {

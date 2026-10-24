@@ -120,17 +120,23 @@ gap-bearing.
 
 ### `GET /api/v1/dengue/signals`
 
-| Parameter   | Type   | Notes                |
-| ----------- | ------ | -------------------- |
-| `disease`   | string | Defaults to `Dengue`.|
-| `locationId` | string | Optional.            |
+| Parameter    | Type   | Notes |
+| ------------ | ------ | ----- |
+| `disease`    | string | Defaults to `Dengue`. |
+| `locationId` | string | Optional. A reporting unit id; without `week`, that unit's whole series. Unknown ids are a 400. |
+| `week`       | string | Optional. A week start (Sunday, `YYYY-MM-DD`) from 2016-01-10 to 2021-01-03. Default: the latest week with an EARS result, all units. |
 
-Anomaly results, plus the open-source signal demo data in a separate,
-clearly labelled block. While no anomaly model is connected to the API,
-`status` is `not_connected`, `signals` is empty, and `reason` explains
-that this is not evidence that no outbreak is occurring. The EARS engine
-that would produce these results is described in `engine`, including its
-method, its data window, and its limitations.
+EARS C1/C2/C3 results per HDX reporting unit and week, read from the
+committed SIGMA export (`ml/ears.py` → `ml/export_sigma_web.py` →
+`web/public/data/sigma/hdx-dengue-sigma.json`), `live` and historical. One
+record per unit, week and method whose statistic was computed on a usable
+week: `value`, `threshold`, and `alarm` (the export's label, which also
+requires at least 5 cases). A missing or suspect-swap week, or a method with
+too short a baseline, has **no record**: that is "no result", not a zero and
+not "no signal". If the export cannot be read the status is `not_connected`.
+The open-source signal demo data stays in its own labelled block, which is
+why `meta.isSample` is `true`. Without parameters (2021-01-03): 327 records,
+9 alarms.
 
 ### `GET /api/v1/dengue/units`
 
@@ -239,8 +245,8 @@ The test suite is deterministic. The route-level tests run against the
 committed OpenDengue fixture, so they assert the real shape of a response
 rather than a mock of it, and the service-layer tests pin the rules that
 matter most here: a missing week is never zero-filled, a slice never claims to
-be the whole series, and an empty anomaly list is reported as `not_connected`
-rather than as "no outbreak". The mobile client has its own tests for the
+be the whole series, and a selection with no EARS record is explained as "no
+computable result", never as "no outbreak". The mobile client has its own tests for the
 error mapping; see [mobile.md](mobile.md).
 
 ## Authentication

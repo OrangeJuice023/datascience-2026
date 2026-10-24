@@ -13,6 +13,14 @@
  *   Neutral grey   #8A877E   capabilities that are not connected
  *   Red            #C4242A   unavailable and errors
  *   Leaf green     #747D59   the brand mark and Sigi's world
+ *   Forest         #1E4D36   dashboard headings, chart lines and the wordmark
+ *                            (Overview / Explore redesign, 2026-10-24)
+ *
+ * Signal classes (EARS C1/C2/C3 and alarm-week bins) use one ordinal ramp,
+ * checked with the dataviz palette validator (CVD and normal-vision
+ * separation pass; the gold is below 3:1, so it is always shown with a
+ * labelled legend):  none #2F9A5A, C1 #D4A20A, C2 #E2532B, C3 #8E1F5C;
+ * dark mode has its own steps, validated on #121211: #24834C, #B78D11, #C8363F, #B66BD0.
  *
  * The semantic colors are the important part: `live`, `demo`, `not_connected`
  * and `unavailable` must never look alike, because a demo series and a live
@@ -63,6 +71,23 @@ export const Colors = {
     demoText: '#8A4B08',
     notConnectedText: '#5F5D56',
     unavailableText: '#A11D22',
+    /** Dashboard headings, chart lines, the wordmark. */
+    brand: '#1E4D36',
+    /** Tinted stat tiles. */
+    brandSoft: '#E6EDE3',
+    /** The tile that marks a peak. */
+    alertSoft: '#F8E3DF',
+    /** The faint grid behind the dashboards and chart gridlines. */
+    grid: '#E5E3DB',
+    /** Signal classes, lowest to highest. */
+    signalNone: '#2F9A5A',
+    signalC1: '#D4A20A',
+    signalC2: '#E2532B',
+    signalC3: '#8E1F5C',
+    /** No computable result: drawn hollow, never as the lowest class. */
+    noResult: '#9C998F',
+    /** Land on the maps: neutral, never a data value. */
+    land: '#D3E0CF',
   },
   dark: {
     background: '#121211',
@@ -83,6 +108,16 @@ export const Colors = {
     demoText: '#F5C46E',
     notConnectedText: '#B4B2AA',
     unavailableText: '#F28B88',
+    brand: '#9FD3B4',
+    brandSoft: '#1E2A22',
+    alertSoft: '#3A2523',
+    grid: '#262622',
+    signalNone: '#24834C',
+    signalC1: '#B78D11',
+    signalC2: '#C8363F',
+    signalC3: '#B66BD0',
+    noResult: '#77746C',
+    land: '#2E3A31',
   },
 } as const;
 
@@ -134,6 +169,12 @@ export const Fonts = Platform.select({
     mono: 'var(--font-mono)',
   },
 });
+
+/** Pixelify Sans (OFL), the web app's pixel face, loaded in app/_layout.tsx. */
+export const PixelFont = {
+  regular: 'PixelifySans_400Regular',
+  bold: 'PixelifySans_700Bold',
+} as const;
 
 /**
  * The type scale.

@@ -102,7 +102,7 @@ const DEMO_SIGNAL: Signal = {
 };
 
 describe("buildSignals", () => {
-  it("reports not_connected when no anomaly model is connected", () => {
+  it("reports not_connected when the EARS results cannot be read", () => {
     const data = buildSignals({ anomalyResults: [], demoSignals: [], earsConnected: false });
 
     expect(data.status).toBe("not_connected");
@@ -111,11 +111,13 @@ describe("buildSignals", () => {
     expect(data.reason).toMatch(/not evidence that no outbreak/i);
   });
 
-  it("does not report live when the engine is connected but produced nothing", () => {
+  it("explains an empty selection without calling it 'no outbreak'", () => {
     const data = buildSignals({ anomalyResults: [], demoSignals: [], earsConnected: true });
 
-    expect(data.status).toBe("not_connected");
+    expect(data.status).toBe("live");
     expect(data.signals).toEqual([]);
+    expect(data.reason).toMatch(/no EARS result could be computed/i);
+    expect(data.reason).toMatch(/not evidence that no outbreak/i);
   });
 
   it("reports live only when a model actually returned a result", () => {

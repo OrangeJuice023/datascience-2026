@@ -5,6 +5,7 @@ import type {
   ChatRequestBody,
   ChatResponseData,
   DengueObservationsData,
+  DengueSignalsData,
   DengueSummaryData,
   DengueUnitsData,
   HealthResponse,
@@ -55,6 +56,18 @@ export function fetchSummary(
   signal?: AbortSignal
 ): Promise<ApiSuccess<DengueSummaryData>> {
   return apiRequest<DengueSummaryData>(baseUrl, `/dengue/summary${toQuery({ limit })}`, { signal });
+}
+
+/**
+ * EARS C1/C2/C3 results from /dengue/signals: the latest week for every unit
+ * by default, one unit's whole series with `locationId`, or one week with `week`.
+ */
+export function fetchSignals(
+  baseUrl: string,
+  query: { locationId?: string; week?: string } = {},
+  signal?: AbortSignal
+): Promise<ApiSuccess<DengueSignalsData>> {
+  return apiRequest<DengueSignalsData>(baseUrl, `/dengue/signals${toQuery({ ...query })}`, { signal });
 }
 
 /** The 126 HDX reporting units with their per-epi-year EARS and DOH-threshold counts, or one unit. */

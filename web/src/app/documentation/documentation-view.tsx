@@ -560,7 +560,7 @@ export function DocumentationView() {
             {[
               "The dengue series is national and historical: 2012-12-30 to 2023-11-25, with 544 of 569 expected weeks recorded. Sub-national reporting is not connected.",
               "Missing weeks are absent, never zero-filled and never interpolated. A gap in a chart is a week with no record.",
-              "The anomaly engine is implemented in the Python data track but is not connected to this API, so no anomaly score is served. An empty anomaly list is not evidence that no outbreak is occurring.",
+              "EARS results are historical (2016-2021) and read from the committed SIGMA export; the API cannot recompute them. A unit-week with no EARS record had no computable result, which is not evidence that no outbreak is occurring.",
               "Every ACCESS record is simulated. A facility listed there has a demo record; that does not establish that it is operating, stocked, staffed or clinically accessible.",
               "The policy evidence pack is a curated research artefact, not an exhaustive census of Philippine LGUs, and many budget figures are planned amounts rather than awards, payments or expenditure.",
               "Policy Copilot replies are generated over demo evidence. They are not a verified government position, not an official advisory, and not a clinical or legal recommendation.",

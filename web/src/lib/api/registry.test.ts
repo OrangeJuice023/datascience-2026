@@ -167,7 +167,10 @@ async function callRealHandler(
         body: await (await summaryGet(request("/dengue/summary", "?limit=2"))).json(),
       };
     case "GET /dengue/signals":
-      return { status: 200, body: await (await signalsGet(request("/dengue/signals"))).json() };
+      return {
+        status: 200,
+        body: await (await signalsGet(request("/dengue/signals", "?locationId=iloilo-city&week=2019-07-14"))).json(),
+      };
     case "GET /dengue/units":
       return {
         status: 200,
