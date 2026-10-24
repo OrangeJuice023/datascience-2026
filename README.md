@@ -109,7 +109,7 @@ national alert. That is why SIGMA always shows both. See the
 
 | Source | Licence | Coverage | Used in |
 | --- | --- | --- | --- |
-| [HDX Philippine Dengue Cases and Deaths](https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths) (DOH Epidemiology Bureau data, via Cirrolytix) | CC BY | 126 reporting units, weekly, 2016-2021 | Explore, Lab, SIGI, `/dengue/signals`, `/dengue/units` |
+| [HDX Philippine Dengue Cases and Deaths](https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths) (DOH Epidemiology Bureau data, via Cirrolytix) | CC BY | 126 reporting units, weekly, 2016-2021 | Explore, Lab, SIGI |
 | [OpenDengue v1.3](https://opendengue.org) | CC BY 4.0 | National, weekly, Dec 2012 to Nov 2023 (544 weeks, with gaps) | Lab, `/dengue/summary`, `/dengue/observations` |
 | [HOT OpenStreetMap health facilities](https://data.humdata.org/dataset/hotosm_phl_health_facilities) | ODbL 1.0 | 15,586 facilities after cleaning, snapshot 2026-10-13 | ACCESS, SIGI |
 | [DOH Drug Price Reference Index](https://dpri.doh.gov.ph/drug_search) 2026 | Philippine government work | Public-hospital prices for 4 dengue medicines (procurement year 2025) | ACCESS, SIGI |
@@ -213,17 +213,16 @@ says what kind of data it carries.
 | `GET /api/v1/sources` | Source catalogue | `live` |
 | `GET /api/v1/dengue/observations` | National weekly observations (OpenDengue) | `live` |
 | `GET /api/v1/dengue/summary` | National weekly, monthly and yearly aggregates | `live` |
-| `GET /api/v1/dengue/units` | Per reporting unit and epi year: cases, EARS weeks, DOH weeks | `live` |
-| `GET /api/v1/dengue/signals` | EARS C1-C3 alarms per reporting unit and week | `live` |
+| `GET /api/v1/dengue/signals` | EARS alarms per reporting unit (being connected) | `not_connected` |
 | `GET /api/v1/access/units` | Mapped facilities and dengue burden per reporting unit | `live` |
 | `GET /api/v1/access/medicines` | DOH medicine prices and formulary status | `live` |
 | `GET /api/v1/access/metrics` | Retired; answers with empty lists | `not_connected` |
-| `GET /api/v1/policy/info` | Units SIGI covers, evidence summary, AI disclosure | `live` |
-| `GET /api/v1/policy/evidence` | The policy evidence records | `live` |
-| `POST /api/v1/chat` | SIGI's answer with server-checked citations | `live`, or `not_configured` without a key |
+| `GET /api/v1/policy/info` | Copilot scope and AI disclosure (being moved to real data) | `demo` |
+| `GET /api/v1/policy/evidence` | The policy evidence records | `demo` label (records are sourced; relabel pending) |
+| `POST /api/v1/chat` | SIGI's answer with server-checked citations | `demo` label, or `not_configured` without a key |
 
 ```bash
-curl "https://datascience-2026.vercel.app/api/v1/dengue/signals?locationId=quezon-city&limit=5"
+curl "https://datascience-2026.vercel.app/api/v1/dengue/observations?limit=2"
 curl "https://datascience-2026.vercel.app/api/v1/access/units?unitId=quezon-city"
 ```
 
@@ -249,7 +248,7 @@ reference: [docs/api.md](docs/api.md) and [`/documentation`](https://datascience
 | Part | State |
 | --- | --- |
 | Dengue cleaning, DOH thresholds, EARS C1-C3 | ✅ Run offline on 2016-2021 data, with QA reports ([docs/reports/](docs/reports/)) |
-| EARS and DOH results in the app and API | ✅ Explore, Lab, `/dengue/units`, `/dengue/signals` |
+| EARS and DOH results in the app and API | ✅ Explore and Lab · 🔜 `/dengue/signals` being connected |
 | ACCESS | ✅ Real facilities and prices · ⛔ medicine stock has no public source |
 | SIGI | ✅ Evidence pack per unit, server-checked citations · 🔜 answer quality to be live-tested with a model key |
 | Policy coverage | 🔜 Local records for 4 of 126 units so far |
