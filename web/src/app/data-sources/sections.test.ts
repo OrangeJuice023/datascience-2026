@@ -31,7 +31,7 @@ describe("groupCatalog", () => {
       SOURCE_CATALOG.filter((s) => s.status !== "connected").map((s) => s.sourceId),
     );
     expect(notConnected.map((s) => s.sourceId)).toEqual(
-      expect.arrayContaining(["gdelt-doc", "ph-news-rss", "doh-weekly", "ritm-surveillance"]),
+      expect.arrayContaining(["doh-weekly", "ritm-surveillance"]),
     );
   });
 

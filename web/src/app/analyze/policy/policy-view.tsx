@@ -9,7 +9,7 @@ import { Disclosure } from "@/components/ui/disclosure";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getAllPolicyEvidence } from "@/data/policy-evidence";
-import { SIGMA_DOES_NOT } from "@/data/demo-policy";
+import { SIGMA_DOES_NOT } from "@/data/sigma-scope";
 import { getComparison } from "@/data/policy-evidence/comparator";
 import { FACILITY_TYPES, FACILITY_TYPE_LABEL, accessUnit } from "@/lib/access/reference";
 import { isLocalPolicyFor } from "@/lib/analyze-chat/evidence";

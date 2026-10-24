@@ -1,14 +1,19 @@
-import { buildPolicyInfoWithAreas } from "@/lib/api/policy";
+import { ApiError } from "@/lib/api/envelope";
+import { buildPolicyInfo } from "@/lib/api/policy";
 import { withErrors } from "@/lib/api/route";
+import { readSigmaData } from "@/lib/sigma/summary";
 
 /**
  * GET /api/v1/policy/info
  *
- * Assessment areas, evidence summary, supported diseases and the AI
- * disclosure. Everything behind these areas is demo data, and the payload
- * says so.
+ * The policy evidence summary, the reporting units SIGI can answer about
+ * (and which of them have local policy records), the sources and the AI
+ * disclosure, all counted from SIGMA's real records.
  */
 export const GET = withErrors(async () => {
-  const data = await buildPolicyInfoWithAreas();
-  return { data, status: "demo" as const, isSample: true };
+  const sigma = await readSigmaData();
+  if (!sigma) {
+    throw new ApiError("unavailable", 503, "The reporting-unit list is not available right now.");
+  }
+  return { data: buildPolicyInfo(sigma), status: "live" as const, isSample: false };
 });

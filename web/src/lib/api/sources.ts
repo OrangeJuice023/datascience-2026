@@ -14,8 +14,6 @@ import type { DengueSourceDescriptor } from "./dengue";
 /** Coverage facts that the catalogue stores as prose. */
 const COVERAGE: Record<string, { from: string | null; to: string | null; geographicLevel: string }> = {
   opendengue: { from: "2012-12-30", to: "2023-11-25", geographicLevel: "national" },
-  "gdelt-doc": { from: null, to: null, geographicLevel: "per-signal" },
-  "ph-news-rss": { from: null, to: null, geographicLevel: "per-signal" },
   "doh-weekly": { from: null, to: null, geographicLevel: "national_or_regional" },
   "ritm-surveillance": { from: null, to: null, geographicLevel: "national_or_regional" },
   "open-meteo": { from: null, to: null, geographicLevel: "point" },
@@ -33,10 +31,6 @@ const COVERAGE: Record<string, { from: string | null; to: string | null; geograp
 const SCOPE: Record<string, string> = {
   opendengue:
     "Historical national reported dengue case counts only. Not a forecast, not sub-national, and not a confirmed outbreak statement.",
-  "gdelt-doc":
-    "Open-source document activity. Never a case count and never a confirmation of an outbreak.",
-  "ph-news-rss":
-    "Open-source document activity. Never a case count and never a confirmation of an outbreak.",
   "doh-weekly":
     "Official reported counts and advisories once a parser exists. Today nothing is ingested from it.",
   "ritm-surveillance":

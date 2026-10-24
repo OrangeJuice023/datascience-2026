@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { Platform } from 'react-native';
 
 import { apiRequest } from '@/api/client';
-import { clearStoredBaseUrl, defaultBaseUrl, loadStoredBaseUrl, normalizeBaseUrl, storeBaseUrl } from '@/api/config';
+import { clearStoredBaseUrl, defaultBaseUrl, isLoopbackUrl, loadStoredBaseUrl, normalizeBaseUrl, storeBaseUrl } from '@/api/config';
 import { candidateBaseUrls, discoverBaseUrl, PROBE_TIMEOUT_MS, type CandidateSource } from '@/api/discovery';
 
 /**
@@ -70,8 +70,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const stored = await loadStoredBaseUrl().catch(() => null);
+      let stored = await loadStoredBaseUrl().catch(() => null);
       if (!active) return;
+      // A localhost address saved by an older build can never work on a phone.
+      if (stored && !__DEV__ && isLoopbackUrl(stored)) {
+        await clearStoredBaseUrl().catch(() => undefined);
+        stored = null;
+      }
       if (stored) {
         setBaseUrl(normalizeBaseUrl(stored));
         setSource('saved');

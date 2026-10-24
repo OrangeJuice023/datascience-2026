@@ -62,7 +62,8 @@ export const POST = withErrors(async (request: NextRequest) => {
     },
   });
 
-  return { data, status: "demo" as const, isSample: true };
+  // The evidence pack is built from real records; the reply's limitations travel in `data.limitations`.
+  return { data, status: "live" as const, isSample: false };
 });
 
 export const GET = methodNotAllowed(["POST"]);
