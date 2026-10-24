@@ -142,12 +142,6 @@ export const SOURCE_USAGE: Record<string, SourceUsage> = {
     ],
     buildOnly: "Used as the basemap when no MapTiler key or custom map style is configured.",
   },
-  "gdelt-doc": {
-    uses: [{ label: "API", href: "/documentation#group-surveillance", detail: "simulated signal block, /dengue/signals" }],
-  },
-  "ph-news-rss": {
-    uses: [{ label: "API", href: "/documentation#group-surveillance", detail: "simulated signal block, /dengue/signals" }],
-  },
 };
 
 export interface GroupedCatalog {

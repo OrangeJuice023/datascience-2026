@@ -92,10 +92,8 @@ describe("source catalogue contents", () => {
     }
   });
 
-  it("keeps synthetic stand-ins out of the connected list", () => {
-    const byId = new Map(buildSources().map((s) => [s.id, s]));
-    expect(byId.get("gdelt-doc")?.status).toBe("demo");
-    expect(byId.get("ph-news-rss")?.status).toBe("demo");
+  it("lists no simulated source: every entry is connected or planned", () => {
+    expect(buildSources().filter((s) => s.status !== "connected" && s.status !== "planned")).toEqual([]);
   });
 
   it("gives the copilot the same sources and statuses as the API", async () => {

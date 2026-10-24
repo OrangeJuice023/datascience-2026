@@ -35,6 +35,21 @@ export function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, '');
 }
 
+/**
+ * True for addresses that only mean something on a developer's machine:
+ * localhost, 127.x, the Android emulator's host alias and `0.0.0.0`. On a
+ * phone they point at the phone itself, so an installed build never keeps
+ * one as a saved address (an older APK could have saved one).
+ */
+export function isLoopbackUrl(value: string): boolean {
+  try {
+    const host = new URL(value.trim()).hostname.replace(/^\[|\]$/g, '');
+    return host === 'localhost' || host === '10.0.2.2' || host === '0.0.0.0' || host === '::1' || /^127\./.test(host);
+  } catch {
+    return false;
+  }
+}
+
 export async function loadStoredBaseUrl(): Promise<string | null> {
   try {
     return await AsyncStorage.getItem(STORAGE_KEY);

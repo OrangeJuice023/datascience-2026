@@ -64,7 +64,8 @@ export const GET = withErrors(async (request: Request) => {
       records,
       limitations: POLICY_RESEARCH_PACK.limitations,
     },
-    status: "demo" as const,
-    isSample: true,
+    // Curated, cited extracts from real documents: reference data, not a simulation.
+    status: "live" as const,
+    isSample: false,
   };
 });
