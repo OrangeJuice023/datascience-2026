@@ -65,7 +65,8 @@ export function SeasonalProfileChart({ weeks }: { weeks: SeasonalWeek[] }) {
     <ResponsiveContainer width="100%" height={260}>
       <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="week" tick={AXIS_TICK} axisLine={{ stroke: GRID }} tickLine={false} interval={3} tickFormatter={(w: number) => `W${w}`} />
+        {/* Every nth week, n as small as the width allows without labels overlapping or clipping. */}
+        <XAxis dataKey="week" tick={AXIS_TICK} axisLine={{ stroke: GRID }} tickLine={false} interval="equidistantPreserveStart" minTickGap={32} tickFormatter={(w: number) => `W${w}`} />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
         <Tooltip content={<SeasonalTooltip />} cursor={{ stroke: "#9a978e", strokeWidth: 1 }} />
         <Area dataKey="bandBase" stackId="band" stroke="none" fill="transparent" isAnimationActive={false} connectNulls={false} />

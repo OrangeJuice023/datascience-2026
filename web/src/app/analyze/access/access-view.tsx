@@ -91,7 +91,7 @@ export function AccessView() {
             <li key={s.id} className="flex flex-wrap items-baseline gap-x-2">
               <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
                 {s.title}
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
               </a>
               <span>
                 {s.snapshot ? `snapshot ${formatIsoDate(s.snapshot)} · ` : ""}

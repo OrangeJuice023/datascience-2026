@@ -177,7 +177,9 @@ export function AnalyticalMap({
             <SegmentedControl
               ariaLabel="Map view"
               size="sm"
-              className="shrink-0 flex-nowrap"
+              // One row from sm up. cn() does not merge classes, so a plain
+              // flex-nowrap loses to the control's own flex-wrap.
+              className="shrink-0 sm:flex-nowrap"
               value={view}
               onChange={onViewChange}
               items={VIEWS.map(({ id, label, icon: Icon }) => ({

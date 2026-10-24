@@ -258,7 +258,7 @@ function EvidenceItem({ record: r }: { record: PolicyEvidenceRecord }) {
       {r.sourceUrl && (
         <a href={r.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-accent hover:underline">
           {r.sourceTitle}
-          <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
           <span className="sr-only">(opens in a new tab)</span>
         </a>
       )}
