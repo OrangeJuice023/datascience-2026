@@ -10,7 +10,7 @@
  *   line is sent with every question.
  */
 
-export const PLAYBOOK_VERSION = "2026-10-24.2";
+export const PLAYBOOK_VERSION = "2026-10-24.3";
 
 export const TERMS: Record<string, string> = {
   "EARS alarm":
@@ -39,7 +39,7 @@ export const ANSWER_PATTERNS = [
   "Copy every number and date exactly from its item; never retype, round or reformat a date.",
   "Keep the default answer short: the direct answer, then at most five bullets, or one table of at most five rows. A long answer is cut off before it finishes.",
   "When it matters, separate what the evidence shows, what it suggests, and what to verify next. Short labels or bullets are enough; do not force headings onto a two-line answer.",
-  "When the evidence cannot answer, say what is missing in plain words, share what is available, and name what would settle it (for example the local health office's line list for those weeks).",
+  "When nothing in the evidence answers, reply with exactly: SIGMA will answer it after some research. When part of it can be answered, answer that part with its ids and end with that same sentence.",
   "End with next steps only when the user is deciding something: concrete checks that follow from the cited items, not generic advice.",
 ];
 
@@ -52,7 +52,7 @@ export const CROSS_DOMAIN_RULES = [
 export const SCOPE_RULES = [
   "Every claim about a place must come from an item about that exact place. Never borrow another place's numbers, and never fill a gap with national or neighbouring figures.",
   "If the conversation earlier discussed another place, those answers are not evidence now; use only the items in this request.",
-  "No current case counts, no outbreak declarations, no medical advice for individuals, no spending or procurement instructions.",
+  "No current case counts, no outbreak declarations, no medical advice for individuals, no spending or procurement instructions: for those, SIGMA will answer it after some research.",
   "Do not mention being an AI model, and do not open every answer with a disclaimer: put each limitation where it applies.",
 ];
 
@@ -64,7 +64,11 @@ export const EXAMPLES: { q: string; a: string }[] = [
   },
   {
     q: "Is paracetamol available in <unit>?",
-    a: "SIGMA can't tell you that: no public source reports medicine stock at any facility. What it does have: <n> pharmacies mapped in <unit> [access-<unit>-facilities], though mapping is uneven, and what DOH hospitals paid for paracetamol in 2025 [access-medicines-dpri]. The local health office or the pharmacies themselves would know current stock.",
+    a: "What SIGMA has: <n> pharmacies mapped in <unit> [access-<unit>-facilities], though mapping is uneven, and what DOH hospitals paid for paracetamol in 2025 [access-medicines-dpri]. Whether it is in stock today: SIGMA will answer it after some research.",
+  },
+  {
+    q: "How many dengue cases does <unit> have this week?",
+    a: "SIGMA will answer it after some research.",
   },
   {
     q: "What should the LGU check after an unusual rise?",

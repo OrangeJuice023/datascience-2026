@@ -88,7 +88,7 @@ export function labItemsForUnit(data: SigmaData, unitId: string): EvidenceItem[]
     const peak = usable.reduce((best, i) => (best === -1 || unit.value[i]! > unit.value[best]! ? i : best), -1);
     const firstCrossing = [...alerts, ...epidemics].sort()[0];
     const firstAlarm = alarms[0];
-    let order = "DOH thresholds are only computed from 2019, so there is no comparison this year.";
+    let order = "No DOH thresholds before 2019.";
     if (year >= 2019) {
       if (firstAlarm && firstCrossing) {
         const lead = Math.round((Date.parse(firstCrossing) - Date.parse(firstAlarm)) / (7 * 86_400_000));
@@ -102,7 +102,8 @@ export function labItemsForUnit(data: SigmaData, unitId: string): EvidenceItem[]
       else if (firstAlarm) order = `EARS alarmed (first week ${firstAlarm}) but no DOH threshold was crossed this year.`;
       else order = "No EARS alarm and no DOH-threshold week this year.";
     }
-    const list = (xs: string[]) => (xs.length === 0 ? "none" : xs.length <= 8 ? xs.join(", ") : `${xs.slice(0, 8).join(", ")} and ${xs.length - 8} more`);
+    // Five dates per list: the prompt has to fit the free model tier (see PROMPT_BUDGET_CHARS in lib/api/chat.ts).
+    const list = (xs: string[]) => (xs.length === 0 ? "none" : xs.length <= 5 ? xs.join(", ") : `${xs.slice(0, 5).join(", ")} and ${xs.length - 5} more`);
     items.push({
       id: `lab-${unitId}-${year}`,
       kind: "lab",
@@ -117,8 +118,8 @@ export function labItemsForUnit(data: SigmaData, unitId: string): EvidenceItem[]
           ? ` DOH alert weeks (${alerts.length}): ${list(alerts)}. DOH epidemic weeks (${epidemics.length}): ${list(epidemics)}.`
           : "") +
         ` ${order}` +
-        (swapWeeks > 0 ? ` ${swapWeeks} suspected cases/deaths swap week${swapWeeks === 1 ? " is" : "s are"} treated as no data.` : "") +
-        " Retrospective DOH-EB counts; an EARS alarm is a statistical signal, not an official declaration.",
+        // That these are retrospective counts and that an alarm is not a declaration is in the prompt's rules once.
+        (swapWeeks > 0 ? ` ${swapWeeks} suspected cases/deaths swap week${swapWeeks === 1 ? " is" : "s are"} treated as no data.` : ""),
       source: { name: "DOH-EB dengue counts via HDX (Cirrolytix), CC BY; SIGMA EARS and DOH-threshold pipeline", url: HDX_URL },
       href: "/explore",
     });

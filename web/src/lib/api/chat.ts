@@ -200,6 +200,23 @@ export function chatEnvironment(env: Record<string, string | undefined> = proces
   };
 }
 
+/**
+ * Most characters of prompt one request sends: about 6K tokens at ~3.6
+ * characters a token. Groq's base limit for openai/gpt-oss-20b is 8K tokens a
+ * minute, and it refuses a single request over that outright, which used to
+ * surface as "The model provider request failed" on follow-up questions and
+ * comparisons.
+ */
+export const PROMPT_BUDGET_CHARS = 22_000;
+
+/** Drops the oldest question/answer pairs until prompt, history and question fit the budget. */
+export function fitHistory(system: string, history: ChatMessage[], message: string, budget = PROMPT_BUDGET_CHARS): ChatMessage[] {
+  let kept = history;
+  const size = () => system.length + message.length + kept.reduce((n, m) => n + m.content.length, 0);
+  while (kept.length >= 2 && size() > budget) kept = kept.slice(2);
+  return kept;
+}
+
 /** The signing key: CHAT_HISTORY_SECRET, or a key derived from the provider key (which never leaves the server). */
 export function historySecret(config: ChatProviderConfig): string {
   if (config.historySecret) return config.historySecret;
@@ -230,9 +247,11 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
   const pack = await loadEvidencePack(input.request.locationId, input.request.compareLocationId);
   const model = resolveModel(input.config);
 
+  const system = buildAnalyzePrompt(pack, input.request.disease);
+  const history = fitHistory(system, input.request.history, input.request.message);
   const messages = [
-    { role: "system" as const, content: buildAnalyzePrompt(pack, input.request.disease) },
-    ...input.request.history.map(({ role, content }) => ({ role, content })),
+    { role: "system" as const, content: system },
+    ...history.map(({ role, content }) => ({ role, content })),
     { role: "user" as const, content: input.request.message },
   ];
 
@@ -252,6 +271,9 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
         messages,
         max_completion_tokens: LIMITS.maxCompletionTokens,
         temperature: 0.3,
+        // gpt-oss reasons before answering, and reasoning tokens count against both the
+        // completion limit and the per-minute budget; "low" leaves them for the answer.
+        ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
       }),
       signal: controller.signal,
     });
@@ -264,10 +286,18 @@ export async function completeChat(input: CompleteChatInput): Promise<ChatRespon
     clearTimeout(timer);
   }
 
-  if (upstream.status === 429) {
-    throw ApiError.rateLimited("The model provider rate limit was reached. Try again shortly.", 30);
-  }
   if (!upstream.ok) {
+    // Logged server-side only (never sent to the client), so a refusal can be diagnosed.
+    const detail = (await upstream.text().catch(() => "")).slice(0, 300);
+    console.error(`chat: model provider answered ${upstream.status}: ${detail}`);
+    if (upstream.status === 429) {
+      throw ApiError.rateLimited("SIGI is answering too many questions at once on its free model tier. Try again in about a minute.", 30);
+    }
+    if (upstream.status === 413 || /too large|reduce your message size/i.test(detail)) {
+      throw ApiError.payloadTooLarge(
+        "This question and its conversation are too long for SIGI's model tier. Start a new conversation, or ask without a comparison.",
+      );
+    }
     throw ApiError.upstreamUnavailable("The model provider request failed.");
   }
 
