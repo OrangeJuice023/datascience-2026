@@ -177,6 +177,7 @@ export function AnalyticalMap({
             <SegmentedControl
               ariaLabel="Map view"
               size="sm"
+              className="shrink-0 flex-nowrap"
               value={view}
               onChange={onViewChange}
               items={VIEWS.map(({ id, label, icon: Icon }) => ({
