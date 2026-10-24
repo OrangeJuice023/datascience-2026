@@ -1,184 +1,261 @@
+<div align="center">
+
+<img src="web/public/mascot/sigi/greeting.gif" width="104" alt="Sigi, SIGMA's pixel-art bird mascot, waving">
+
 # SIGMA
 
-**S**patial **I**ntelligence & **G**eographic **M**odeling for **A**ction
+**Spatial Intelligence & Geographic Modeling for Action**
 
-SIGMA is a public-health intelligence prototype for the Philippines, built for
-PJDSC 2026. It brings formal surveillance data, open-source signals and
-geography together so that analysts and local health offices can see where
-dengue activity is unusual, how it compares with official thresholds, and
-where to look more closely.
+Dengue early-warning for the Philippines, looked at in hindsight:<br>
+126 reporting units, two warning signals, and an assistant that cites its sources.
 
-> **Status: hackathon prototype.** SIGMA does not predict outbreaks, issue
-> operational alerts, or provide real-time nationwide surveillance. Its dengue
-> analysis is retrospective (2016–2021), several modules run on clearly labelled
-> demo data, and nothing here is a validated public-health claim.
+[![Validate](https://github.com/OrangeJuice023/datascience-2026/actions/workflows/validate.yml/badge.svg)](https://github.com/OrangeJuice023/datascience-2026/actions/workflows/validate.yml)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-111111?style=flat-square&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-mobile-1B1F23?style=flat-square&logo=expo&logoColor=white)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![PJDSC 2026](https://img.shields.io/badge/PJDSC-2026-E8590C?style=flat-square)
 
-**Live site:** <https://datascience-2026.vercel.app> (Vercel production deploys
-from `main`). **API reference:** [`/documentation`](https://datascience-2026.vercel.app/documentation).
+[**Open the live site**](https://datascience-2026.vercel.app) &nbsp;·&nbsp;
+[API reference](https://datascience-2026.vercel.app/documentation) &nbsp;·&nbsp;
+[Docs](docs/architecture.md) &nbsp;·&nbsp;
+[Status and next steps](docs/next-steps.md)
 
-## What it supports
+</div>
 
-Dengue surveillance in the Philippines relies on weekly reports that arrive late,
-vary in completeness between areas, and are judged against seasonal thresholds.
-SIGMA explores three questions on that data:
+<br>
 
-- **Is this week unusual?** EARS C1/C2/C3 flag sudden rises against recent weeks;
-  the DOH alert/epidemic threshold flags levels that are high for the season.
-- **Where?** Results are mapped to the 126 DOH reporting units (provinces,
-  province remainders, cities and Pateros).
-- **What should be reviewed?** Findings become *areas for assessment* for a human
-  decision-maker. SIGMA suggests what to look at; it never prescribes policy.
+> [!IMPORTANT]
+> **Hackathon prototype.** SIGMA works on historical data (2016-2021). It is not real-time
+> surveillance, it does not predict outbreaks or issue alerts, it never prescribes policy,
+> and nothing in it is a validated public-health claim.
 
-## Workflow and modules
+<br>
 
+<div align="center">
+
+| **126** | **261** | **15,586** | **17** |
+| :---: | :---: | :---: | :---: |
+| DOH reporting units | weeks of unit-level data | health facilities mapped | sourced policy records |
+| <sub>59 provinces, 22 province remainders, 44 cities, Pateros</sub> | <sub>10 Jan 2016 to 3 Jan 2021</sub> | <sub>OpenStreetMap snapshot, 13 Oct 2026</sub> | <sub>local records for 4 cities, plus national law</sub> |
+
+</div>
+
+## The app
+
+Three tabs, all on real data. Where a figure has no public source (medicine stock,
+search demand, population per unit), SIGMA says "unknown" instead of guessing.
+
+| | Tab | What you can do there |
+| :---: | --- | --- |
+| 🏠 | **Overview** &nbsp;`/` | See what SIGMA covers, how the two signals work, and where to go next. |
+| 🗺️ | **Explore** &nbsp;`/explore` | Map every reporting unit week by week: reported cases, EARS signal, DOH threshold, and weekly weather for 12 cities. |
+| 🔬 | **Analyze** &nbsp;`/analyze` | Three views on one place at a time, listed below. |
+
+**Inside Analyze**
+
+- **ACCESS** &nbsp;`/analyze/access`: hospitals, clinics, pharmacies and labs mapped in each
+  reporting unit, and what DOH hospitals paid for dengue medicines (DPRI 2026).
+- **Policy, with SIGI** &nbsp;`/analyze/policy`: ask about any reporting unit. SIGI answers
+  only from that unit's evidence (Lab results, ACCESS figures, local and national policy),
+  numbers every source, and the server rejects any citation from another place.
+- **Lab** &nbsp;`/analyze/lab`: the national trend, each unit's weekly EARS and DOH marks,
+  which signal came first each year, and how the methods work.
+
+Also: **Data Sources** (`/data-sources`) lists every dataset with its coverage, licence and
+credit line, and **Documentation** (`/documentation`) renders the API reference.
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Sources
+    HDX["HDX DOH dengue<br/>126 units, 2016-2021"]
+    OD["OpenDengue<br/>national weekly"]
+    OSM["OpenStreetMap<br/>health facilities"]
+    DPRI["DOH DPRI<br/>medicine prices"]
+    POL["Policy documents<br/>local and national"]
+    WX["CCHAIN and Open-Meteo<br/>weather"]
+  end
+
+  HDX --> ML["Python pipeline<br/>clean, EARS, DOH thresholds"]
+  ML --> EXP[("Committed export<br/>hdx-dengue-sigma.json")]
+  OSM --> ACC["scripts/access<br/>pinned build"]
+  DPRI --> ACC
+
+  EXP --> WEB["Next.js app<br/>and /api/v1"]
+  OD --> WEB
+  ACC --> WEB
+  WX --> WEB
+  POL --> WEB
+
+  WEB --> UI["Overview, Explore, Analyze"]
+  WEB --> SIGI["SIGI<br/>evidence pack per unit"]
+  WEB --> MOB["Expo mobile app"]
 ```
-TRACE (Lab) ──► ANALYZE (Explore) ──► ACT (Policy)
- signals          anomalies, maps       areas for assessment
-                         └── ACCESS (medicine access) ──┘
-```
 
-| Module | Route | What it does | Data behind it |
+### Two signals, read together
+
+| Signal | Asks | Rule | Good at |
 | --- | --- | --- | --- |
-| Overview | `/` | Landing dashboard and entry point to the modules | Mixed real and demo; see the module rows below |
-| Explore | `/explore` | Map with four views: Reported cases, EARS signal, DOH threshold (126 reporting units) and Environment (weekly weather for 12 cities) | **Real** HDX DOH dengue 2016–2021 (retrospective export); **real** CCHAIN and Open-Meteo weather |
-| Analyze → Lab | `/analyze/lab` | National trend, per-unit EARS/DOH analysis, method and data quality | **Real** OpenDengue national series and HDX reporting-unit results |
-| Analyze → ACCESS | `/analyze/access` | Where care and pharmacies are mapped per reporting unit, and what DOH hospitals pay for dengue medicines | **Real** OpenStreetMap facilities (snapshot) and DOH DPRI 2026 prices; stock and search demand have no public source |
-| Analyze → Policy | `/analyze/policy` | SIGI: answers about any reporting unit from Lab, ACCESS and policy evidence, with cited sources | **Real** evidence; verified local records for 4 units and national law; SIGI needs a server-side model key |
-| Data Sources | `/data-sources` | Every dataset SIGMA uses: purpose, where it appears, coverage, update behaviour, licence and credit line; demo and planned sources listed separately | Rendered from the source catalogue (`web/src/data/source-catalog.ts`), the same one `GET /api/v1/sources` serves |
-| Documentation | `/documentation` | Rendered API reference | Generated from the API registry |
+| **EARS** C1, C2, C3 | Is this week a sudden rise? | Compares a week with the 7 weeks before it (CDC EARS) | Timing: it fires early, but at every season's start |
+| **DOH threshold** | Is this level high for the season? | Same week's mean over 3 prior years, + 1 SD for alert, + 2 SD for epidemic (PIDSR manual s. 5.3.5) | Size: it separates a big season from an ordinary one |
 
-## Architecture
+In the 2019 epidemic, EARS alarmed nationally on 26 May 2019, seven weeks before the DOH
+national alert. That is why SIGMA always shows both. See the
+[EARS QA report](docs/reports/dengue_ears_qa_report.pdf).
 
-```
-web/                    Next.js 16 (App Router) + TypeScript + Tailwind; MapLibre, deck.gl, Recharts
-  src/app/api/v1/       The versioned JSON API (route handlers)
-  src/lib/api/          API service layer and the endpoint registry (single source for /api/v1 and /documentation)
-mobile/                 Expo + React Native client that reads the API
-packages/sigma-contracts/  Type-only request/response contracts shared by web and mobile
-ml/                     Python dengue pipeline: clean_dengue.py → ears.py → export_sigma_web.py; QA reports in ml/qa/
-scripts/geo/            Geography build (Node, no npm deps): HDX reporting units → COD-AB / PSA PSGC
-data/reference/         Small committed reference tables (crosswalks, curated decisions)
-data/raw/, data/processed/  Local only, git-ignored
-docs/                   Architecture, API, pipeline, geography and data-model documentation
-planning/               Research plan (SIGMA_RESEARCH.md)
-```
+## Data
 
-The web app is both the UI and the API; the mobile app is a second API client.
-Analysis runs offline in Python, and its map output
-(`web/public/data/sigma/hdx-dengue-sigma.json`) is a committed, generated file.
-There is no database yet. See [docs/architecture.md](docs/architecture.md).
+| Source | Licence | Coverage | Used in |
+| --- | --- | --- | --- |
+| [HDX Philippine Dengue Cases and Deaths](https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths) (DOH Epidemiology Bureau data, via Cirrolytix) | CC BY | 126 reporting units, weekly, 2016-2021 | Explore, Lab, SIGI, `/dengue/signals`, `/dengue/units` |
+| [OpenDengue v1.3](https://opendengue.org) | CC BY 4.0 | National, weekly, Dec 2012 to Nov 2023 (544 weeks, with gaps) | Lab, `/dengue/summary`, `/dengue/observations` |
+| [HOT OpenStreetMap health facilities](https://data.humdata.org/dataset/hotosm_phl_health_facilities) | ODbL 1.0 | 15,586 facilities after cleaning, snapshot 2026-10-13 | ACCESS, SIGI |
+| [DOH Drug Price Reference Index](https://dpri.doh.gov.ph/drug_search) 2026 | Philippine government work | Public-hospital prices for 4 dengue medicines (procurement year 2025) | ACCESS, SIGI |
+| Policy evidence registry | Per document | 17 records, each tied to its source document | SIGI |
+| [Project CCHAIN](https://data.humdata.org/dataset/project-cchain) climate | CC BY 4.0 | 12 cities, weekly, 2003-2022 | Explore → Environment |
+| [Open-Meteo](https://open-meteo.com/) historical weather (ERA5) | CC BY 4.0 | Same 12 cities, weekly, 2008 to Oct 2026 | Explore → Environment |
+| OCHA COD-AB, geoBoundaries, PSA PSGC | CC BY-IGO, CC BY 3.0 IGO, PSA terms | Region down to reporting unit | Boundaries and codes |
+
+**Not available, so shown as unknown:** medicine stock per facility, what people search for,
+and population per reporting unit.
+
+<details>
+<summary><b>Known data-quality limits</b></summary>
+
+<br>
+
+Detail in [docs/dengue-pipeline.md](docs/dengue-pipeline.md) and [docs/geo/](docs/geo/README.md).
+
+- Reporting units are not provinces: 22 are province remainders. Values are only summed
+  upward, never split.
+- Missing weeks (for example 6 Jan 2019, for every unit) and 665 suspected cases↔deaths swap
+  rows are **no data**, never zero.
+- The meaning of the HDX `date` column, whether counts are by residence, and whether province
+  rows exclude their cities are **unconfirmed** assumptions.
+- Zeros cannot be told apart from "no report". Long zero runs and one-week spikes are flagged,
+  not corrected. The national OpenDengue series has year-end reporting artefacts.
+- The DOH thresholds use 3 prior years, the shortest the PIDSR manual allows. The official
+  system may use 5 years and regional thresholds.
+- A low facility count can mean low OpenStreetMap mapping, not low access.
+
+</details>
 
 ## Getting started
 
-**Prerequisites:** Node.js 20+ (CI uses 20 for web, 22 for mobile), npm, and
-Python 3.12 for the data pipeline.
+You need Node.js 20+ and npm. The data pipeline also needs Python 3.12.
 
 ```bash
-# Web app and API — http://localhost:3000
+# Web app and API: http://localhost:3000
 cd web && npm ci && npm run dev
 
-# Mobile client (set the API address in the app's Settings or in mobile/.env)
+# Mobile app (point it at the API in the app's Settings, or in mobile/.env)
 cd mobile && npm ci && npm start
 
-# Python pipeline
+# Python pipeline (needs the raw files in data/raw/, see docs/dengue-pipeline.md)
 pip install -r ml/requirements.txt
-python ml/clean_dengue.py && python ml/ears.py   # needs the raw files in data/raw/
+python ml/clean_dengue.py && python ml/ears.py
 ```
 
-The pipeline's raw inputs are not committed; see
-[docs/dengue-pipeline.md](docs/dengue-pipeline.md) for what to place in `data/raw/`.
+<details>
+<summary><b>Environment variables</b> (all optional)</summary>
 
-### Environment variables
+<br>
 
-All are optional. Copy each `.env.example` and fill in what you need; never
-commit the real file.
+Copy each `.env.example` and fill in what you need. Never commit the real file.
 
-| File | Variables | Effect when unset |
+| File | Variables | When unset |
 | --- | --- | --- |
-| [`web/.env.example`](web/.env.example) → `web/.env.local` | `GROQ_API_KEY` (server-only), `GROQ_MODEL`, `CHAT_DISABLED`, `CHAT_PUBLIC_DISABLED` | Policy Copilot answers `not_configured` |
-| | `NEXT_PUBLIC_MAP_STYLE_URL`, `NEXT_PUBLIC_MAPTILER_KEY`, `NEXT_PUBLIC_MAPTILER_STYLE` | Maps fall back to OpenStreetMap raster tiles |
-| [`mobile/.env.example`](mobile/.env.example) → `mobile/.env` | `EXPO_PUBLIC_API_BASE_URL` (bundled into the app; never a secret) | Defaults to `http://localhost:3000/api/v1` |
+| [`web/.env.example`](web/.env.example) → `web/.env.local` | `GROQ_API_KEY` (server only), `GROQ_MODEL`, `CHAT_DISABLED`, `CHAT_PUBLIC_DISABLED` | SIGI answers `not_configured` |
+| | `NEXT_PUBLIC_MAP_STYLE_URL`, `NEXT_PUBLIC_MAPTILER_KEY`, `NEXT_PUBLIC_MAPTILER_STYLE` | Maps use OpenStreetMap raster tiles |
+| [`mobile/.env.example`](mobile/.env.example) → `mobile/.env` | `EXPO_PUBLIC_API_BASE_URL` (bundled into the app, never a secret) | `http://localhost:3000/api/v1` |
 | [`ml/.env.example`](ml/.env.example) → `ml/.env` | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` | Unused today (no database yet) |
 
-## Data sources
+</details>
 
-| Source | Status | Coverage | Used for |
-| --- | --- | --- | --- |
-| [OpenDengue v1.3](https://opendengue.org) | Connected | National, weekly, 30/12/2012 – 25/11/2023 (544 weeks, with gaps) | Lab, `/api/v1/dengue/*` |
-| HDX Philippine Dengue Cases and Deaths (DOH Epidemiology Bureau data, via Cirrolytix), CC BY | Processed offline | 126 reporting units, weekly, 10/01/2016 – 03/01/2021 | EARS, DOH thresholds, Explore map |
-| COD-AB / geoBoundaries (CC BY-IGO), PSA PSGC | Geography reference | Region → reporting unit | Joining dengue units to boundaries and codes |
-| OpenStreetMap | Connected | Basemap tiles only | Map background |
-| [Project CCHAIN](https://data.humdata.org/dataset/project-cchain) climate (CC BY 4.0) | Processed offline | 12 cities, weekly, 2003 – 2022 | Explore → Environment; weather covariates |
-| [Open-Meteo](https://open-meteo.com/) historical weather, ERA5 (CC BY 4.0; free tier non-commercial) | Processed offline | Same 12 cities, weekly, 2008 – Oct 2026 | Explore → Environment; extends CCHAIN past 2022 |
-| GDELT, Philippine news / RSS | Demo | — | Signal layers (synthetic stand-ins) |
-| DOH reports, RITM | Planned | — | Not ingested |
+<details>
+<summary><b>Repository layout</b></summary>
 
-**Known quality limitations** (detail in [docs/dengue-pipeline.md](docs/dengue-pipeline.md)
-and [docs/geo/](docs/geo/README.md)):
+<br>
 
-- Reporting units are not provinces: 22 are province remainders. Values are only
-  summed upward, never split.
-- Missing weeks (e.g. 06/01/2019 for every unit) and 665 suspected cases↔deaths
-  swap rows are treated as **no data**, never zero.
-- The meaning of the HDX `date` column, whether counts are by residence, and whether
-  province rows exclude their cities are **unconfirmed** assumptions.
-- Zeros cannot be told apart from "no report"; long zero runs and one-week spikes are
-  flagged, not corrected. National OpenDengue data has year-end reporting artefacts.
-- The DOH alert and epidemic thresholds follow the PIDSR Manual of Procedures (2014,
-  §5.3.5: same-week mean + 1 SD / + 2 SD) using 3 prior years, the shortest the manual
-  allows; the official system may use 5 years and regional thresholds.
+```
+web/                       Next.js 16 (App Router), TypeScript, Tailwind; MapLibre, deck.gl, Recharts
+  src/app/api/v1/          The versioned JSON API
+  src/lib/api/             API services and the endpoint registry (feeds /api/v1 and /documentation)
+  src/lib/analyze-chat/    SIGI: evidence pack, prompt, playbook
+mobile/                    Expo + React Native client of the API
+packages/sigma-contracts/  Request/response types shared by web and mobile
+ml/                        Python pipeline: clean_dengue.py → ears.py → export_sigma_web.py
+scripts/geo/               Geography build: HDX reporting units → COD-AB / PSA PSGC
+scripts/access/            ACCESS build: OpenStreetMap facilities and DOH prices, hash-pinned
+data/reference/            Small committed reference tables
+data/raw/, data/processed/ Local only, git-ignored
+docs/                      Architecture, API, pipeline, geography and data-model docs
+```
+
+The web app is both the UI and the API, and the mobile app is a second client. Analysis runs
+offline in Python, and its output (`web/public/data/sigma/hdx-dengue-sigma.json`) is a
+committed, generated file. There is no database yet. See [docs/architecture.md](docs/architecture.md).
+
+</details>
 
 ## API
 
-Base URL: `/api/v1` (live: `https://datascience-2026.vercel.app/api/v1`). Read-only
-JSON, no authentication. Full reference: [docs/api.md](docs/api.md) and `/documentation`.
+Read-only JSON at `/api/v1` ([live](https://datascience-2026.vercel.app/api/v1)), no
+authentication. Every response is `{ data, meta }` or `{ error, meta }`, and `meta.status`
+says what kind of data it carries.
 
-| Endpoint | Method | Returns | `meta.status` |
-| --- | --- | --- | --- |
-| `/api/v1` | GET | Endpoint index | `live` |
-| `/api/v1/health` | GET | Service status and configuration flags | `live` |
-| `/api/v1/sources` | GET | Source catalogue | `live` |
-| `/api/v1/dengue/observations` | GET | Weekly national observations | `live` |
-| `/api/v1/dengue/summary` | GET | Weekly, monthly and yearly aggregates | `live` |
-| `/api/v1/dengue/signals` | GET | Anomaly results | `not_connected` |
-| `/api/v1/access/units` | GET | Mapped facilities and dengue burden per reporting unit | `live` |
-| `/api/v1/access/medicines` | GET | Dengue medicine prices (DOH DPRI) and formulary status | `live` |
-| `/api/v1/access/metrics` | GET | Retired (demo inventory); answers with empty lists | `not_connected` |
-| `/api/v1/policy/info` | GET | Assessment areas and AI disclosure | `demo` |
-| `/api/v1/policy/evidence` | GET | Curated policy evidence | `demo` |
-| `/api/v1/chat` | POST | Policy Copilot | depends on configuration |
-
-Every response uses one envelope, `{ data, meta }` or `{ error, meta }`, and
-`meta.status` says what kind of data it carries:
-
-| Status | Meaning |
-| --- | --- |
-| `live` | Real records from a connected source (which may still be historical) |
-| `demo` | Simulated or illustrative records; `isSample` is `true` |
-| `unavailable` | The capability exists but has no data right now |
-| `not_connected` | The capability has not been wired to a source yet |
+| Endpoint | Returns | `meta.status` |
+| --- | --- | --- |
+| `GET /api/v1` | Endpoint index | `live` |
+| `GET /api/v1/health` | Service status and configuration flags | `live` |
+| `GET /api/v1/sources` | Source catalogue | `live` |
+| `GET /api/v1/dengue/observations` | National weekly observations (OpenDengue) | `live` |
+| `GET /api/v1/dengue/summary` | National weekly, monthly and yearly aggregates | `live` |
+| `GET /api/v1/dengue/units` | Per reporting unit and epi year: cases, EARS weeks, DOH weeks | `live` |
+| `GET /api/v1/dengue/signals` | EARS C1-C3 alarms per reporting unit and week | `live` |
+| `GET /api/v1/access/units` | Mapped facilities and dengue burden per reporting unit | `live` |
+| `GET /api/v1/access/medicines` | DOH medicine prices and formulary status | `live` |
+| `GET /api/v1/access/metrics` | Retired; answers with empty lists | `not_connected` |
+| `GET /api/v1/policy/info` | Units SIGI covers, evidence summary, AI disclosure | `live` |
+| `GET /api/v1/policy/evidence` | The policy evidence records | `live` |
+| `POST /api/v1/chat` | SIGI's answer with server-checked citations | `live`, or `not_configured` without a key |
 
 ```bash
-curl "https://datascience-2026.vercel.app/api/v1/dengue/observations?limit=2"
+curl "https://datascience-2026.vercel.app/api/v1/dengue/signals?locationId=quezon-city&limit=5"
 curl "https://datascience-2026.vercel.app/api/v1/access/units?unitId=quezon-city"
 ```
 
-## Model maturity
+`live` means real records from a connected source, which may still be historical. Full
+reference: [docs/api.md](docs/api.md) and [`/documentation`](https://datascience-2026.vercel.app/documentation).
 
-| Component | State |
+<details>
+<summary><b>Notes for API integrators</b></summary>
+
+<br>
+
+- No endpoint takes credentials, and there are no API keys or quotas. This is a prototype
+  deployment, not a hardened public API.
+- SIGI's model key stays on the server. `/api/v1/chat` is rate limited (30 requests per 60 s
+  per IP) and refuses with `not_configured` when no key is set.
+- Branch on `meta.status`. Never treat `not_connected` or a missing week as "nothing found".
+- Request limits (row caps, 16 KB body) are in [docs/api.md](docs/api.md#limits).
+
+</details>
+
+## Where things stand
+
+| Part | State |
 | --- | --- |
-| Dengue cleaning, DOH thresholds, EARS C1/C2/C3 | **Implemented** in Python, run offline on 2016–2021 data, with QA reports ([docs/reports/](docs/reports/)) |
-| EARS / DOH results on the map | **Implemented** as a static retrospective export on Explore |
-| EARS in the API (`/dengue/signals`) | **Not connected**: returns `not_connected`, not "no outbreak" |
-| ACCESS gap rule | **Implemented**, rule-based and illustrative, on **demo** data only |
-| Simulate page | **Removed** (was a demo curve, not a fitted model) |
-| Forecasting models (SARIMA, gradient boosting, Bayesian spatial) | **Not started**; proposed in [planning/SIGMA_RESEARCH.md](planning/SIGMA_RESEARCH.md) |
-| Signal ingestion (GDELT, news) | **Demo** stand-ins; no live ingestion |
+| Dengue cleaning, DOH thresholds, EARS C1-C3 | ✅ Run offline on 2016-2021 data, with QA reports ([docs/reports/](docs/reports/)) |
+| EARS and DOH results in the app and API | ✅ Explore, Lab, `/dengue/units`, `/dengue/signals` |
+| ACCESS | ✅ Real facilities and prices · ⛔ medicine stock has no public source |
+| SIGI | ✅ Evidence pack per unit, server-checked citations · 🔜 answer quality to be live-tested with a model key |
+| Policy coverage | 🔜 Local records for 4 of 126 units so far |
+| Forecasting | ⛔ Not started: no fitted model yet ([research plan](planning/SIGMA_RESEARCH.md)) |
 
-Retrospective comparison with the 2019 epidemic: EARS alarmed nationally on
-26/05/2019, seven weeks before the DOH national alert, but it alarms at every season
-onset, so it is a timing signal and needs the DOH threshold alongside it. See the
-[EARS QA report](docs/reports/dengue_ears_qa_report.pdf).
+The full checklist, with what blocks each item, is in [docs/next-steps.md](docs/next-steps.md).
 
 ## Checks
 
@@ -188,31 +265,9 @@ cd mobile && npm run lint && npm run typecheck && npm run test
 python -m compileall -q ml
 ```
 
-The web tests include a registry test that checks every route file against
-`/documentation`, runs each documented example against the real handler, and
-pins the four data statuses. CI (`.github/workflows/validate.yml`) runs the web
-and mobile lint, typecheck and tests, the web build, and a Python compile check.
-
-## Security notes for API integrators
-
-- No endpoint requires or accepts credentials, and there are no API keys or
-  per-consumer quotas. This is a prototype deployment, not a hardened public API.
-- The Copilot's provider key stays on the server; `/api/v1/chat` is rate limited
-  (30 requests per 60 s per IP) and refuses with `not_configured` when no key is set.
-- Branch on `meta.status` and `isSample`. Never display `demo` data as real or
-  treat `not_connected` as "nothing found".
-- Request limits (row caps, 16 KB body) are listed in [docs/api.md](docs/api.md#limits).
-
-## Roadmap (incomplete work)
-
-- Connect the EARS results to `/api/v1/dengue/signals`.
-- A real ACCESS data source and provider, with a privacy review
-  ([docs/access-data-model.md](docs/access-data-model.md#implementation-status-and-open-decisions)).
-- Live signal ingestion (GDELT, Philippine news).
-- Weather for reporting units beyond the 12 CCHAIN cities, CHIRPS rainfall past
-  2022, and the fitted forecasting models from the research plan
-  ([docs/environmental-covariates.md](docs/environmental-covariates.md)).
-- A database (Supabase is planned but not configured).
+CI ([`validate.yml`](.github/workflows/validate.yml)) runs all of these on every pull request.
+The web tests include a registry test that runs every documented API example against the real
+handler, so `/documentation` cannot drift from the code.
 
 ## Documentation
 
@@ -222,10 +277,16 @@ and mobile lint, typecheck and tests, the web build, and a Python compile check.
 | [docs/api.md](docs/api.md) | API endpoints, envelopes, limits and errors |
 | [docs/dengue-pipeline.md](docs/dengue-pipeline.md) | Cleaning, DOH thresholds and EARS ([QA reports](docs/reports/)) |
 | [docs/geo/](docs/geo/README.md) | Reporting units, geography method and data quality |
-| [docs/environmental-covariates.md](docs/environmental-covariates.md) | Weather sources (CCHAIN, Open-Meteo), comparability, covariate plan |
-| [docs/access-data-model.md](docs/access-data-model.md) | ACCESS data model, status and open decisions |
+| [docs/environmental-covariates.md](docs/environmental-covariates.md) | Weather sources, comparability, covariate plan |
+| [docs/access-data-model.md](docs/access-data-model.md) | ACCESS data model and open decisions |
 | [docs/mobile.md](docs/mobile.md) | Expo client, API address, EAS builds |
+| [docs/next-steps.md](docs/next-steps.md) | Status, next steps and data gaps |
 | [AGENTS.md](AGENTS.md) | Rules for contributors and AI agents |
 
-The watercolour SIGMA logo in `web/public/brand/` is a brand asset only; the
-application UI is a clean, dashboard-style design.
+## Credits
+
+Built for the Philippine Junior Data Science Challenge (PJDSC) 2026.
+
+Data: DOH Epidemiology Bureau via HDX and Cirrolytix · OpenDengue · © OpenStreetMap
+contributors (ODbL), via the Humanitarian OpenStreetMap Team · DOH Pharmaceutical Division
+(DPRI) · OCHA COD-AB · geoBoundaries · PSA · Project CCHAIN · Open-Meteo.
