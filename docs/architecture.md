@@ -16,10 +16,11 @@ SIGMA is organized around three conceptual modules:
 | Route       | Page            | Evidence shown today                                   |
 | ----------- | --------------- | ------------------------------------------------------ |
 | `/`         | Overview        | Formal summary (real) + demo signal landscape          |
-| `/explore`  | Signal Explorer | Analytical map: formal readout, demo signals/model     |
-| `/lab`      | SIGMA Lab       | Real OpenDengue national series; demo LGU signal tabs  |
-| `/access`   | ACCESS          | Demo medicine availability, search demand, access gaps |
-| `/policy`   | Policy          | Demo assessment areas                                  |
+| `/explore`  | Explore         | Map: reported cases, EARS, DOH threshold, environment  |
+| `/analyze/lab` | Lab          | OpenDengue national series; per-unit EARS/DOH results  |
+| `/analyze/access` | ACCESS    | OSM facilities per unit; DOH dengue medicine prices    |
+| `/analyze/policy` | Policy    | SIGI over Lab, ACCESS and policy evidence              |
+| `/data-sources` | Data Sources | Source catalogue: coverage, licence, provenance       |
 
 ## Evidence categories (never mixed)
 

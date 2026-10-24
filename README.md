@@ -40,10 +40,10 @@ TRACE (Lab) ──► ANALYZE (Explore) ──► ACT (Policy)
 | Module | Route | What it does | Data behind it |
 | --- | --- | --- | --- |
 | Overview | `/` | Landing dashboard and entry point to the modules | Mixed real and demo; see the module rows below |
-| Explore | `/explore` | Signal Explorer map: dengue cases, DOH thresholds and EARS results per reporting unit, weekly city weather (Environment), plus signal, anomaly and scenario layers | **Real** HDX DOH dengue 2016–2021 (retrospective export) and **real** weather for 12 CCHAIN cities; other layers demo |
-| Lab | `/lab` | Investigate the pattern behind a signal | **Real** OpenDengue national weekly series |
-| ACCESS | `/access` | Medicine availability, search demand and potential access gaps | **Demo** (simulated facilities, inventory and searches) |
-| Policy | `/policy` | LGU decision support: areas for verification and assessment, Policy Copilot | Demo evidence; Copilot needs a server-side model key |
+| Explore | `/explore` | Map with four views: Reported cases, EARS signal, DOH threshold (126 reporting units) and Environment (weekly weather for 12 cities) | **Real** HDX DOH dengue 2016–2021 (retrospective export); **real** CCHAIN and Open-Meteo weather |
+| Analyze → Lab | `/analyze/lab` | National trend, per-unit EARS/DOH analysis, method and data quality | **Real** OpenDengue national series and HDX reporting-unit results |
+| Analyze → ACCESS | `/analyze/access` | Where care and pharmacies are mapped per reporting unit, and what DOH hospitals pay for dengue medicines | **Real** OpenStreetMap facilities (snapshot) and DOH DPRI 2026 prices; stock and search demand have no public source |
+| Analyze → Policy | `/analyze/policy` | SIGI: answers about any reporting unit from Lab, ACCESS and policy evidence, with cited sources | **Real** evidence; verified local records for 4 units and national law; SIGI needs a server-side model key |
 | Data Sources | `/data-sources` | Every dataset SIGMA uses: purpose, where it appears, coverage, update behaviour, licence and credit line; demo and planned sources listed separately | Rendered from the source catalogue (`web/src/data/source-catalog.ts`), the same one `GET /api/v1/sources` serves |
 | Documentation | `/documentation` | Rendered API reference | Generated from the API registry |
 
@@ -141,7 +141,9 @@ JSON, no authentication. Full reference: [docs/api.md](docs/api.md) and `/docume
 | `/api/v1/dengue/observations` | GET | Weekly national observations | `live` |
 | `/api/v1/dengue/summary` | GET | Weekly, monthly and yearly aggregates | `live` |
 | `/api/v1/dengue/signals` | GET | Anomaly results | `not_connected` |
-| `/api/v1/access/metrics` | GET | Medicine-access indicators | `demo` |
+| `/api/v1/access/units` | GET | Mapped facilities and dengue burden per reporting unit | `live` |
+| `/api/v1/access/medicines` | GET | Dengue medicine prices (DOH DPRI) and formulary status | `live` |
+| `/api/v1/access/metrics` | GET | Retired (demo inventory); answers with empty lists | `not_connected` |
 | `/api/v1/policy/info` | GET | Assessment areas and AI disclosure | `demo` |
 | `/api/v1/policy/evidence` | GET | Curated policy evidence | `demo` |
 | `/api/v1/chat` | POST | Policy Copilot | depends on configuration |
@@ -158,7 +160,7 @@ Every response uses one envelope, `{ data, meta }` or `{ error, meta }`, and
 
 ```bash
 curl "https://datascience-2026.vercel.app/api/v1/dengue/observations?limit=2"
-curl "https://datascience-2026.vercel.app/api/v1/access/metrics?medicineId=<id>&limit=10"
+curl "https://datascience-2026.vercel.app/api/v1/access/units?unitId=quezon-city"
 ```
 
 ## Model maturity
