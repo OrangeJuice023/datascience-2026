@@ -1,13 +1,13 @@
 import type {
-  AccessMetricsData,
+  AccessMedicinesData,
+  AccessUnitsData,
   ApiSuccess,
   ChatRequestBody,
   ChatResponseData,
   DengueObservationsData,
-  DengueSignalsData,
   DengueSummaryData,
+  DengueUnitsData,
   HealthResponse,
-  PolicyInfoData,
 } from '@sigma/contracts';
 
 import { apiRequest, toQuery } from './client';
@@ -34,10 +34,6 @@ export function fetchHealth(baseUrl: string, signal?: AbortSignal): Promise<ApiS
   return apiRequest<HealthResponse>(baseUrl, '/health', { signal });
 }
 
-export function fetchSources(baseUrl: string, signal?: AbortSignal): Promise<ApiSuccess<{ sources: PolicyInfoData['sources'] }>> {
-  return apiRequest<{ sources: PolicyInfoData['sources'] }>(baseUrl, '/sources', { signal });
-}
-
 export interface ObservationsQuery {
   from?: string;
   to?: string;
@@ -52,6 +48,7 @@ export function fetchObservations(
   return apiRequest<DengueObservationsData>(baseUrl, `/dengue/observations${toQuery({ ...query })}`, { signal });
 }
 
+/** The national OpenDengue series, aggregated. `limit` caps the weekly points, not the coverage figures. */
 export function fetchSummary(
   baseUrl: string,
   limit?: number,
@@ -60,30 +57,27 @@ export function fetchSummary(
   return apiRequest<DengueSummaryData>(baseUrl, `/dengue/summary${toQuery({ limit })}`, { signal });
 }
 
-export function fetchSignals(
+/** The 126 HDX reporting units with their per-epi-year EARS and DOH-threshold counts, or one unit. */
+export function fetchDengueUnits(
   baseUrl: string,
-  query: { disease?: string; locationId?: string } = {},
+  query: { unitId?: string } = {},
   signal?: AbortSignal
-): Promise<ApiSuccess<DengueSignalsData>> {
-  return apiRequest<DengueSignalsData>(baseUrl, `/dengue/signals${toQuery({ ...query })}`, { signal });
+): Promise<ApiSuccess<DengueUnitsData>> {
+  return apiRequest<DengueUnitsData>(baseUrl, `/dengue/units${toQuery({ ...query })}`, { signal });
 }
 
-export interface AccessQuery {
-  medicineId?: string;
-  areaId?: string;
-  limit?: number;
-}
-
-export function fetchAccessMetrics(
+/** Facilities mapped in OpenStreetMap for a reporting unit. Stock, search demand and population are always null. */
+export function fetchAccessUnits(
   baseUrl: string,
-  query: AccessQuery = {},
+  query: { unitId?: string } = {},
   signal?: AbortSignal
-): Promise<ApiSuccess<AccessMetricsData>> {
-  return apiRequest<AccessMetricsData>(baseUrl, `/access/metrics${toQuery({ ...query })}`, { signal });
+): Promise<ApiSuccess<AccessUnitsData>> {
+  return apiRequest<AccessUnitsData>(baseUrl, `/access/units${toQuery({ ...query })}`, { signal });
 }
 
-export function fetchPolicyInfo(baseUrl: string, signal?: AbortSignal): Promise<ApiSuccess<PolicyInfoData>> {
-  return apiRequest<PolicyInfoData>(baseUrl, '/policy/info', { signal });
+/** Dengue medicines and what DOH hospitals paid for them: procurement prices, not shelf prices or stock. */
+export function fetchAccessMedicines(baseUrl: string, signal?: AbortSignal): Promise<ApiSuccess<AccessMedicinesData>> {
+  return apiRequest<AccessMedicinesData>(baseUrl, '/access/medicines', { signal });
 }
 
 export function sendChat(

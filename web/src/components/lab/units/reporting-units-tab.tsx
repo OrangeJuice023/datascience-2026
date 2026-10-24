@@ -7,7 +7,8 @@ import { DataStateNotice } from "@/components/ui/data-state-notice";
 import { Disclosure } from "@/components/ui/disclosure";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 import { SelectFilter } from "@/components/ui/select-filter";
-import { StatCard } from "@/components/ui/stat-card";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { formatCount, formatIsoDate } from "@/lib/map/format";
 import { SIGMA_HEX, hexToRgba } from "@/lib/map/palette";
 import { epiWeek } from "@/lib/national-observations";
@@ -112,7 +113,7 @@ function Legend({ showThresholds }: { showThresholds: boolean }) {
       : []),
   ];
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-600">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
       {items.map((item) => (
         <li key={item.key} className="flex items-center gap-1.5">
           <span aria-hidden="true" className="flex w-4 items-center justify-center">
@@ -157,11 +158,11 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-400">{unit.region}</p>
-          <h3 className="text-base font-semibold text-slate-900">{unit.name}</h3>
+          <p className="text-xs font-medium text-slate-400">{unit.region}</p>
+          <h3 className="text-base font-semibold text-ink">{unit.name}</h3>
           <p className="text-xs text-slate-500">{UNIT_TYPE_LABEL[unit.unitType] ?? unit.unitType}</p>
         </div>
-        <p className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+        <p className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
           <EvidenceBadge kind="formal" /> reported cases
           <EvidenceBadge kind="model" className="ml-2" /> EARS and DOH-threshold results
         </p>
@@ -174,7 +175,7 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
         </DataStateNotice>
       )}
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatStrip columns={4}>
         <StatCard
           label="Weeks with data"
           value={`${coverage.ok} of ${data.meta.weeks.length}`}
@@ -198,40 +199,33 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
           hint={`of ${total.dohEvaluated} weeks compared (thresholds from 2019)`}
           badge={<EvidenceBadge kind="model" />}
         />
-      </div>
+      </StatStrip>
 
       <Card className="p-4">
         <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold text-slate-600">Weekly reported cases</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-sm font-semibold text-ink">Weekly reported cases</p>
+            <p className="text-xs text-slate-400">
               {unit.name} · {year === null ? `${formatIsoDate(data.meta.weeks[0])} – ${formatIsoDate(data.meta.weeks[data.meta.weeks.length - 1])}` : `epi year ${year}`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div role="radiogroup" aria-label="Range" className="flex flex-wrap gap-1">
-              {[null, ...rows.map((r) => r.year)].map((y) => (
-                <button
-                  key={y ?? "all"}
-                  type="button"
-                  role="radio"
-                  aria-checked={y === year}
-                  onClick={() => setYear(y)}
-                  className={cn(
-                    "rounded px-2 py-1 text-xs font-medium tabular-nums",
-                    y === year ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50",
-                  )}
-                >
-                  {y ?? `${firstYear}–${lastYear}`}
-                </button>
-              ))}
-            </div>
-            <label className="flex items-center gap-1.5 text-xs text-slate-600">
+            <SegmentedControl
+              ariaLabel="Range"
+              size="sm"
+              value={year === null ? "all" : String(year)}
+              onChange={(id) => setYear(id === "all" ? null : Number(id))}
+              items={[
+                { id: "all", label: `${firstYear}–${lastYear}` },
+                ...rows.map((r) => ({ id: String(r.year), label: String(r.year) })),
+              ]}
+            />
+            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[13px] text-slate-700 sm:min-h-8">
               <input
                 type="checkbox"
                 checked={showThresholds}
                 onChange={(event) => setShowThresholds(event.target.checked)}
-                className="h-3.5 w-3.5 accent-slate-900"
+                className="h-4 w-4 accent-[var(--ink)]"
               />
               DOH threshold lines
             </label>
@@ -241,7 +235,7 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
         <div className="mt-2">
           <UnitWeeklyChart data={data} unit={unit} year={year} showThresholds={showThresholds} />
         </div>
-        <p className="mt-2 text-[11px] leading-snug text-slate-400">
+        <p className="mt-2 text-xs leading-snug text-slate-400">
           Breaks in the line and grey columns are missing or suspect-swap weeks: no data, never zero. The axis is
           scaled to reported cases, so threshold lines above it run off the top. Hover a week for its EARS and DOH
           result and why.
@@ -263,8 +257,8 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
       )}
 
       <Card className="p-4">
-        <p className="text-xs font-semibold text-slate-600">By epidemiological year</p>
-        <p className="mb-2 text-[11px] text-slate-400">MMWR epi years (the year that holds the week&apos;s Wednesday).</p>
+        <p className="text-sm font-semibold text-ink">By epidemiological year</p>
+        <p className="mb-2 text-xs text-slate-400">MMWR epi years (the year that holds the week&apos;s Wednesday).</p>
         <UnitYearTable rows={rows} />
       </Card>
 
@@ -274,15 +268,15 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
       >
         <div className="max-h-80 overflow-auto">
           <table className="w-full min-w-[520px] text-left text-xs">
-            <thead className="sticky top-0 bg-white">
-              <tr className="border-b border-slate-200 text-[11px] font-medium text-slate-500">
+            <thead className="sticky top-0 bg-sheet">
+              <tr className="border-b border-border text-xs font-medium text-slate-500">
                 <th scope="col" className="py-1.5 pr-3">Week of</th>
                 <th scope="col" className="py-1.5 pr-3 text-right">Reported cases</th>
                 <th scope="col" className="py-1.5 pr-3">EARS</th>
                 <th scope="col" className="py-1.5">DOH threshold</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-rule">
               {visibleWeeks.map((w) => {
                 const ok = hasData(w);
                 return (
@@ -303,7 +297,7 @@ function UnitDetail({ data, unit }: { data: SigmaData; unit: SigmaUnitSeries }) 
         </div>
       </Disclosure>
 
-      <div className="space-y-1 text-[11px] leading-snug text-slate-500">
+      <div className="space-y-1 text-xs leading-snug text-slate-500">
         <p className="font-medium text-amber-800">
           Retrospective prototype. EARS and DOH-threshold results show change relative to this unit&apos;s own
           history, not local risk or incidence, and are not a validated public-health claim.
@@ -349,7 +343,7 @@ export function ReportingUnitsTab({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex w-full flex-col gap-1 sm:w-60">
-          <label htmlFor="lab-unit-search" className="text-[11px] font-medium text-slate-500">
+          <label htmlFor="lab-unit-search" className="text-xs font-medium text-slate-500">
             Search reporting units
           </label>
           <input
@@ -361,13 +355,13 @@ export function ReportingUnitsTab({
             onKeyDown={(event) => {
               if (event.key === "Enter" && matches[0]) onUnitChange(matches[0].id);
             }}
-            className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="h-11 rounded-[var(--radius-control)] border border-control bg-sheet px-3 text-sm text-ink placeholder:text-slate-400 hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:h-9"
           />
         </div>
         <div className="w-full sm:w-[26rem]">
           <SelectFilter label="Reporting unit" value={unitId} onChange={onUnitChange} options={options} />
         </div>
-        <p className="pb-2 text-[11px] text-slate-400" aria-live="polite">
+        <p className="pb-2.5 text-xs text-slate-500 md:pb-2" aria-live="polite">
           {q ? `${matches.length} of ${units.length} units match` : `${units.length} HDX DOH reporting units`}
         </p>
       </div>
@@ -375,7 +369,7 @@ export function ReportingUnitsTab({
       {sigma.error ? (
         <DataStateNotice state="source-unavailable" title="Reporting-unit results could not be loaded">
           {sigma.error}. Nothing is shown rather than substitute values.{" "}
-          <Button variant="secondary" className="mt-2 px-2.5 py-1 text-xs" onClick={sigma.retry}>
+          <Button variant="secondary" className="mt-2" onClick={sigma.retry}>
             Try again
           </Button>
         </DataStateNotice>

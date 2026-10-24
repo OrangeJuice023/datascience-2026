@@ -132,6 +132,10 @@ that this is not evidence that no outbreak is occurring. The EARS engine
 that would produce these results is described in `engine`, including its
 method, its data window, and its limitations.
 
+### `GET /api/v1/dengue/units`
+
+Per HDX reporting unit (126, optional `unitId`) and epi year 2016–2020: cases over usable weeks, EARS alarm weeks and DOH-threshold weeks from the SIGMA export, `live`, historical; a count that could not be computed (no usable week, no EARS baseline, no DOH threshold before 2019) is `null`, never 0.
+
 ### `GET /api/v1/access/metrics`
 
 | Parameter    | Type   | Notes                    |

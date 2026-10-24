@@ -6,10 +6,10 @@ import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { Tabs, TabPanel } from "@/components/ui/tabs";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 import { DataStateNotice } from "@/components/ui/data-state-notice";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { formatCount, formatIsoDate } from "@/lib/map/format";
 import type { NationalSummary } from "@/lib/national-observations";
 import type { AnomalyResult } from "@/types/data";
-import { cn } from "@/lib/utils";
 import { WeeklyHistoryChart } from "./national/weekly-history-chart";
 import { EpiYearChart } from "./national/epi-year-chart";
 import { SeasonalProfileChart } from "./national/seasonal-profile-chart";
@@ -117,16 +117,16 @@ export function NationalObservationsPanel({
   return (
     <div className="flex flex-col gap-4">
       {/* Evidence banner */}
-      <Card className="border-teal-200 p-4">
+      <Card className="p-4">
         <div className="flex flex-wrap items-center gap-2">
           <EvidenceBadge kind="formal" />
-          <p className="text-sm font-semibold text-teal-900">Formal observed data</p>
+          <p className="text-sm font-semibold text-ink">Formal observed data</p>
         </div>
         <p className="mt-1 text-sm text-slate-700">
           This is reported historical disease data, not model output.
         </p>
         <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
-          <span className="font-medium text-slate-700">Dengue</span>
+          <span className="font-medium text-ink">Dengue</span>
           <span>Philippines · national</span>
           <span>National / Weekly</span>
           <span>
@@ -150,56 +150,56 @@ export function NationalObservationsPanel({
         <StatCard label="Resolution" value="National · weekly" hint="No sub-national formal series used" />
       </StatStrip>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        {/* Summary statistics */}
-        <Card className="p-4">
-          <p className="text-xs font-semibold text-slate-600">Summary statistics</p>
-          <p className="text-[11px] text-slate-400">
-            Weekly figures use the {formatCount(weekly.recorded)} recorded weeks only; missing
-            weeks are excluded, not counted as zero.
-          </p>
-          {weekly.stats && (
-            <StatStrip columns={4} className="mt-3">
-              <StatCard label="Mean weekly count" value={weekly.stats.mean.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
-              <StatCard label="Median weekly count" value={weekly.stats.median.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
+      {/* Summary statistics */}
+      <section aria-label="Summary statistics" className="flex flex-col">
+        <p className="text-sm font-semibold text-ink">Summary statistics</p>
+        <p className="text-xs text-slate-500">
+          Weekly figures use the {formatCount(weekly.recorded)} recorded weeks only; missing
+          weeks are excluded, not counted as zero.
+        </p>
+        {weekly.stats && (
+          <StatStrip columns={4} className="mt-3">
+            <StatCard label="Mean weekly count" value={weekly.stats.mean.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
+            <StatCard label="Median weekly count" value={weekly.stats.median.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
+            <StatCard
+              label="Maximum weekly count"
+              value={formatCount(weekly.stats.max.value)}
+              hint={`Peak week of ${formatIsoDate(weekly.stats.max.periodStart)}`}
+            />
+            <StatCard
+              label="Minimum weekly count"
+              value={formatCount(weekly.stats.min.value)}
+              hint={`Week of ${formatIsoDate(weekly.stats.min.periodStart)}`}
+            />
+          </StatStrip>
+        )}
+        {completeYears.length > 0 && (
+          <StatStrip columns={2} className="mt-3">
+            <StatCard
+              label="Complete epi years"
+              value={String(completeYears.length)}
+              hint={`${completeYears.map((y) => y.year).join(", ")} · every week recorded`}
+            />
+            {peakCompleteYear && (
               <StatCard
-                label="Maximum weekly count"
-                value={formatCount(weekly.stats.max.value)}
-                hint={`Peak week of ${formatIsoDate(weekly.stats.max.periodStart)}`}
+                label="Highest complete-year total"
+                value={formatCount(peakCompleteYear.recordedSum)}
+                hint={`${peakCompleteYear.year} · sum of ${peakCompleteYear.recordedWeeks} weeks`}
               />
-              <StatCard
-                label="Minimum weekly count"
-                value={formatCount(weekly.stats.min.value)}
-                hint={`Week of ${formatIsoDate(weekly.stats.min.periodStart)}`}
-              />
-            </StatStrip>
-          )}
-          {completeYears.length > 0 && (
-            <StatStrip columns={2} className="mt-3">
-              <StatCard
-                label="Complete epi years"
-                value={String(completeYears.length)}
-                hint={`${completeYears.map((y) => y.year).join(", ")} · every week recorded`}
-              />
-              {peakCompleteYear && (
-                <StatCard
-                  label="Highest complete-year total"
-                  value={formatCount(peakCompleteYear.recordedSum)}
-                  hint={`${peakCompleteYear.year} · sum of ${peakCompleteYear.recordedWeeks} weeks`}
-                />
-              )}
-            </StatStrip>
-          )}
-          <p className="mt-2 text-[11px] text-slate-400">
-            Annual totals are shown only for epi years with every week recorded; other years
-            have partial sums, labelled as such.
-          </p>
-        </Card>
+            )}
+          </StatStrip>
+        )}
+        <p className="mt-2 text-xs text-slate-500">
+          Annual totals are shown only for epi years with every week recorded; other years
+          have partial sums, labelled as such.
+        </p>
+      </section>
 
-        {/* Data quality / coverage */}
-        <Card className="p-4">
-          <p className="text-xs font-semibold text-slate-600">Data quality / coverage</p>
-          <dl className="mt-2 divide-y divide-slate-100 text-xs">
+      {/* Data quality / coverage */}
+      <Card className="p-4">
+        <p className="text-sm font-semibold text-ink">Data quality and coverage</p>
+        <div className="mt-2 grid grid-cols-1 gap-x-8 gap-y-3 lg:grid-cols-2">
+          <dl className="divide-y divide-rule text-xs">
             <Row label="Observations">
               {formatCount(weekly.recorded)} weekly (validated against the reconciliation)
             </Row>
@@ -236,7 +236,7 @@ export function NationalObservationsPanel({
                 .join(" · ")}
             </Row>
           </dl>
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="flex flex-col gap-2 lg:pt-1.5">
             <DataStateNotice state="partial-coverage">
               {missingWeeks} weeks between {firstYear} and {lastYear} have no weekly record,
               mostly around year-end. They appear as breaks in the charts, never as zero.
@@ -248,15 +248,15 @@ export function NationalObservationsPanel({
               not flag which weeks, if any, were imputed.
             </DataStateNotice>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {/* Historical time series */}
       <Card className="p-4">
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <p className="text-xs font-semibold text-slate-600">Reported dengue cases per week</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-sm font-semibold text-ink">Reported dengue cases per week</p>
+            <p className="text-xs text-slate-500">
               Philippines, national · {formatIsoDate(weekly.first!)} – {formatIsoDate(weekly.last!)} ·
               drag the handles below to zoom
             </p>
@@ -272,32 +272,27 @@ export function NationalObservationsPanel({
         <div className="p-4">
           <TabPanel id="year-weekly" activeId={yearTab}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <div role="radiogroup" aria-label="Epidemiological year" className="flex flex-wrap gap-1">
-                {weekly.epiYears.map((y) => (
-                  <button
-                    key={y.year}
-                    type="button"
-                    role="radio"
-                    aria-checked={y.year === year}
-                    onClick={() => setYear(y.year)}
-                    className={cn(
-                      "rounded px-2 py-1 text-xs font-medium tabular-nums",
-                      y.year === year
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-200 text-slate-600 hover:bg-slate-50",
-                    )}
-                    title={`${y.recordedWeeks} of ${y.expectedWeeks} weeks recorded`}
-                  >
-                    {y.year}
-                    {!y.complete && <span className="ml-0.5 opacity-60">*</span>}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl
+                ariaLabel="Epidemiological year"
+                size="sm"
+                value={String(year)}
+                onChange={(id) => setYear(Number(id))}
+                items={weekly.epiYears.map((y) => ({
+                  id: String(y.year),
+                  title: `${y.recordedWeeks} of ${y.expectedWeeks} weeks recorded`,
+                  label: (
+                    <>
+                      {y.year}
+                      {!y.complete && <span className="-ml-1 opacity-60">*</span>}
+                    </>
+                  ),
+                }))}
+              />
               {yearSummary && (
                 <p className="text-xs text-slate-500">
                   {yearSummary.recordedWeeks} of {yearSummary.expectedWeeks} weeks recorded ·{" "}
                   {yearSummary.complete ? (
-                    <span className="font-medium text-slate-700">
+                    <span className="font-medium text-ink">
                       Sum of all weeks: {formatCount(yearSummary.recordedSum)}
                     </span>
                   ) : yearSummary.truncated ? (
@@ -309,12 +304,12 @@ export function NationalObservationsPanel({
               )}
             </div>
             <EpiYearChart weeks={yearWeeks} />
-            <p className="mt-2 text-[11px] text-slate-400">
+            <p className="mt-2 text-xs text-slate-500">
               * Incomplete epi year. Shaded columns are weeks with no record.
             </p>
           </TabPanel>
           <TabPanel id="year-coverage" activeId={yearTab}>
-            <p className="mb-2 text-[11px] text-slate-400">
+            <p className="mb-2 text-xs text-slate-500">
               Sum of recorded weeks per MMWR epi year. Solid bars are complete years (an annual
               total); pale bars are partial sums over the weeks on record, not annual totals.
             </p>
@@ -336,8 +331,8 @@ export function NationalObservationsPanel({
 
       {/* Seasonal view */}
       <Card className="p-4">
-        <p className="text-xs font-semibold text-slate-600">Seasonal profile by epidemiological week</p>
-        <p className="mb-2 text-[11px] text-slate-400">
+        <p className="text-sm font-semibold text-ink">Seasonal profile by epidemiological week</p>
+        <p className="mb-2 text-xs text-slate-500">
           Median and min–max across epi years with a record for that week (weekly rows only).
           Descriptive, not a baseline. Week 53 exists only in 53-week years.
         </p>
@@ -348,7 +343,7 @@ export function NationalObservationsPanel({
 
       {/* Provenance */}
       <Card className="p-4">
-        <p className="text-xs font-semibold text-slate-600">Provenance</p>
+        <p className="text-sm font-semibold text-ink">Provenance</p>
         <dl className="mt-2 grid grid-cols-1 gap-x-6 text-xs sm:grid-cols-2">
           <Row label="Source">{meta.source}</Row>
           <Row label="Release">
@@ -365,7 +360,7 @@ export function NationalObservationsPanel({
           <Row label="Resolution">National / Weekly</Row>
           <Row label="License">{meta.license}</Row>
           <Row label="Input SHA-256">
-            <span className="break-all font-mono text-[11px] text-slate-500">{meta.sha256}</span>
+            <span className="break-all font-mono text-xs text-slate-600">{meta.sha256}</span>
           </Row>
         </dl>
       </Card>

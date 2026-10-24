@@ -17,6 +17,7 @@ import { GET as policyInfoGet } from "@/app/api/v1/policy/info/route";
 import { GET as signalsGet } from "@/app/api/v1/dengue/signals/route";
 import { GET as sourcesGet } from "@/app/api/v1/sources/route";
 import { GET as summaryGet } from "@/app/api/v1/dengue/summary/route";
+import { GET as dengueUnitsGet } from "@/app/api/v1/dengue/units/route";
 import { POST as chatPost } from "@/app/api/v1/chat/route";
 import {
   API_ENDPOINTS,
@@ -167,6 +168,11 @@ async function callRealHandler(
       };
     case "GET /dengue/signals":
       return { status: 200, body: await (await signalsGet(request("/dengue/signals"))).json() };
+    case "GET /dengue/units":
+      return {
+        status: 200,
+        body: await (await dengueUnitsGet(request("/dengue/units", "?unitId=quezon-city"))).json(),
+      };
     case "GET /access/metrics":
       return {
         status: 200,

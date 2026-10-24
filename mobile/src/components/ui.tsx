@@ -184,6 +184,115 @@ export function ChipGroup<T extends string>({
 }
 
 /**
+ * A segmented control: two to four views of the same screen, one row, equal
+ * widths, each segment a 44pt touch target that announces whether it is
+ * selected.
+ */
+export function SegmentedControl<T extends string>({
+  options,
+  selected,
+  onSelect,
+  accessibilityLabel,
+}: {
+  options: { value: T; label: string }[];
+  selected: T;
+  onSelect: (value: T) => void;
+  accessibilityLabel?: string;
+}) {
+  const theme = useTheme();
+  return (
+    <View
+      accessibilityRole="tablist"
+      accessibilityLabel={accessibilityLabel}
+      style={[styles.segmented, { backgroundColor: theme.backgroundSelected }]}>
+      {options.map((option) => {
+        const active = option.value === selected;
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            onPress={() => onSelect(option.value)}
+            style={({ pressed }) => [
+              styles.segment,
+              active && { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+              { opacity: pressed ? 0.75 : 1 },
+            ]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.segmentText, { color: active ? theme.text : theme.textSecondaryStrong }, active && styles.segmentTextActive]}>
+              {option.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * A row that goes somewhere: a title, one line on what is there, and a
+ * chevron. The whole row is the touch target.
+ */
+export function LinkRow({
+  title,
+  description,
+  onPress,
+  accessibilityHint,
+}: {
+  title: string;
+  description?: string;
+  onPress: () => void;
+  accessibilityHint?: string;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityHint={accessibilityHint}
+      onPress={onPress}
+      style={({ pressed }) => [styles.linkRow, { borderTopColor: theme.border, opacity: pressed ? 0.7 : 1 }]}>
+      <View style={styles.disclosureText}>
+        <Text style={[Type.title, { fontSize: 15, lineHeight: 20, color: theme.accent }]}>{title}</Text>
+        {description ? <Text style={[styles.bannerBody, { color: theme.textSecondary }]}>{description}</Text> : null}
+      </View>
+      <Text
+        style={[styles.disclosureChevron, { color: theme.textSecondary }]}
+        accessibilityElementsHidden
+        importantForAccessibility="no">
+        ›
+      </Text>
+    </Pressable>
+  );
+}
+
+/** A square 44pt button holding one glyph; the label is for screen readers. */
+export function IconButton({
+  glyph,
+  label,
+  onPress,
+}: {
+  glyph: React.ReactNode;
+  label: string;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      hitSlop={4}
+      style={({ pressed }) => [
+        styles.iconButton,
+        { borderColor: theme.border, backgroundColor: theme.backgroundElement, opacity: pressed ? 0.7 : 1 },
+      ]}>
+      {glyph}
+    </Pressable>
+  );
+}
+
+/**
  * A collapsible section: supporting detail a reader may need but should not
  * have to scroll past. The header is one large touch target and announces
  * whether it is expanded.
@@ -349,12 +458,53 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: 14,
-    minHeight: 40,
+    minHeight: 44,
     justifyContent: 'center',
   },
   chipText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 3,
+    gap: 3,
+  },
+  segment: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 44,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.one,
+  },
+  segmentText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  segmentTextActive: {
+    fontWeight: '700',
+  },
+  linkRow: {
+    minHeight: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingVertical: Spacing.two,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
