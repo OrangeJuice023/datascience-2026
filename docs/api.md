@@ -134,8 +134,7 @@ week: `value`, `threshold`, and `alarm` (the export's label, which also
 requires at least 5 cases). A missing or suspect-swap week, or a method with
 too short a baseline, has **no record**: that is "no result", not a zero and
 not "no signal". If the export cannot be read the status is `not_connected`.
-The open-source signal demo data stays in its own labelled block, which is
-why `meta.isSample` is `true`. Without parameters (2021-01-03): 327 records,
+`meta.isSample` is `false`: every record is computed from real reports. Without parameters (2021-01-03): 327 records,
 9 alarms.
 
 ### `GET /api/v1/dengue/units`
@@ -150,11 +149,9 @@ Per HDX reporting unit (126, optional `unitId`) and epi year 2016–2020: cases 
 | `areaId`     | string | Optional.                |
 | `limit`      | int    | 1–1000, defaults to max. |
 
-Weekly medication-access indicators per area and medicine. The payload
-carries a `scope` block stating what the data can and cannot support. The
-records are simulated: a facility listed here has a demo record, which does
-not establish that the facility is operating, stocked, staffed or clinically
-accessible. The response is `status: "demo"`.
+Retired. No public source reports weekly medicine stock or searches, so it
+answers `not_connected` with empty lists; real ACCESS data is at
+`/access/units` and `/access/medicines`.
 
 ### `GET /api/v1/policy/info`
 

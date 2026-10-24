@@ -6,7 +6,6 @@ import type {
   ObservationRecord,
 } from "@sigma/contracts";
 import type { HealthObservation } from "@/types/data";
-import type { Signal } from "@/types";
 import { summarizeNational, type NationalSummary } from "@/lib/national-observations";
 
 /**
@@ -211,8 +210,6 @@ export interface BuildSignalsInput {
     threshold: number;
     alarm: boolean;
   }[];
-  /** Open-source signal demo data, kept separate and clearly labelled. */
-  demoSignals: Signal[];
   /** Whether the EARS results could be read (the committed SIGMA export). */
   earsConnected: boolean;
 }
@@ -237,22 +234,6 @@ export function buildSignals(input: BuildSignalsInput): DengueSignalsData {
       geographicScope: EARS_ENGINE.geographicScope,
     },
     signals: connected ? input.anomalyResults : [],
-    openSourceSignals: {
-      isSample: true,
-      records: input.demoSignals.map((s) => ({
-        id: s.id,
-        disease: s.disease,
-        locationId: s.locationId,
-        locationName: s.locationName,
-        date: s.date,
-        signalLevel: s.signalLevel,
-        sourceCount: s.sourceCount,
-        confidence: s.confidence,
-        changePercent: s.changePercent,
-        status: s.status,
-      })),
-      note: "Open-source signal demo data. These are illustrative activity indicators derived from simulated sources, not case counts, and not evidence of an outbreak.",
-    },
     limitations: EARS_LIMITATIONS,
   };
 }

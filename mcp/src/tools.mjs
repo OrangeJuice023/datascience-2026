@@ -37,7 +37,7 @@ export const TOOLS = [
       "EARS C1/C2/C3 aberration results per Philippine dengue reporting unit and week (HDX DOH data, 2016-01-10 to 2021-01-03). " +
       "Default: the latest week (all 126 units). Give locationId for one unit's whole series, week for one week, or both. " +
       "An alarm prompts investigation; it does not confirm an outbreak. No record for a unit-week means no computable result, not 'no signal'. " +
-      "The openSourceSignals block is simulated demo data. " + CAVEAT,
+      CAVEAT,
     input: {
       locationId: z.string().optional().describe("Reporting unit id, e.g. 'iloilo-city' (see dengue_units)."),
       week: isoDate.optional().describe("Week start (a Sunday), e.g. '2019-07-14'."),

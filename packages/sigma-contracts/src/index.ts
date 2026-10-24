@@ -242,12 +242,6 @@ export interface DengueSignalsData {
   };
   /** Empty while not connected. Never interpreted as "no signal". */
   signals: DengueSignalRecord[];
-  /** Separate, clearly-labelled open-source signal demo data. */
-  openSourceSignals: {
-    isSample: true;
-    records: DemoSignalRecord[];
-    note: string;
-  };
   limitations: string[];
 }
 
@@ -292,19 +286,6 @@ export interface DengueUnitsData {
     units: number;
     notes: string[];
   };
-}
-
-export interface DemoSignalRecord {
-  id: string;
-  disease: string;
-  locationId: string;
-  locationName: string;
-  date: string;
-  signalLevel: number;
-  sourceCount: number;
-  confidence: "low" | "medium" | "high";
-  changePercent: number;
-  status: "normal" | "watch" | "elevated";
 }
 
 // ---------------------------------------------------------------------------

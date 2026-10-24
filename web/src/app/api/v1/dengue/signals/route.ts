@@ -1,5 +1,4 @@
 import type { NextRequest } from "next/server";
-import { dataProvider } from "@/data/opendengue-provider";
 import { buildSignals } from "@/lib/api/dengue";
 import { earsSignals } from "@/lib/api/dengue-signals";
 import { ApiError } from "@/lib/api/envelope";
@@ -14,9 +13,8 @@ const KNOWN_PARAMS = ["disease", "locationId", "week"] as const;
  * GET /api/v1/dengue/signals
  *
  * EARS C1/C2/C3 results per HDX reporting unit and week, from the committed
- * SIGMA export (ml/ears.py -> ml/export_sigma_web.py), plus the clearly
- * separated open-source signal demo data. Historical records (2016-2021), not
- * real-time. A week or method with no record had no computable result; an
+ * SIGMA export (ml/ears.py -> ml/export_sigma_web.py). Historical records
+ * (2016-2021), not real-time. A week or method with no record had no computable result; an
  * empty list never means "no outbreak". If the export cannot be read the
  * status is `not_connected`, never an empty "live" answer.
  */
@@ -31,10 +29,7 @@ export const GET = withErrors(async (request: NextRequest) => {
   const locationId = query.get("locationId") ?? undefined;
   const week = query.get("week") ?? undefined;
 
-  const [sigma, demoSignals] = await Promise.all([
-    readSigmaData(),
-    dataProvider.getSignals({ disease, ...(locationId ? { locationId } : {}) }),
-  ]);
+  const sigma = await readSigmaData();
 
   if (sigma && locationId !== undefined && !sigma.units.some((u) => u.id === locationId)) {
     throw ApiError.badRequest(`Unknown reporting unit "${locationId}".`, { locationId: ["unknown reporting unit"] });
@@ -46,7 +41,7 @@ export const GET = withErrors(async (request: NextRequest) => {
   }
 
   const ears = sigma ? earsSignals(sigma, { unitId: locationId, week }) : { records: [], weeks: [] };
-  const data = buildSignals({ anomalyResults: ears.records, demoSignals, earsConnected: sigma !== null });
+  const data = buildSignals({ anomalyResults: ears.records, earsConnected: sigma !== null });
 
-  return { data, status: data.status === "live" ? ("live" as const) : ("not_connected" as const), isSample: true };
+  return { data, status: data.status === "live" ? ("live" as const) : ("not_connected" as const), isSample: false };
 });

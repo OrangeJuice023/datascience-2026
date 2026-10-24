@@ -608,9 +608,9 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     listedInIndex: true,
     group: "Surveillance",
     title: "Dengue signals",
-    summary: "EARS C1/C2/C3 results per reporting unit and week (2016-2021), plus open-source signal demo data.",
+    summary: "EARS C1/C2/C3 results per reporting unit and week (2016-2021).",
     description:
-      "EARS results read from the committed SIGMA export (ml/ears.py -> ml/export_sigma_web.py), one record per reporting unit, week and method whose statistic was computed on a usable week. Historical records, not real-time. A unit-week or method with no record had no computable result (missing or suspect-swap week, or too short a baseline); an empty list never means \"no outbreak\". The open-source signal block is simulated, and says so.",
+      "EARS results read from the committed SIGMA export (ml/ears.py -> ml/export_sigma_web.py), one record per reporting unit, week and method whose statistic was computed on a usable week. Historical records, not real-time. A unit-week or method with no record had no computable result (missing or suspect-swap week, or too short a baseline); an empty list never means \"no outbreak\".",
     parameters: [
       {
         name: "disease",
@@ -623,7 +623,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
         name: "locationId",
         type: "string",
         required: false,
-        notes: "Reporting unit id (as in /dengue/units). Without `week`, returns that unit's whole series. Also narrows the open-source signal block. Unknown ids are a 400.",
+        notes: "Reporting unit id (as in /dengue/units). Without `week`, returns that unit's whole series. Unknown ids are a 400.",
       },
       {
         name: "week",
@@ -637,14 +637,11 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "reason — what the records are, or why there are none, in plain language",
       "engine — id, name, location, status, method, dataWindow, geographicScope",
       "signals[] — id, geographyId, periodStart, periodEnd, method (EARS C1/C2/C3), value, threshold, alarm",
-      "openSourceSignals.isSample — always true for this block",
-      "openSourceSignals.records[] — simulated signal records",
-      "openSourceSignals.note — what this block is and is not",
       "limitations[] — what the engine cannot do",
     ],
     status: "live",
     possibleStatuses: ["live", "not_connected"],
-    isSample: true,
+    isSample: false,
     auth: NO_AUTH,
     dataType: { name: "DengueSignalsData", from: "@sigma/contracts" },
     example: { query: "?locationId=iloilo-city&week=2019-07-14" },
@@ -696,12 +693,6 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
             alarm: true,
           },
         ],
-        openSourceSignals: {
-          isSample: true,
-          records: [],
-          note:
-            "Open-source signal demo data. These are illustrative activity indicators derived from simulated sources, not case counts, and not evidence of an outbreak.",
-        },
         limitations: [
           "Historical results (2016-01-10 to 2021-01-03), not real-time: the HDX source ends in January 2021.",
         ],
@@ -710,7 +701,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
         apiVersion: "v1",
         generatedAt: "2026-10-24T00:00:00.000Z",
         status: "live",
-        isSample: true,
+        isSample: false,
       },
     },
     exampleIsTrimmed: true,

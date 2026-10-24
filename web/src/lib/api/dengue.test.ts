@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { HealthObservation } from "@/types/data";
-import type { Signal } from "@/types";
 import { buildObservations, buildSignals, type DengueSourceDescriptor } from "./dengue";
 
 /**
@@ -88,22 +87,9 @@ describe("buildObservations", () => {
   });
 });
 
-const DEMO_SIGNAL: Signal = {
-  id: "signal-1",
-  disease: "Dengue",
-  locationId: "quezon-city",
-  locationName: "Quezon City",
-  date: "2020-01-19",
-  signalLevel: 2,
-  sourceCount: 3,
-  confidence: "medium",
-  changePercent: 12,
-  status: "watch",
-};
-
 describe("buildSignals", () => {
   it("reports not_connected when the EARS results cannot be read", () => {
-    const data = buildSignals({ anomalyResults: [], demoSignals: [], earsConnected: false });
+    const data = buildSignals({ anomalyResults: [], earsConnected: false });
 
     expect(data.status).toBe("not_connected");
     expect(data.signals).toEqual([]);
@@ -112,7 +98,7 @@ describe("buildSignals", () => {
   });
 
   it("explains an empty selection without calling it 'no outbreak'", () => {
-    const data = buildSignals({ anomalyResults: [], demoSignals: [], earsConnected: true });
+    const data = buildSignals({ anomalyResults: [], earsConnected: true });
 
     expect(data.status).toBe("live");
     expect(data.signals).toEqual([]);
@@ -134,21 +120,11 @@ describe("buildSignals", () => {
           alarm: true,
         },
       ],
-      demoSignals: [],
       earsConnected: true,
     });
 
     expect(data.status).toBe("live");
     expect(data.signals).toHaveLength(1);
     expect(data.engine.status).toBe("connected");
-  });
-
-  it("keeps the open-source demo signals in their own labelled block", () => {
-    const data = buildSignals({ anomalyResults: [], demoSignals: [DEMO_SIGNAL], earsConnected: false });
-
-    expect(data.openSourceSignals.isSample).toBe(true);
-    expect(data.openSourceSignals.records).toHaveLength(1);
-    expect(data.openSourceSignals.note).toMatch(/not case counts/i);
-    expect(data.signals).toEqual([]);
   });
 });
