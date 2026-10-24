@@ -176,7 +176,7 @@ function EndpointCard({ endpoint }: { endpoint: ApiEndpoint }) {
 
         {endpoint.parameters.length > 0 ? (
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <h4 className="text-xs font-semibold text-slate-500">
               Parameters
             </h4>
             <div className="mt-2 overflow-x-auto rounded-lg border border-slate-200">
@@ -225,7 +225,7 @@ function EndpointCard({ endpoint }: { endpoint: ApiEndpoint }) {
         )}
 
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <h4 className="text-xs font-semibold text-slate-500">
             Response shape
           </h4>
           <ul className="mt-2 space-y-1">
@@ -259,12 +259,12 @@ function EndpointCard({ endpoint }: { endpoint: ApiEndpoint }) {
 
         {endpoint.errors.length > 0 ? (
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <h4 className="text-xs font-semibold text-slate-500">
               Errors
             </h4>
             <ul className="mt-2 space-y-1.5">
-              {endpoint.errors.map((error) => (
-                <li key={`${error.status}-${error.code}`} className="text-[13px] leading-relaxed">
+              {endpoint.errors.map((error, i) => (
+                <li key={`${error.status}-${error.code}-${i}`} className="text-[13px] leading-relaxed">
                   <span className="font-mono text-[12px] font-semibold text-rose-700">
                     {error.status}
                   </span>
@@ -278,7 +278,7 @@ function EndpointCard({ endpoint }: { endpoint: ApiEndpoint }) {
 
         {endpoint.notes.length > 0 ? (
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Notes</h4>
+            <h4 className="text-xs font-semibold text-slate-500">Notes</h4>
             <ul className="mt-2 space-y-1.5">
               {endpoint.notes.map((note) => (
                 <li key={note} className="text-[13px] leading-relaxed text-slate-600">
@@ -299,12 +299,11 @@ export function DocumentationView() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        eyebrow="Developers"
         title="API documentation"
         subtitle="SIGMA serves a versioned, read-only JSON API. Every response states what kind of data it carries, so a client never has to guess whether a number is an observation, a simulation, or nothing at all."
       />
 
-      <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+      <div className="mt-6 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
       <nav aria-label="On this page" className="hidden lg:block">
         <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
           <p className="mb-2 px-2 text-xs font-semibold text-slate-500">On this page</p>

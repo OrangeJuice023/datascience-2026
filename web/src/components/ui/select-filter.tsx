@@ -21,7 +21,7 @@ export function SelectFilter({
   const id = `filter-${label.toLowerCase().replace(/\s+/g, "-")}`;
   return (
     <div className="flex min-w-[9rem] flex-col gap-1">
-      <label htmlFor={id} className="text-[11px] font-medium text-slate-500">
+      <label htmlFor={id} className="text-xs font-medium text-slate-500">
         {label}
       </label>
       <div className="relative">
@@ -29,7 +29,7 @@ export function SelectFilter({
           id={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 py-1.5 pr-8 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="h-10 w-full cursor-pointer appearance-none rounded-[var(--radius-control)] border border-control bg-sheet pl-3 pr-8 text-sm text-ink hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:h-9"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>

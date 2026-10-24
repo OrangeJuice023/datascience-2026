@@ -20,6 +20,9 @@ const COVERAGE: Record<string, { from: string | null; to: string | null; geograp
   "ritm-surveillance": { from: null, to: null, geographicLevel: "national_or_regional" },
   "open-meteo": { from: null, to: null, geographicLevel: "point" },
   "hdx-doh-dengue": { from: "2016-01-10", to: "2021-01-03", geographicLevel: "doh_reporting_unit" },
+  "project-cchain": { from: null, to: null, geographicLevel: "city" },
+  "hotosm-phl-health-facilities": { from: null, to: null, geographicLevel: "point" },
+  "doh-dpri-dashboard": { from: null, to: null, geographicLevel: "national" },
   geoboundaries: { from: null, to: null, geographicLevel: "municipality_city" },
   "cod-ab-phl": { from: null, to: null, geographicLevel: "region_to_municipality" },
   "psa-psgc": { from: null, to: null, geographicLevel: "region_to_barangay" },
@@ -42,6 +45,12 @@ const SCOPE: Record<string, string> = {
     "Environmental covariates for models. Never an epidemiological finding on its own.",
   "hdx-doh-dengue":
     "Retrospective weekly counts per DOH reporting unit, 2016–2021. A province remainder is not the whole province, swap rows and missing weeks are no data, and the date column's meaning is unconfirmed. Not live surveillance.",
+  "project-cchain":
+    "Environmental covariates for 12 cities, ending in 2022. Never an epidemiological finding on its own.",
+  "hotosm-phl-health-facilities":
+    "Places mapped in OpenStreetMap as of one snapshot. Mapping completeness varies, so a low count can mean low mapping, not low access. Says nothing about medicine stock.",
+  "doh-dpri-dashboard":
+    "What DOH hospitals paid for listed medicines in 2025 procurement. Not shelf prices at private pharmacies, and not whether a medicine is in stock anywhere.",
   geoboundaries: "Display polygons only. Not health data and not an official boundary determination.",
   "cod-ab-phl": "Reference units and p-codes for matching places. Not health data.",
   "psa-psgc": "Authoritative area codes for joining systems, not health data.",

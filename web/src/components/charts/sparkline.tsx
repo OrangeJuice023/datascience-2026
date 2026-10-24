@@ -15,14 +15,14 @@ export function Sparkline({
       <LineChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
         <Line
           dataKey="observed"
-          stroke="#0d9488"
+          stroke="#2468c9"
           strokeWidth={1.75}
           dot={false}
           isAnimationActive={false}
         />
         <Line
           dataKey="expected"
-          stroke="#cbd5e1"
+          stroke="#c9c5bb"
           strokeWidth={1.25}
           strokeDasharray="3 2"
           dot={false}

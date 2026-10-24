@@ -140,8 +140,12 @@ describe("completeChat", () => {
     const system = calls[0].messages[0];
     expect(system.role).toBe("system");
     expect(system.content).toMatch(/Stay in scope/);
-    expect(system.content).toMatch(/Dengue in Pasig/);
-    expect(system.content).toMatch(/decline in one sentence/);
+    expect(system.content).toMatch(/Pasig \(Dengue\)/);
+    expect(system.content).toMatch(/Decline unrelated requests in one sentence/);
+    // The prompt carries Pasig's own evidence and never another city's.
+    expect(system.content).toContain("[pe-pasig-tf-2025]");
+    expect(system.content).toContain("[lab-pasig-city-2019]");
+    expect(system.content).not.toContain("pe-qc-");
   });
 
   it("refuses without a provider key and never calls the provider", async () => {

@@ -1,18 +1,19 @@
 "use client";
 
 import { useId, useMemo, useRef, useState } from "react";
-import { Send, RotateCcw } from "lucide-react";
-import type { ChatResponseData } from "@sigma/contracts";
+import { ExternalLink, RotateCcw, Send } from "lucide-react";
+import type { ChatCitation, ChatResponseData } from "@sigma/contracts";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Sigi } from "@/components/mascot/sigi";
-import type { PolicyEvidenceRecord } from "@/lib/policy-evidence/types";
+import { CopilotAnswer } from "@/components/policy/copilot-answer";
 import {
   copilotSigiState,
   historyForRequest,
   isCopilotUnavailable,
-  referencedEvidence,
-  suggestedQuestions,
+  linkServerCitations,
+  suggestedQuestionGroups,
+  type SuggestionContext,
 } from "@/lib/policy-chat/copilot-ui";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +24,12 @@ interface Turn {
   signature?: string;
   /** What the API said about an assistant reply: model, scope, limitations. */
   meta?: Pick<ChatResponseData, "model" | "contextScope" | "limitations">;
-  cited?: PolicyEvidenceRecord[];
+  /** The reply with its cited ids turned into numbered links. */
+  display?: string;
+  /** The server-verified citations, in citation-number order. */
+  citations?: ChatCitation[];
+  /** Ids the reply named that SIGI was not given; never shown as sources. */
+  rejected?: string[];
 }
 
 interface CopilotError {
@@ -35,24 +41,35 @@ interface CopilotError {
 
 interface PolicyCopilotProps {
   disease: string;
+  /** A reporting-unit id (or one of the app's LGU ids). */
   locationId: string;
   locationName?: string;
-  hasSignal: boolean;
-  /** The curated records the server gives the model for this LGU. */
-  evidence: PolicyEvidenceRecord[];
+  /** An optional second unit to compare with; part of the conversation's scope. */
+  compareLocationId?: string;
+  compareName?: string;
+  /** What evidence exists for the place, so suggestions never promise more. */
+  suggestionContext: SuggestionContext;
 }
 
 /**
- * The Policy Copilot: a conversation over the evidence SIGMA holds for the
- * selected LGU. The request goes to POST /api/v1/chat; the provider key and
- * the system prompt stay on the server. Every reply is shown with what the
- * API says it was based on, and with any curated records it refers to.
+ * SIGI in Analyze: a conversation over the evidence SIGMA holds for the
+ * selected reporting unit across Lab, ACCESS and Policy. The request goes to
+ * POST /api/v1/chat, where the evidence pack and system prompt are built;
+ * the provider key never reaches the browser. Every reply shows the sources
+ * the server verified it cites, and flags any id it was not given.
  *
- * One instance holds one conversation: PolicyView keys it by disease and LGU
- * (copilotConversationKey), so switching LGU starts a new conversation and a
- * reply still in flight for the old one is discarded with it.
+ * One instance holds one conversation: PolicyView keys it by place (and any
+ * comparison place), so switching starts a new conversation and a reply still
+ * in flight for the old place is discarded with it.
  */
-export function PolicyCopilot({ disease, locationId, locationName, hasSignal, evidence }: PolicyCopilotProps) {
+export function PolicyCopilot({
+  disease,
+  locationId,
+  locationName,
+  compareLocationId,
+  compareName,
+  suggestionContext,
+}: PolicyCopilotProps) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -61,20 +78,20 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const place = locationName ?? locationId;
-  const suggestions = useMemo(() => suggestedQuestions(evidence, hasSignal), [evidence, hasSignal]);
+  const suggestionGroups = useMemo(() => suggestedQuestionGroups(suggestionContext), [suggestionContext]);
   const unavailable = isCopilotUnavailable(error?.code ?? null);
   const hasReply = turns.some((t) => t.role === "assistant");
   const sigiState = copilotSigiState({ sending, errorCode: error?.code ?? null, draft, hasReply });
 
   const statusLine = sending
-    ? "Asking the copilot…"
+    ? "SIGI is reading the evidence…"
     : unavailable
-      ? "The copilot is not configured on this deployment. The evidence panel still works."
+      ? "SIGI is not configured on this deployment. The evidence panel still works."
       : error
         ? "The last request failed. Nothing was generated in its place."
         : hasReply
           ? "Answer received. Check it against the evidence before using it."
-          : `Ask about ${place}: what to verify, what is missing, what the evidence does and does not show.`;
+          : `Ask about ${place}${compareName ? ` and ${compareName}` : ""}: what the data shows, what is missing, and what to check next.`;
 
   async function send(text: string) {
     const question = text.trim();
@@ -89,20 +106,20 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
       const res = await fetch("/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, history, disease, locationId }),
+        body: JSON.stringify({ message: question, history, disease, locationId, ...(compareLocationId ? { compareLocationId } : {}) }),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok) {
         setError({
           code: body?.error?.code ?? null,
-          message: body?.error?.message ?? "The copilot request failed.",
+          message: body?.error?.message ?? "SIGI's request failed.",
           question,
         });
         return;
       }
       const data = body?.data as ChatResponseData | undefined;
       if (!data?.reply) {
-        setError({ code: null, message: "The copilot returned an empty response.", question });
+        setError({ code: null, message: "SIGI returned an empty answer. Nothing was generated in its place.", question });
         return;
       }
       setTurns((current) => [
@@ -112,11 +129,15 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
           content: data.reply,
           signature: data.replySignature,
           meta: { model: data.model, contextScope: data.contextScope, limitations: data.limitations },
-          cited: referencedEvidence(data.reply, evidence),
+          // Only ids the server says the model was given become links.
+          ...(() => {
+            const { text, cited } = linkServerCitations(data.reply, data.citations ?? []);
+            return { display: text, citations: cited, rejected: data.rejectedCitationIds ?? [] };
+          })(),
         },
       ]);
     } catch {
-      setError({ code: null, message: "The copilot could not be reached. Check your connection.", question });
+      setError({ code: null, message: "SIGI could not be reached. Check your connection.", question });
     } finally {
       setSending(false);
     }
@@ -144,14 +165,19 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 id={`${inputId}-title`} className="text-base font-semibold text-slate-900">
-              Policy Copilot
+              Ask SIGI
             </h2>
             <StatusBadge label="AI-generated · verify before use" tone="warning" />
           </div>
           <p className="text-sm text-slate-600">
-            Answers questions about <span className="font-medium text-slate-800">{place}</span> ({disease}) using
-            the curated evidence listed for this LGU. It does not make decisions, declare outbreaks or recommend
-            spending.
+            Answers about <span className="font-medium text-slate-800">{place}</span>
+            {compareName ? (
+              <>
+                {" "}and <span className="font-medium text-slate-800">{compareName}</span>
+              </>
+            ) : null}{" "}
+            ({disease}) from SIGMA&apos;s Lab, ACCESS and Policy evidence, and cites every source. It does not declare
+            outbreaks, know current case counts or medicine stock, or make decisions for you.
           </p>
           <p role="status" aria-live="polite" className="text-xs text-slate-500">
             {statusLine}
@@ -175,15 +201,15 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
                   </p>
                 ) : (
                   <div className="w-full max-w-[95%] rounded-lg border border-slate-200 bg-slate-50/60 px-4 py-3">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{turn.content}</p>
-                    <AnswerProvenance turn={turn} />
+                    <CopilotAnswer text={turn.display ?? turn.content} anchorPrefix={`answer-${i}`} />
+                    <AnswerProvenance turn={turn} anchorPrefix={`answer-${i}`} />
                   </div>
                 )}
               </li>
             ))}
             {sending && (
               <li className="text-sm text-slate-500" aria-hidden="true">
-                Asking the copilot…
+                SIGI is reading the evidence…
               </li>
             )}
           </ol>
@@ -205,22 +231,26 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
         )}
 
         {turns.length === 0 && !unavailable && (
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium text-slate-500">Suggested questions</p>
-            <ul className="flex flex-wrap gap-2">
-              {suggestions.map((q) => (
-                <li key={q}>
-                  <button
-                    type="button"
-                    onClick={() => send(q)}
-                    disabled={sending}
-                    className="rounded-md border border-slate-200 px-3 py-1.5 text-left text-xs text-slate-700 hover:border-accent hover:text-accent disabled:opacity-50"
-                  >
-                    {q}
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {suggestionGroups.map((group) => (
+              <div key={group.label} className="flex flex-col gap-1.5">
+                <p className="text-xs font-semibold text-slate-600">{group.label}</p>
+                <ul className="flex flex-col gap-1.5">
+                  {group.questions.map((q) => (
+                    <li key={q}>
+                      <button
+                        type="button"
+                        onClick={() => send(q)}
+                        disabled={sending}
+                        className="w-full rounded-md border border-slate-200 px-3 py-2 text-left text-sm text-slate-700 hover:border-accent hover:text-accent disabled:opacity-50"
+                      >
+                        {q}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         )}
 
@@ -265,26 +295,63 @@ export function PolicyCopilot({ disease, locationId, locationName, hasSignal, ev
   );
 }
 
-/** What an answer was based on, as reported by the API, plus any cited records. */
-function AnswerProvenance({ turn }: { turn: Turn }) {
+const KIND_LABEL: Record<ChatCitation["kind"], string> = {
+  lab: "Lab",
+  access: "ACCESS",
+  policy: "Policy",
+  method: "Method",
+};
+
+/** The numbered sources behind an answer (server-verified), then what it was based on. */
+function AnswerProvenance({ turn, anchorPrefix }: { turn: Turn; anchorPrefix: string }) {
   if (!turn.meta) return null;
   return (
-    <div className="mt-3 flex flex-col gap-2 border-t border-slate-200 pt-2 text-xs text-slate-500">
+    <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-3 text-xs text-slate-500">
+      {turn.citations && turn.citations.length > 0 ? (
+        <div>
+          <p className="font-semibold text-slate-600">Sources</p>
+          <ol className="mt-1.5 flex flex-col gap-2">
+            {turn.citations.map((c, n) => (
+              <li key={c.id} id={`${anchorPrefix}-${c.id}`} className="flex scroll-mt-24 gap-2">
+                <span className="inline-flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded bg-teal-50 px-1 text-[11px] font-semibold text-teal-700 ring-1 ring-teal-200">
+                  {n + 1}
+                </span>
+                <span className="min-w-0 text-slate-600">
+                  <span className="font-medium text-slate-800">{c.title}</span>
+                  <span className="ml-1.5 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-medium text-slate-500">
+                    {KIND_LABEL[c.kind]} · {c.jurisdiction}
+                  </span>
+                  <span className="block">
+                    {c.source.name}
+                    {c.source.url && /^https?:\/\//i.test(c.source.url) && (
+                      <a href={c.source.url} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-0.5 text-teal-700 hover:underline">
+                        source
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      </a>
+                    )}
+                    {c.href && (
+                      <a href={c.href} className="ml-2 text-teal-700 hover:underline">
+                        open in SIGMA
+                      </a>
+                    )}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : (
+        <p>This answer cites none of the evidence SIGI was given, so treat it as unsupported.</p>
+      )}
+      {turn.rejected && turn.rejected.length > 0 && (
+        <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-amber-900">
+          SIGI referred to evidence it was not given for this place ({turn.rejected.join(", ")}). Those parts are
+          unsupported and are not shown as sources.
+        </p>
+      )}
       <p>
         <span className="font-medium text-slate-600">Based on:</span> {turn.meta.contextScope}
       </p>
-      {turn.cited && turn.cited.length > 0 ? (
-        <p className="flex flex-wrap items-center gap-1.5">
-          <span className="font-medium text-slate-600">Evidence referenced:</span>
-          {turn.cited.map((r) => (
-            <a key={r.evidenceId} href={`#evidence-${r.evidenceId}`} className="rounded bg-white px-1.5 py-0.5 text-accent ring-1 ring-slate-200 hover:underline">
-              {r.sourceTitle}
-            </a>
-          ))}
-        </p>
-      ) : (
-        <p>This answer does not cite a curated evidence record by id.</p>
-      )}
       <details>
         <summary className="cursor-pointer text-slate-600 hover:text-slate-800">
           Limitations · model {turn.meta.model}

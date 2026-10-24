@@ -1,236 +1,138 @@
-import { ACCESS_METRIC_LABEL, GAP_LABEL, metricFor, stateFor } from "@/lib/access/bundle";
-import { facilityTypeLabel } from "@/lib/access/labels";
-import { formatCount, formatIsoDate } from "../format";
+import { SIGMA_BOUNDARIES_URL } from "@/lib/sigma/data";
 import {
-  AVAILABILITY_HEX,
-  DEMAND_RAMP,
-  FRESHNESS_HEX,
-  GAP_HEX,
-  hexToRgba,
-} from "../palette";
-import type {
-  LegendSpec,
-  MapDataBundle,
-  MapFeature,
-  MapFilters,
-  MapModeDefinition,
-  PreparedMode,
-} from "../types";
-
-const AVAILABILITY_LABEL = {
-  available: "Available",
-  low: "Low",
-  unavailable: "Reported unavailable",
-  unknown: "Unknown",
-} as const;
-
-const FRESHNESS_LABEL = {
-  fresh: "Fresh",
-  aging: "Aging",
-  stale: "Stale",
-  unknown: "No report",
-} as const;
-
-function reportAge(hours: number | null): string {
-  if (hours === null) return "No report";
-  return hours < 48 ? `${hours}h before week end` : `${Math.round(hours / 24)}d before week end`;
-}
-
-function legendFor(metric: MapFilters["accessMetric"], medicine: string, t: { fresh: number; aging: number }): LegendSpec {
-  switch (metric) {
-    case "availability":
-      return {
-        title: "Availability",
-        metric: `Latest facility report for ${medicine}`,
-        classification: "categorical",
-        classes: (Object.keys(AVAILABILITY_LABEL) as Array<keyof typeof AVAILABILITY_LABEL>).map((k) => ({
-          label: AVAILABILITY_LABEL[k],
-          color: AVAILABILITY_HEX[k],
-        })),
-        opacity: { label: "Faded point: stale report. Treated as uncertain, not unavailable." },
-        note: "Demo inventory. Reported states are not verified stock levels.",
-      };
-    case "freshness":
-      return {
-        title: "Inventory freshness",
-        metric: "Time between a facility's last report and the week end",
-        classification: "threshold",
-        classes: [
-          { label: FRESHNESS_LABEL.fresh, color: FRESHNESS_HEX.fresh, range: `< ${t.fresh}h` },
-          { label: FRESHNESS_LABEL.aging, color: FRESHNESS_HEX.aging, range: `${t.fresh}–${t.aging}h` },
-          { label: FRESHNESS_LABEL.stale, color: FRESHNESS_HEX.stale, range: `> ${t.aging}h` },
-          { label: FRESHNESS_LABEL.unknown, color: FRESHNESS_HEX.unknown, range: "—" },
-        ],
-        note: "Prototype thresholds, not a validated operational standard.",
-      };
-    case "demand":
-      return {
-        title: "Search demand",
-        metric: `Demo searches for ${medicine} in the selected week, by area`,
-        classification: "linear",
-        ramp: { colors: [...DEMAND_RAMP], minLabel: "Low", maxLabel: "High" },
-        height: { label: "Column height (3D): searches in the area" },
-        note: "Aggregate, non-identifying search counts. A search is a demand signal, not a case or a shortage.",
-      };
-    case "gap":
-      return {
-        title: "Potential access gap",
-        metric: "Demand vs. confirmed availability, given reporting coverage",
-        classification: "threshold",
-        classes: (["elevated", "moderate", "low", "insufficient_data"] as const).map((k) => ({
-          label: GAP_LABEL[k],
-          color: GAP_HEX[k],
-        })),
-        height: { label: "Column height (3D): searches in the area" },
-        note: "Illustrative analytical classes, not clinically validated thresholds, and not a shortage determination.",
-      };
-  }
-}
+  ACCESS_REFERENCE,
+  FACILITY_TYPES,
+  FACILITY_TYPE_LABEL,
+  type AccessFacilityType,
+} from "@/lib/access/reference";
+import { formatCount, formatIsoDate } from "../format";
+import { hexToRgba } from "../palette";
+import type { LegendClass, MapDataBundle, MapFeature, MapFilters, MapModeDefinition, PreparedMode, Rgba } from "../types";
 
 /**
- * Searches across areas in one week. A total is only a total when every area
- * has a metric that week; otherwise there is no total (null, drawn as a gap),
- * never a sum that treats a missing area as zero searches.
+ * ACCESS: health facilities and pharmacies mapped in OpenStreetMap (HOT export
+ * on HDX), as points, with each dengue reporting unit shaded by how many of
+ * the selected kind are mapped per 100 km². A snapshot, so the timeline has a
+ * single slice. Mapping completeness varies; the legend says so.
  */
-export function weeklySearchTotal(
-  access: MapDataBundle["access"],
-  areaIds: string[],
-  medicineId: string,
-  weekIndex: number,
-): number | null {
-  let sum = 0;
-  for (const areaId of areaIds) {
-    const m = metricFor(access, areaId, medicineId, weekIndex);
-    if (!m) return null;
-    sum += m.searchDemand;
-  }
-  return areaIds.length > 0 ? sum : null;
+const TYPE_HEX: Record<AccessFacilityType, string> = {
+  hospital: "#b42318",
+  clinic: "#0e7490",
+  pharmacy: "#2f7a5f",
+  laboratory: "#7c3aed",
+};
+
+/** Mapped facilities per 100 km²: fixed bins, so units compare across the map. */
+const DENSITY_BINS: { max: number; label: string; hex: string }[] = [
+  { max: 0, label: "None mapped", hex: "#f1f5f9" },
+  { max: 1, label: "Under 1 per 100 km²", hex: "#d9ede4" },
+  { max: 5, label: "1 – 5 per 100 km²", hex: "#a6d4bf" },
+  { max: 20, label: "5 – 20 per 100 km²", hex: "#5fae8c" },
+  { max: Infinity, label: "20 or more per 100 km²", hex: "#2f7a5f" },
+];
+
+const UNIT_NAME = new Map(ACCESS_REFERENCE.units.map((u) => [u.id, u.name]));
+const HOT_SOURCE = ACCESS_REFERENCE.meta.sources.find((s) => s.id === "hotosm-phl-health-facilities");
+const SNAPSHOT = HOT_SOURCE?.snapshot ?? "";
+
+function densityBin(per100: number | null | undefined) {
+  if (per100 === null || per100 === undefined) return null;
+  return DENSITY_BINS.find((b) => per100 <= b.max) ?? DENSITY_BINS[DENSITY_BINS.length - 1];
 }
 
-function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
-  const access = bundle.access;
-  const medicine = access.medicines.find((m) => m.id === filters.medicine) ?? access.medicines[0];
-  const lguById = new Map(bundle.lgus.map((l) => [l.id, l]));
-  const areaIds = [...new Set(access.facilities.map((f) => f.areaId))].filter((id) => lguById.has(id));
-  const metric = filters.accessMetric;
+const EMPTY: PreparedMode = {
+  timeline: { slices: [], trackLabel: "", interpretation: "", formatValue: String },
+  legend: { title: "ACCESS", metric: "Loading mapped facilities…", classification: "none" },
+  frameAt: () => ({ features: [], links: [] }),
+};
 
-  const weeklyTotals = access.weeks.map((w) => weeklySearchTotal(access, areaIds, medicine.id, w.index));
-  const maxDemand = Math.max(
-    1,
-    ...access.weeks.flatMap((w) =>
-      areaIds.flatMap((a) => {
-        const m = metricFor(access, a, medicine.id, w.index);
-        return m ? [m.searchDemand] : [];
-      }),
-    ),
-  );
+function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
+  const data = bundle.accessPoints;
+  if (!data) {
+    return bundle.accessPointsError
+      ? { ...EMPTY, legend: { ...EMPTY.legend, metric: `Facilities could not be loaded: ${bundle.accessPointsError}` } }
+      : EMPTY;
+  }
+  const type = filters.facilityType;
+  const typeIndex = data.meta.types.indexOf(type);
+  const color = hexToRgba(TYPE_HEX[type], 220);
+  const total = data.points.filter((p) => p[2] === typeIndex).length;
+
+  const classes: LegendClass[] = [
+    { label: FACILITY_TYPE_LABEL[type], color: TYPE_HEX[type] },
+    ...DENSITY_BINS.map((b) => ({ label: b.label, color: b.hex })),
+  ];
 
   return {
     timeline: {
-      slices: access.weeks.map((w, i) => ({
-        key: w.periodStart,
-        label: `Week of ${formatIsoDate(w.periodStart)}`,
-        shortLabel: formatIsoDate(w.periodStart, { month: "short", day: "numeric" }),
-        value: weeklyTotals[i],
-        gapBefore: false,
-      })),
-      trackLabel: `Demo searches for ${medicine.name} per week`,
-      interpretation: `${ACCESS_METRIC_LABEL[metric]} for ${medicine.name} as of the end of the selected week.`,
-      formatValue: (v) => `${formatCount(v)} searches`,
+      slices: [
+        {
+          key: SNAPSHOT,
+          label: `OpenStreetMap snapshot of ${formatIsoDate(SNAPSHOT)}`,
+          shortLabel: formatIsoDate(SNAPSHOT, { month: "short", year: "numeric" }),
+          value: total,
+          gapBefore: false,
+        },
+      ],
+      trackLabel: `${FACILITY_TYPE_LABEL[type]} mapped in OpenStreetMap`,
+      interpretation: "One snapshot of current mapping; there is no weekly history.",
+      formatValue: (v) => `${formatCount(v)} mapped`,
     },
-    legend: legendFor(metric, medicine.name, access.freshnessThresholds),
-    frameAt(index) {
-      const week = Math.min(index, access.weeks.length - 1);
+    legend: {
+      title: `${FACILITY_TYPE_LABEL[type]} (mapped)`,
+      metric: "Points: places mapped in OpenStreetMap. Areas: mapped per 100 km² of each reporting unit.",
+      classification: "categorical",
+      classes,
+      note:
+        "Mapping completeness varies by place, so a low count can mean low mapping, not low access. Medicine stock is not shown: no public source reports it. © OpenStreetMap contributors, ODbL.",
+    },
+    frameAt(_index, toggles) {
       const features: MapFeature[] = [];
-
-      if (metric === "availability" || metric === "freshness") {
-        for (const f of access.facilities) {
-          const s = stateFor(access, f.id, medicine.id, week);
-          if (!s) continue;
-          const stale = s.freshness === "stale";
-          const color =
-            metric === "availability"
-              ? hexToRgba(AVAILABILITY_HEX[s.availability], stale ? 110 : 240)
-              : hexToRgba(FRESHNESS_HEX[s.freshness], 240);
-          const classLabel =
-            metric === "availability"
-              ? `${AVAILABILITY_LABEL[s.availability]}${stale ? " (stale report)" : ""}`
-              : FRESHNESS_LABEL[s.freshness];
-          features.push({
-            id: f.id,
-            name: f.name,
-            kind: "facility",
-            position: [f.longitude, f.latitude],
-            color,
-            radius: 6,
-            classLabel,
-            rank: { unavailable: 3, low: 2, unknown: 1, available: 0 }[s.availability],
-            rows: [
-              { label: "Type", value: facilityTypeLabel(f.type) },
-              { label: "Availability", value: AVAILABILITY_LABEL[s.availability] },
-              { label: "Freshness", value: FRESHNESS_LABEL[s.freshness] },
-              { label: "Last report", value: reportAge(s.ageHours) },
-            ],
-          });
-        }
-      } else {
-        for (const areaId of areaIds) {
-          const m = metricFor(access, areaId, medicine.id, week);
-          const lgu = lguById.get(areaId);
-          if (!m || !lgu) continue;
-          const demandShare = m.searchDemand / maxDemand;
-          const color =
-            metric === "gap"
-              ? hexToRgba(GAP_HEX[m.accessGap], 240)
-              : hexToRgba(DEMAND_RAMP[Math.min(DEMAND_RAMP.length - 1, Math.floor(demandShare * DEMAND_RAMP.length))], 230);
-          features.push({
-            id: areaId,
-            name: lgu.name,
-            kind: "area",
-            position: [lgu.longitude, lgu.latitude],
-            color,
-            radius: metric === "gap" ? 11 : 8,
-            elevation: demandShare,
-            classLabel: metric === "gap" ? `${GAP_LABEL[m.accessGap]} access gap` : `${formatCount(m.searchDemand)} searches`,
-            rank: metric === "gap" ? { elevated: 3, moderate: 2, insufficient_data: 1, low: 0 }[m.accessGap] * 1000 + m.searchDemand : m.searchDemand,
-            rows: [
-              { label: "Access gap", value: `${GAP_LABEL[m.accessGap]} · ${m.confidence} confidence` },
-              { label: "Search demand", value: `${formatCount(m.searchDemand)} (${m.demandRatio.toFixed(1)}x early level)` },
-              { label: "Confirmed available", value: m.facilities > 0 ? `${m.confirmedAvailable} of ${m.facilities} facilities` : "No facilities" },
-              { label: "Reporting coverage", value: m.facilities > 0 ? `${Math.round(m.facilityCoverage * 100)}%` : "No facilities" },
-            ],
-          });
+      for (let i = 0; i < data.points.length; i++) {
+        const [lon, lat, t, u, name] = data.points[i];
+        if (t !== typeIndex) continue;
+        const unit = data.meta.units[u];
+        features.push({
+          id: `f${i}`,
+          name: name ?? `Unnamed ${FACILITY_TYPE_LABEL[type].toLowerCase().replace(/s$/, "")}`,
+          position: [lon, lat],
+          color,
+          radius: 3,
+          classLabel: FACILITY_TYPE_LABEL[type].replace(/s$/, ""),
+          kind: "facility",
+          rank: 0,
+          rows: [
+            { label: "Type", value: FACILITY_TYPE_LABEL[type].replace(/s$/, "") },
+            { label: "Reporting unit", value: UNIT_NAME.get(unit) ?? unit },
+            { label: "Source", value: "OpenStreetMap (HOT export, ODbL)" },
+            { label: "Medicine stock", value: "Unknown: no public source" },
+          ],
+        });
+      }
+      const fills: Record<string, Rgba> = {};
+      if (toggles.areas) {
+        for (const unit of ACCESS_REFERENCE.units) {
+          const bin = densityBin(unit.mappedPer100SqKm?.[type]);
+          if (bin) fills[unit.id] = hexToRgba(bin.hex, 170);
         }
       }
-
-      const heat =
-        metric === "demand"
-          ? areaIds.flatMap((areaId) => {
-              const m = metricFor(access, areaId, medicine.id, week);
-              const lgu = lguById.get(areaId);
-              return m && lgu ? [{ position: [lgu.longitude, lgu.latitude] as [number, number], weight: m.searchDemand }] : [];
-            })
-          : undefined;
-
-      return {
-        features,
-        links: [],
-        heat,
-        heatColors: heat ? DEMAND_RAMP.map((hex) => hexToRgba(hex, 255)) : undefined,
-      };
+      return { features, links: [], areas: toggles.areas ? { url: SIGMA_BOUNDARIES_URL, fills } : undefined };
     },
   };
 }
 
 export const ACCESS_MODE: MapModeDefinition = {
   id: "access",
-  label: "Access",
-  question: "Where might medicine access gaps be emerging?",
-  availability: "demo",
+  label: "ACCESS",
+  question: "Where are health facilities and pharmacies mapped, and how dense are they?",
+  availability: "observed",
   evidence: "context",
-  evidenceLabel: "Access indicators (demo inventory and searches)",
-  extent: "metro",
-  filters: ["medicine", "accessMetric"],
-  layerToggles: ["columns"],
+  evidenceLabel: `Facilities and pharmacies mapped in OpenStreetMap (HOT export on HDX, snapshot ${SNAPSHOT})`,
+  extent: "national",
+  filters: ["facilityType"],
+  layerToggles: ["areas"],
+  defaultToggles: { areas: true },
   prepare,
 };
+
+export { FACILITY_TYPES, TYPE_HEX, densityBin };

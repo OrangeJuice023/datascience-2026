@@ -323,7 +323,8 @@ export interface AccessMetricsData {
     facilities: number;
     medicines: number;
     weeks: number;
-    coverage: { from: string; to: string };
+    /** Null when there are no weeks. */
+    coverage: { from: string | null; to: string | null };
     /** What the data can and cannot support. */
     supports: string[];
     doesNotSupport: string[];
@@ -346,6 +347,90 @@ export interface AccessAssessmentRecord {
   confidence: AccessConfidence;
   observed: string[];
   areaForAssessment: string;
+}
+
+// The types above describe GET /access/metrics, which served demo inventory
+// and now answers `not_connected` with empty lists. Real ACCESS data is
+// served by /access/units and /access/medicines below.
+
+export type AccessFacilityType = "hospital" | "clinic" | "pharmacy" | "laboratory";
+
+export interface AccessSourceRecord {
+  id: string;
+  title: string;
+  publisher: string;
+  url: string;
+  license: string;
+  attribution: string;
+  /** Upstream snapshot date or edition, when the source states one. */
+  snapshot: string | null;
+  edition: string | null;
+  sha256: string | null;
+}
+
+export interface AccessUnitRecord {
+  /** HDX dengue reporting-unit id, the same id the SIGMA map uses. */
+  id: string;
+  name: string;
+  unitType: string;
+  regionId: string;
+  psgcCode: string | null;
+  areaSqKm: number | null;
+  /** Facilities mapped in OpenStreetMap; low counts can mean low mapping, not low access. */
+  mappedFacilities: Record<AccessFacilityType, number>;
+  mappedPer100SqKm: Record<AccessFacilityType, number> | null;
+  /** Not in the dataset; never estimated. */
+  population: null;
+  /** Never reported by any public source; always null. */
+  medicineAvailability: null;
+  /** No search data exists; always null. */
+  searchDemand: null;
+  /** Reported dengue cases per year, summed over usable weeks only. */
+  dengue: { year: number; reportedCases: number; usableWeeks: number; weeks: number }[] | null;
+}
+
+export interface AccessUnitsData {
+  scope: {
+    question: string;
+    units: number;
+    facilitiesMapped: number;
+    supports: string[];
+    doesNotSupport: string[];
+    limitations: string[];
+  };
+  sources: AccessSourceRecord[];
+  units: AccessUnitRecord[];
+}
+
+export interface AccessMedicinePriceRecord {
+  item: string;
+  /** "priced", or why there is no price (e.g. hidden in the DOH public view). */
+  status: string;
+  lowestPhp: number | null;
+  medianPhp: number | null;
+  highestPhp: number | null;
+  /** DOH hospitals with a public procurement row for the item. */
+  reportingFacilities: number | null;
+}
+
+export interface AccessMedicineRecord {
+  id: string;
+  name: string;
+  role: string;
+  onPnfEml: boolean;
+  pnfPage: string | null;
+  basis: string;
+  prices: AccessMedicinePriceRecord[];
+}
+
+export interface AccessMedicinesData {
+  scope: {
+    /** What the prices are: DOH hospital procurement, not shelf prices or stock. */
+    priceBasis: string;
+    doesNotSupport: string[];
+  };
+  sources: AccessSourceRecord[];
+  medicines: AccessMedicineRecord[];
 }
 
 // ---------------------------------------------------------------------------
@@ -406,6 +491,8 @@ export interface ChatRequestBody {
   history?: ChatMessage[];
   disease?: string;
   locationId?: string;
+  /** Optional second reporting unit to compare with; its evidence is kept separate. */
+  compareLocationId?: string;
 }
 
 export interface ChatResponseData {
@@ -416,6 +503,30 @@ export interface ChatResponseData {
   limitations: string[];
   /** Send back as the `signature` of this reply when it is part of a later request's history. */
   replySignature: string;
+  /**
+   * The evidence items the reply cites, as the server found them among the
+   * items the model was given, in order of first citation. An id the model
+   * made up never appears here.
+   */
+  citations: ChatCitation[];
+  /**
+   * Evidence ids the reply named that SIGI was not given (for example another
+   * city's records). They are never shown as sources; the client marks that
+   * part of the answer as unsupported.
+   */
+  rejectedCitationIds: string[];
+}
+
+export interface ChatCitation {
+  id: string;
+  kind: "lab" | "access" | "policy" | "method";
+  jurisdiction: "reporting unit" | "local" | "national" | "method";
+  /** The reporting unit the item is about; null for national and method items. */
+  unitId: string | null;
+  title: string;
+  source: { name: string; url: string | null };
+  /** In-app page showing the same evidence. */
+  href: string | null;
 }
 
 // ---------------------------------------------------------------------------

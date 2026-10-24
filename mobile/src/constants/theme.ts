@@ -1,23 +1,23 @@
 /**
  * Colors, spacing, type scale.
  *
- * The palette is the SIGMA field-guide system: warm paper, ink, and a small
- * set of accents that carry meaning rather than decoration.
+ * The same system as the web app (web/src/app/globals.css), built from the Sigi
+ * character sheet (docs/brand/sigi-mascot-guide.png):
  *
- *   Paper          #F4F0E6   the page
- *   Warm surface   #FFFCF5   cards and sheets
- *   Primary ink    #22231F   text
- *   Muted text     #6F706B   secondary text
- *   SIGMA cobalt   #2468C9   actions and the accent
- *   Olive          #747D59   live data
- *   Terracotta     #B66D4D   demo data
- *   Slate blue     #627B8B   data that is not connected
- *   Fine borders   #DAD3C6   hairlines
- *   Muted wash     #E8E1D5   selected and tinted fills
+ *   Frame          #F2F1ED   the page behind cards (a low-chroma step of Sigi's sand cream)
+ *   Sheet          #FFFFFF   cards and sheets, where data is read
+ *   Ink            #22231F   text and the one filled button
+ *   Muted text     #5F5D56   secondary text (6:1 on white, 5.4:1 on the frame)
+ *   Cobalt         #2468C9   actions, links, the accent, and data from a connected source
+ *   Amber          #D88A0B   demo data (labels in #8A4B08)
+ *   Neutral grey   #8A877E   capabilities that are not connected
+ *   Red            #C4242A   unavailable and errors
+ *   Leaf green     #747D59   the brand mark and Sigi's world
  *
  * The semantic colors are the important part: `live`, `demo`, `not_connected`
  * and `unavailable` must never look alike, because a demo series and a live
- * series must never look alike either.
+ * series must never look alike either. They match the web app's evidence
+ * colours: formal data cobalt, demo amber, not connected grey.
  */
 
 import '@/global.css';
@@ -27,63 +27,62 @@ import { Platform } from 'react-native';
 export const Colors = {
   light: {
     /** The page behind everything. */
-    background: '#F4F0E6',
+    background: '#F2F1ED',
     /** Cards and sheets. */
-    backgroundElement: '#FFFCF5',
+    backgroundElement: '#FFFFFF',
     /** Selected rows and tinted fills. */
-    backgroundSelected: '#E8E1D5',
+    backgroundSelected: '#E8E6E0',
     /** Body text. */
     text: '#22231F',
     /** Secondary text, on a card. */
-    textSecondary: '#6F706B',
-    /**
-     * Secondary text straight on the paper background. The muted token is
-     * 4.4:1 on paper and 4.9:1 on a card, so this slightly darker step is
-     * used where the smaller sizes sit directly on the page.
-     */
-    textSecondaryStrong: '#5F605B',
+    textSecondary: '#5F5D56',
+    /** Secondary text straight on the frame, and small sizes. */
+    textSecondaryStrong: '#4A4943',
     /** Hairlines and card borders. */
-    border: '#DAD3C6',
+    border: '#E1DED7',
     /** Actions, links, the accent. */
     accent: '#2468C9',
     /** Tinted accent fills. */
-    accentSoft: '#E8E1D5',
+    accentSoft: '#EEF4FC',
+    /** Sigi's sand cream, for the band Sigi sits on. */
+    brandWash: '#F4F0E6',
     /** Data from a connected source. */
-    live: '#747D59',
+    live: '#2468C9',
     /** Simulated data. */
-    demo: '#B66D4D',
+    demo: '#D88A0B',
     /** A capability that is not wired to a source. */
-    notConnected: '#627B8B',
+    notConnected: '#8A877E',
     /** A capability that has no data right now. */
-    unavailable: '#8A3A28',
+    unavailable: '#C4242A',
     /**
      * Darker steps of the same hues, for when the colour carries text. The
      * status hues above are fills and dots; a label set in the fill colour
      * would sit below the 4.5:1 contrast a small label needs.
      */
-    liveText: '#5F6743',
-    demoText: '#8F4A2E',
-    notConnectedText: '#4E6373',
-    unavailableText: '#8A3A28',
+    liveText: '#1D55A6',
+    demoText: '#8A4B08',
+    notConnectedText: '#5F5D56',
+    unavailableText: '#A11D22',
   },
   dark: {
-    background: '#1A1B14',
-    backgroundElement: '#23241B',
-    backgroundSelected: '#2F3026',
-    text: '#F1EDE2',
-    textSecondary: '#A9A79C',
-    textSecondaryStrong: '#BFBDAF',
-    border: '#3A3B30',
+    background: '#121211',
+    backgroundElement: '#1C1C1A',
+    backgroundSelected: '#2A2A27',
+    text: '#F4F3EF',
+    textSecondary: '#B4B2AA',
+    textSecondaryStrong: '#C8C6BE',
+    border: '#2E2E2B',
     accent: '#7FB0F0',
-    accentSoft: '#22303F',
-    live: '#A8B487',
-    demo: '#D79A7C',
-    notConnected: '#9DB4C2',
-    unavailable: '#E08A70',
-    liveText: '#C3CDA0',
-    demoText: '#E8A88A',
-    notConnectedText: '#B9CBD8',
-    unavailableText: '#F0A48C',
+    accentSoft: '#1C2735',
+    brandWash: '#22221E',
+    live: '#7FB0F0',
+    demo: '#F0B44C',
+    notConnected: '#9A978E',
+    unavailable: '#EF6F6C',
+    liveText: '#9CC2F4',
+    demoText: '#F5C46E',
+    notConnectedText: '#B4B2AA',
+    unavailableText: '#F28B88',
   },
 } as const;
 
@@ -139,35 +138,33 @@ export const Fonts = Platform.select({
 /**
  * The type scale.
  *
- * Headings are set in the display serif, which is what gives the app its
- * field-guide character; body copy stays in the system sans for legibility at
- * small sizes. Numbers are tabular so that a column of figures lines up and a
- * changing digit does not shift the ones next to it.
+ * One sans face, as on the web app: screen titles at 24/700, section titles
+ * at 17/600, body at 15 and labels at 13. Numbers are tabular so that a column of
+ * figures lines up and a changing digit does not shift the ones next to it.
  */
 export const Type = {
   display: {
-    fontFamily: Fonts.serif,
-    fontSize: 26,
-    lineHeight: 32,
+    fontFamily: Fonts.sans,
+    fontSize: 24,
+    lineHeight: 30,
     fontWeight: '700' as const,
     letterSpacing: -0.3,
   },
   title: {
-    fontFamily: Fonts.serif,
+    fontFamily: Fonts.sans,
     fontSize: 17,
-    lineHeight: 23,
-    fontWeight: '700' as const,
+    lineHeight: 22,
+    fontWeight: '600' as const,
   },
   body: {
     fontFamily: Fonts.sans,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 21,
   },
   label: {
     fontFamily: Fonts.sans,
-    fontSize: 12,
-    lineHeight: 16,
-    letterSpacing: 0.2,
+    fontSize: 13,
+    lineHeight: 18,
   },
   /** Figures: aligned columns, no reflow when a digit changes. */
   numeric: {

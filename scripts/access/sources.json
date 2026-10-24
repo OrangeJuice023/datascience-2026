@@ -1,0 +1,35 @@
+{
+  "description": "Pinned inputs for the ACCESS track (scripts/access/build-access.mjs). fetch-sources.mjs downloads each into data/raw/access/<dir>/ and refuses a file whose SHA-256 changed; re-pin only after checking what changed upstream.",
+  "sources": [
+    {
+      "id": "hotosm-phl-health-facilities",
+      "title": "Philippines Health Facilities (OpenStreetMap Export), GeoJSON",
+      "publisher": "Humanitarian OpenStreetMap Team (HOT) via HDX; data © OpenStreetMap contributors",
+      "datasetUrl": "https://data.humdata.org/dataset/hotosm_phl_health_facilities",
+      "url": "https://production-raw-data-api.s3.amazonaws.com/ISO3/PHL/health_facilities/hotosm_phl_health_facilities_osm_geojson.zip",
+      "dir": "hotosm",
+      "file": "hotosm_phl_health_facilities_osm_geojson.zip",
+      "license": "ODbL 1.0 (Open Database License); derived data must stay under ODbL with attribution",
+      "attribution": "© OpenStreetMap contributors, ODbL",
+      "upstreamModified": "2026-10-13",
+      "sha256": "9930f8c15636b937b3bf65ccda8f9665d3ea4e507cfb501ae6b5b3781959e788",
+      "pinnedRetrievedAt": "2026-10-24"
+    },
+    {
+      "id": "doh-dpri-dashboard",
+      "title": "DOH Drug Price Reference Index: public medicine price dashboard",
+      "publisher": "Department of Health, Pharmaceutical Division",
+      "datasetUrl": "https://dpri.doh.gov.ph/drug_search",
+      "url": "https://dpri.doh.gov.ph/downloads/public_medicine_price_dashboard.html",
+      "dir": "dpri",
+      "file": "public_medicine_price_dashboard.html",
+      "license": "Philippine government work (RA 8293 s.176): no copyright; prior approval needed for commercial use. Cite DOH Pharmaceutical Division.",
+      "attribution": "DOH Pharmaceutical Division, Drug Price Reference Index (2026 interim edition, procurement year 2025)",
+      "edition": "2026 Interim DPRI, 14th edition, as of 2026-07-29 (procurement year 2025)",
+      "sha256": "974a0bd13e3fcd547bff931970a8baa40ee1e8a8f5822fb7d3544d8bcea641ec",
+      "pinnedRetrievedAt": "2026-10-24",
+      "manual": true,
+      "manualNote": "dpri.doh.gov.ph answers scripted requests with 403; open the url in a browser and save the page as data/raw/access/dpri/public_medicine_price_dashboard.html."
+    }
+  ]
+}

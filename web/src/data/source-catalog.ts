@@ -1,8 +1,9 @@
 import type { EvidenceKind } from "@/components/ui/evidence-badge";
 
 /**
- * What each data source is for and how far it is from being usable. Feeds a
- * future Data Sources page; statuses must match reality:
+ * What each data source is for and how far it is from being usable. Feeds the
+ * Data Sources page (/data-sources) and GET /api/v1/sources; statuses must
+ * match reality:
  * - connected: real records flow through a provider today
  * - demo: the UI uses synthetic stand-ins shaped like this source
  * - planned: identified in research; nothing ingested
@@ -30,6 +31,8 @@ export interface SourceCatalogEntry {
   licence: string | null;
   /** Credit line to show wherever the data is displayed. */
   attribution: string;
+  /** The source's own page, for clickable citations; null when there is none to link. */
+  url: string | null;
 }
 
 export const SOURCE_CATALOG: SourceCatalogEntry[] = [
@@ -45,6 +48,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Bulk download (release extract), processed at build time",
     licence: "CC BY 4.0",
     attribution: "OpenDengue (Clarke et al.), v1.3; national records from WHO WPRO and the Philippine DOH",
+    url: "https://opendengue.org/",
   },
   {
     sourceId: "hdx-doh-dengue",
@@ -58,6 +62,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Bulk download (HDX), processed offline into a committed static export",
     licence: "CC BY",
     attribution: "Cirrolytix via HDX; data attributed to the DOH Epidemiology Bureau",
+    url: "https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths",
   },
   {
     sourceId: "gdelt-doc",
@@ -71,6 +76,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "API",
     licence: null,
     attribution: "Not ingested; the TRACE signals shown are synthetic stand-ins",
+    url: null,
   },
   {
     sourceId: "ph-news-rss",
@@ -84,6 +90,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "RSS",
     licence: null,
     attribution: "Not ingested; the TRACE signals shown are synthetic stand-ins",
+    url: null,
   },
   {
     sourceId: "doh-weekly",
@@ -97,6 +104,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Manual / PDF extraction",
     licence: null,
     attribution: "Department of Health (not yet ingested)",
+    url: "https://doh.gov.ph/health-statistics/weekly-disease-surveillance-report/",
   },
   {
     sourceId: "ritm-surveillance",
@@ -110,6 +118,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Manual / PDF extraction",
     licence: null,
     attribution: "Research Institute for Tropical Medicine (not yet ingested)",
+    url: "https://ritm.gov.ph/data/surveillance/",
   },
   {
     sourceId: "project-cchain",
@@ -123,6 +132,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Bulk download (HDX)",
     licence: "CC BY 4.0",
     attribution: "Project CCHAIN (Thinking Machines Data Science) via HDX; ERA5 (Copernicus) and CHIRPS upstream",
+    url: "https://data.humdata.org/dataset/project-cchain",
   },
   {
     sourceId: "open-meteo",
@@ -136,6 +146,42 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "API",
     licence: "CC BY 4.0 (Open-Meteo data; free tier is non-commercial)",
     attribution: "Weather data by Open-Meteo.com; ERA5 from the Copernicus Climate Change Service",
+    url: "https://open-meteo.com/en/docs/historical-weather-api",
+  },
+  {
+    sourceId: "hotosm-phl-health-facilities",
+    name: "HOT OpenStreetMap export: Philippines health facilities",
+    evidence: "context",
+    purpose: "Hospitals, clinics, pharmacies and laboratories mapped in OpenStreetMap, counted per reporting unit for ACCESS.",
+    status: "connected",
+    resolution:
+      "Point locations assigned to the 126 reporting units; one snapshot (2026-10-13). 15,586 of 19,129 features kept after removing other facility types, duplicates and unassigned points",
+    updateBehavior:
+      "Static snapshot (upstream modified 2026-10-13, pinned 2026-10-24). scripts/access/fetch-sources.mjs → scripts/access/build-access.mjs → web/src/data/access/access-reference.json and web/public/data/access/facilities.json",
+    provenance:
+      "HDX dataset, HOT export URL and pinned SHA-256 in scripts/access/sources.json; the fetch refuses a file whose hash changed. Mapping completeness varies, so a low count can mean low mapping, not low access",
+    accessMethod: "Bulk download (HOT export via HDX), processed at build time",
+    licence: "ODbL 1.0",
+    attribution: "© OpenStreetMap contributors, ODbL",
+    url: "https://data.humdata.org/dataset/hotosm_phl_health_facilities",
+  },
+  {
+    sourceId: "doh-dpri-dashboard",
+    name: "DOH Drug Price Reference Index (DPRI)",
+    evidence: "context",
+    purpose:
+      "Public-sector prices for the dengue supportive-care medicines in ACCESS: paracetamol, ORS, Lactated Ringer's and 0.9% sodium chloride.",
+    status: "connected",
+    resolution:
+      "National · lowest, median and highest price per item paid by DOH hospitals in 2025 procurement (11 items across 4 medicines)",
+    updateBehavior:
+      "Static edition (2026 Interim DPRI, 14th edition, as of 2026-07-29). The dashboard page is saved by hand because dpri.doh.gov.ph answers scripted requests with 403, then processed by scripts/access/build-access.mjs",
+    provenance:
+      "Dashboard URL, edition and pinned SHA-256 in scripts/access/sources.json; the medicine list follows the PNF Essential Medicines List (8th ed.). Prices are what DOH hospitals paid, not private shelf prices",
+    accessMethod: "Manual download (saved dashboard page), processed at build time",
+    licence: "Philippine government work (RA 8293 s.176): no copyright; prior approval needed for commercial use",
+    attribution: "DOH Pharmaceutical Division, Drug Price Reference Index (2026 interim edition, procurement year 2025)",
+    url: "https://dpri.doh.gov.ph/drug_search",
   },
   {
     sourceId: "geoboundaries",
@@ -149,6 +195,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Bulk download, processed at build time",
     licence: "CC BY 3.0 IGO",
     attribution: "geoBoundaries (Runfola et al. 2020); boundaries from NAMRIA, PSA and OCHA Philippines",
+    url: "https://www.geoboundaries.org/",
   },
   {
     sourceId: "cod-ab-phl",
@@ -162,6 +209,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Bulk download (HDX), processed at build time",
     licence: "CC BY-IGO",
     attribution: "OCHA FISS; source NAMRIA and PSA",
+    url: "https://data.humdata.org/dataset/cod-ab-phl",
   },
   {
     sourceId: "psa-psgc",
@@ -175,6 +223,7 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Manual download, kept in git-ignored data/raw; only derived codes are committed",
     licence: "PSA terms of use (file not redistributed)",
     attribution: "Philippine Statistics Authority, Philippine Standard Geographic Code",
+    url: "https://psa.gov.ph/classification/psgc",
   },
   {
     sourceId: "openstreetmap",
@@ -188,5 +237,6 @@ export const SOURCE_CATALOG: SourceCatalogEntry[] = [
     accessMethod: "Tile server",
     licence: "ODbL",
     attribution: "© OpenStreetMap contributors",
+    url: "https://www.openstreetmap.org/",
   },
 ];
