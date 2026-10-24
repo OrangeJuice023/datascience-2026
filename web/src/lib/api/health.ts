@@ -30,16 +30,16 @@ export function buildHealth(config: HealthConfig): HealthResponse {
     {
       id: "anomaly-engine",
       name: "Anomaly detection (EARS)",
-      status: "disabled",
-      enabled: false,
-      note: "The EARS pipeline exists in the Python data track but is not connected to this API, so no anomaly result is served.",
+      status: "ok",
+      enabled: true,
+      note: "EARS C1/C2/C3 results per reporting unit and week (2016-2021), served by /dengue/signals from the committed SIGMA export. Historical, not real-time.",
     },
     {
       id: "access-metrics",
-      name: "ACCESS medication access metrics",
-      status: "ok",
-      enabled: true,
-      note: "Fully wired prototype running on simulated inventory and search records.",
+      name: "ACCESS stock and search metrics (retired)",
+      status: "disabled",
+      enabled: false,
+      note: "Retired: no public source reports medicine stock or searches, so /access/metrics answers not_connected. Real ACCESS data is served by /access/units and /access/medicines.",
     },
     {
       id: "policy-copilot",

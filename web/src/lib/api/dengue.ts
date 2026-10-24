@@ -17,7 +17,8 @@ import { summarizeNational, type NationalSummary } from "@/lib/national-observat
  *   presented as the output of the local EARS pipeline, and the two are kept
  *   in separate responses with separate metadata.
  * - An anomaly result is only ever reported when a provider actually returns
- *   one. While no model is connected, the response says `not_connected`.
+ *   one. EARS results come from the committed SIGMA export; if it cannot be
+ *   read, the response says `not_connected`.
  * - Open-source signals are demo data and are labelled as such in a separate
  *   block so they can never be mistaken for case counts.
  */
@@ -52,15 +53,16 @@ export const DENGUE_SERIES_INTERPRETATION =
 export const EARS_ENGINE = {
   id: "ears-cdc",
   name: "CDC EARS C1/C2/C3",
-  location: "ml/ears.py (Python), ml/clean_dengue.py, ml/qa/",
+  location: "ml/ears.py (Python) -> ml/export_sigma_web.py -> web/public/data/sigma/hdx-dengue-sigma.json",
   method: "C1: 7-week baseline, C2: 7-week baseline with 2-week lag, C3: sum of max(0, C2-1) over three weeks. Thresholds 3.0 (C1/C2) and 2.0 (C3); minimum 5 of 7 usable baseline weeks; standard deviation floored at 1; minimum 5 cases to alarm.",
   dataWindow: "2016-01-10 to 2021-01-03 (261 weeks)",
-  geographicScope: "National plus 126 provinces and cities",
+  geographicScope: "126 HDX DOH reporting units (provinces, province remainders, cities, Pateros); the national series is not served here",
 } as const;
 
 export const EARS_LIMITATIONS = [
-  "The EARS pipeline is implemented in Python but is not connected to this API.",
-  "It requires two raw source files that are not committed to the repository, so its outputs have not been independently reproduced in this environment.",
+  "Historical results (2016-01-10 to 2021-01-03), not real-time: the HDX source ends in January 2021.",
+  "Results are read from the committed export; rebuilding it needs the raw HDX file (git-ignored), so the API cannot recompute them.",
+  "A unit-week or method with no record had no computable result (missing or suspect-swap week, or fewer than 5 usable baseline weeks). It is not a zero and not a 'no signal'.",
   "EARS is a screening method: it alarms at the start of every season and does not by itself distinguish a large epidemic from an ordinary season.",
   "The DOH-style alert and epidemic thresholds computed by the pipeline are SIGMA's own calculation over three prior years; they are not the official DOH algorithm, which uses three to five years and regional thresholds.",
   "Weeks flagged as possible non-reporting or one-week spikes are reporting artefacts, and all of them raise an alarm if they are not excluded.",
@@ -211,18 +213,20 @@ export interface BuildSignalsInput {
   }[];
   /** Open-source signal demo data, kept separate and clearly labelled. */
   demoSignals: Signal[];
-  /** Whether the EARS engine is wired to a provider yet. */
+  /** Whether the EARS results could be read (the committed SIGMA export). */
   earsConnected: boolean;
 }
 
 export function buildSignals(input: BuildSignalsInput): DengueSignalsData {
-  const connected = input.earsConnected && input.anomalyResults.length > 0;
+  const connected = input.earsConnected;
 
   return {
     status: connected ? "live" : "not_connected",
-    reason: connected
-      ? "Anomaly results are available from a connected model."
-      : "No anomaly model is connected to this API. The EARS pipeline exists in the Python data track (ml/ears.py) but its outputs are not served here, so no anomaly result is reported. This is not evidence that no outbreak is occurring.",
+    reason: !connected
+      ? "The EARS results (the committed SIGMA export) could not be read, so no anomaly result is reported. This is not evidence that no outbreak is occurring."
+      : input.anomalyResults.length > 0
+        ? "EARS C1/C2/C3 results from the committed SIGMA export (historical, 2016-2021). An alarm prompts investigation; it does not confirm an outbreak."
+        : "No EARS result could be computed for this selection (missing or suspect-swap week, or too few usable baseline weeks). This is not evidence that no outbreak is occurring.",
     engine: {
       id: EARS_ENGINE.id,
       name: EARS_ENGINE.name,
