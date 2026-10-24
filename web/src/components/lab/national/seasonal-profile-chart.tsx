@@ -67,7 +67,7 @@ export function SeasonalProfileChart({ weeks }: { weeks: SeasonalWeek[] }) {
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="week" tick={AXIS_TICK} axisLine={{ stroke: GRID }} tickLine={false} interval={3} tickFormatter={(w: number) => `W${w}`} />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
-        <Tooltip content={<SeasonalTooltip />} cursor={{ stroke: "#94a3b8", strokeWidth: 1 }} />
+        <Tooltip content={<SeasonalTooltip />} cursor={{ stroke: "#9a978e", strokeWidth: 1 }} />
         <Area dataKey="bandBase" stackId="band" stroke="none" fill="transparent" isAnimationActive={false} connectNulls={false} />
         <Area
           dataKey="bandRange"

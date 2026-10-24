@@ -60,7 +60,6 @@ export function LabView({ load, units }: { load: NationalLoad; units: UnitsLoad 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Trace"
         title="SIGMA Lab"
         subtitle="Investigate the pattern behind the signal."
       />

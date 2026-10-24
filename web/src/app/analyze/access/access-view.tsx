@@ -76,7 +76,6 @@ export function AccessView() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Analyze"
         title="ACCESS"
         subtitle="Where people can reach care and dengue medicines, and what those medicines cost the public sector."
       />

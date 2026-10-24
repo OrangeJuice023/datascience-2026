@@ -1,27 +1,52 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { BrandMark } from "./brand-mark";
+import { PRIMARY_NAV, SECONDARY_NAV } from "@/lib/nav";
 
-export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
+function sectionName(pathname: string): string {
+  const all = [...PRIMARY_NAV, ...SECONDARY_NAV];
+  const match = all.find((item) => (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)));
+  return match?.label ?? "SIGMA";
+}
+
+/**
+ * On the frame, with no rule under it. Desktop: the product line and the
+ * prototype notice. Phone: menu, the current section and the notice.
+ */
+export function TopBar({
+  onMenuClick,
+  logoSrc,
+}: {
+  onMenuClick: () => void;
+  logoSrc?: string | null;
+}) {
+  const pathname = usePathname();
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
-      <div className="flex items-center gap-3">
+    <header className="flex h-12 shrink-0 items-center justify-between gap-3 bg-frame pl-1 pr-3 lg:h-12 lg:px-2 lg:pr-4">
+      <div className="flex min-w-0 items-center gap-1.5">
         <button
           type="button"
           onClick={onMenuClick}
           aria-label="Open navigation"
-          className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 md:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-frame-active lg:hidden"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
-        <p className="hidden text-sm font-medium text-slate-500 sm:block">
+        <span className="flex items-center gap-2 lg:hidden">
+          <BrandMark size={22} src={logoSrc} />
+          <span className="truncate text-sm font-semibold text-ink">{sectionName(pathname)}</span>
+        </span>
+        <p className="hidden truncate text-[13px] text-slate-500 lg:block">
           Spatial Intelligence &amp; Geographic Modeling for Action
         </p>
       </div>
       <span
-        className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-200"
         title="Real, historical data: DOH-EB dengue counts 2016-2021 (HDX), OpenDengue national 2012-2023, OpenStreetMap facilities, DOH medicine prices. Not a real-time alert system."
       >
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
         Prototype<span className="hidden sm:inline"> · historical data, not real-time</span>
       </span>
     </header>

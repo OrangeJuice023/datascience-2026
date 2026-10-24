@@ -95,8 +95,8 @@ export default function SettingsScreen() {
         {saved ? <Text style={[styles.ok, { color: theme.liveText }]}>Saved. The app now uses this address.</Text> : null}
 
         <View style={styles.buttonRow}>
-          <Pressable accessibilityRole="button" onPress={save} style={[styles.primary, { backgroundColor: theme.accent }]}>
-            <Text style={styles.primaryText}>Save</Text>
+          <Pressable accessibilityRole="button" onPress={save} style={({ pressed }) => [styles.primary, { backgroundColor: theme.text, opacity: pressed ? 0.8 : 1 }]}>
+            <Text style={[styles.primaryText, { color: theme.background }]}>Save</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -116,8 +116,8 @@ export default function SettingsScreen() {
           accessibilityRole="button"
           onPress={check}
           disabled={checking}
-          style={[styles.primary, { backgroundColor: theme.accent, opacity: checking ? 0.6 : 1 }]}>
-          <Text style={styles.primaryText}>{checking ? 'Checking…' : 'Check the API'}</Text>
+          style={({ pressed }) => [styles.primary, { backgroundColor: theme.text, opacity: checking ? 0.6 : pressed ? 0.8 : 1 }]}>
+          <Text style={[styles.primaryText, { color: theme.background }]}>{checking ? 'Checking…' : 'Check the API'}</Text>
         </Pressable>
         {checkResult ? (
           <View style={styles.result}>
@@ -164,19 +164,20 @@ const styles = StyleSheet.create({
   primary: {
     flex: 1,
     borderRadius: 12,
-    paddingVertical: Spacing.three,
+    minHeight: 48,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   primaryText: {
-    color: '#ffffff',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 15,
   },
   secondary: {
     flex: 1,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 12,
-    paddingVertical: Spacing.three,
+    minHeight: 48,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   secondaryText: {

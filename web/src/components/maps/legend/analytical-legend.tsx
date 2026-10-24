@@ -29,7 +29,7 @@ export function AnalyticalLegend({
     <div className={cn("text-xs text-slate-600", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-semibold text-slate-800">{spec.title}</p>
-        <p className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">
+        <p className="shrink-0 text-[11px] text-slate-400">
           {CLASSIFICATION_LABEL[spec.classification]}
         </p>
       </div>

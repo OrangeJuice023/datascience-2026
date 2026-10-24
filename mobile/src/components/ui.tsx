@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { Colors, Spacing, STATUS_COLOR, STATUS_LABEL, STATUS_TEXT_TOKEN, TONE_TEXT_TOKEN, Type, type ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -30,7 +30,9 @@ export function SectionTitle({ children, action }: { children: React.ReactNode; 
   const theme = useTheme();
   return (
     <View style={styles.sectionTitleRow}>
-      <Text style={[Type.title, { color: theme.text }]}>{children}</Text>
+      <Text role="heading" aria-level={2} accessibilityRole="header" style={[Type.title, { color: theme.text }]}>
+        {children}
+      </Text>
       {action}
     </View>
   );
@@ -43,7 +45,10 @@ export function StatusPill({ status, label }: { status: string; label?: string }
   const textToken = STATUS_TEXT_TOKEN[status] ?? color;
   const textColor = theme[textToken] as string;
   return (
-    <View style={[styles.pill, { backgroundColor: `${tint}1a`, borderColor: `${tint}55` }]}>
+    <View
+      accessible
+      accessibilityLabel={`Data status: ${label ?? STATUS_LABEL[status] ?? status}`}
+      style={[styles.pill, { backgroundColor: `${tint}17`, borderColor: `${tint}40` }]}>
       <View style={[styles.dot, { backgroundColor: tint }]} />
       <Text style={[styles.pillText, { color: textColor }]}>{label ?? STATUS_LABEL[status] ?? status}</Text>
     </View>
@@ -60,13 +65,23 @@ export function Banner({
   children: React.ReactNode;
 }) {
   const theme = useTheme();
-  const tint = tone === 'caution' ? theme.demo : theme.accent;
+  // A caution is a pale amber notice; information is a quiet neutral well. No coloured edge bar.
+  const caution = tone === 'caution';
   return (
-    <View style={[styles.banner, { borderLeftColor: tint, backgroundColor: theme.backgroundElement }]}>
+    <View
+      accessibilityRole={caution ? 'alert' : undefined}
+      style={[
+        styles.banner,
+        caution
+          ? { backgroundColor: `${theme.demo}14`, borderColor: `${theme.demo}55` }
+          : { backgroundColor: theme.backgroundSelected, borderColor: 'transparent' },
+      ]}>
       {title ? (
-        <Text style={[Type.title, { fontSize: 15, lineHeight: 21, color: theme.text }]}>{title}</Text>
+        <Text style={[Type.title, { fontSize: 15, lineHeight: 20, color: caution ? theme.demoText : theme.text }]}>
+          {title}
+        </Text>
       ) : null}
-      <Text style={[styles.bannerBody, { color: theme.textSecondary }]}>{children}</Text>
+      <Text style={[styles.bannerBody, { color: caution ? theme.text : theme.textSecondaryStrong }]}>{children}</Text>
     </View>
   );
 }
@@ -112,15 +127,18 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
         <Pressable
           accessibilityRole="button"
           onPress={onRetry}
-          style={[styles.retry, { backgroundColor: theme.accent }]}>
-          <Text style={styles.retryText}>Try again</Text>
+          style={({ pressed }) => [styles.retry, { backgroundColor: theme.text, opacity: pressed ? 0.8 : 1 }]}>
+          <Text style={[styles.retryText, { color: theme.background }]}>Try again</Text>
         </Pressable>
       ) : null}
     </View>
   );
 }
 
-/** A horizontally scrollable row of filter chips. */
+/**
+ * A row of filter chips. It scrolls sideways inside its own row, so a long list
+ * of options takes one line instead of pushing the content down.
+ */
 export function ChipGroup<T extends string>({
   options,
   selected,
@@ -132,7 +150,12 @@ export function ChipGroup<T extends string>({
 }) {
   const theme = useTheme();
   return (
-    <View style={styles.chipRow}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.chipScroll}
+      contentContainerStyle={styles.chipRow}
+      keyboardShouldPersistTaps="handled">
       {options.map((option) => {
         const active = option.value === selected;
         return (
@@ -141,22 +164,22 @@ export function ChipGroup<T extends string>({
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             onPress={() => onSelect(option.value)}
-            hitSlop={6}
+            hitSlop={4}
             style={({ pressed }) => [
               styles.chip,
               {
-                backgroundColor: active ? theme.accent : theme.background,
-                borderColor: active ? theme.accent : theme.border,
-                opacity: pressed ? 0.7 : 1,
+                backgroundColor: active ? theme.text : theme.backgroundElement,
+                borderColor: active ? theme.text : theme.border,
+                opacity: pressed ? 0.75 : 1,
               },
             ]}>
-            <Text style={[styles.chipText, { color: active ? '#ffffff' : theme.textSecondary }]}>
+            <Text style={[styles.chipText, { color: active ? theme.background : theme.textSecondaryStrong }]}>
               {option.label}
             </Text>
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -187,11 +210,14 @@ export function Disclosure({
         onPress={() => setOpen((value) => !value)}
         style={({ pressed }) => [styles.disclosureHeader, { opacity: pressed ? 0.7 : 1 }]}>
         <View style={styles.disclosureText}>
-          <Text style={[Type.title, { fontSize: 16, lineHeight: 22, color: theme.text }]}>{title}</Text>
+          <Text style={[Type.title, { fontSize: 16, lineHeight: 21, color: theme.text }]}>{title}</Text>
           {summary ? <Text style={[styles.bannerBody, { color: theme.textSecondary }]}>{summary}</Text> : null}
         </View>
-        <Text style={[styles.disclosureChevron, { color: theme.textSecondary }]} accessibilityElementsHidden importantForAccessibility="no">
-          {open ? '−' : '+'}
+        <Text
+          style={[styles.disclosureChevron, { color: theme.textSecondary, transform: [{ rotate: open ? '90deg' : '0deg' }] }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no">
+          ›
         </Text>
       </Pressable>
       {open ? <View style={styles.disclosureBody}>{children}</View> : null}
@@ -211,7 +237,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   disclosureChevron: {
-    fontSize: 22,
+    fontSize: 24,
+    lineHeight: 26,
     fontWeight: '400',
     width: 24,
     textAlign: 'center',
@@ -220,8 +247,8 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 14,
+    borderWidth: 1,
+    borderRadius: 12,
     padding: Spacing.three,
     gap: Spacing.two,
   },
@@ -235,11 +262,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    minHeight: 24,
     alignSelf: 'flex-start',
+    flexShrink: 0,
   },
   dot: {
     width: 7,
@@ -248,34 +277,38 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 12,
-    fontWeight: '700',
+    lineHeight: 16,
+    fontWeight: '600',
   },
   banner: {
-    borderLeftWidth: 3,
-    borderRadius: 8,
+    borderWidth: 1,
+    borderRadius: 12,
     padding: Spacing.three,
     gap: Spacing.one,
   },
   bannerBody: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
   },
   factRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: Spacing.three,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   factLabel: {
-    fontSize: 14,
+    fontSize: 15,
+    lineHeight: 20,
     flexShrink: 1,
   },
   factValue: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '600',
     textAlign: 'right',
-    flexShrink: 0,
+    flexShrink: 1,
+    maxWidth: '62%',
   },
   centered: {
     alignItems: 'center',
@@ -294,30 +327,33 @@ const styles = StyleSheet.create({
   },
   retry: {
     marginTop: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: 10,
   },
   retryText: {
-    color: '#ffffff',
-    fontWeight: '700',
-    fontSize: 14,
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  chipScroll: {
+    marginHorizontal: -Spacing.three,
+    flexGrow: 0,
   },
   chipRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
   },
   chip: {
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 36,
+    paddingHorizontal: 14,
+    minHeight: 40,
     justifyContent: 'center',
   },
   chipText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

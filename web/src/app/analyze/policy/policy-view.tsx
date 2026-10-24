@@ -70,7 +70,6 @@ export function PolicyView({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Analyze"
         title="Policy"
         subtitle="Ask SIGI about a place's dengue record, access to care and policy evidence. Every answer cites the evidence it used, and SIGI says what the evidence cannot show."
       />

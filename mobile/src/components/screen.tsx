@@ -2,7 +2,7 @@ import React from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Spacing, Type } from '@/constants/theme';
+import { MaxContentWidth, Spacing, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { Banner, StatusPill } from '@/components/ui';
 
@@ -54,7 +54,9 @@ export function Screen({
         }>
         <View style={styles.header}>
           <View style={styles.headerText}>
-            <Text style={[Type.display, { color: theme.text }]}>{title}</Text>
+            <Text role="heading" aria-level={1} accessibilityRole="header" style={[Type.display, { color: theme.text }]}>
+              {title}
+            </Text>
             {subtitle ? (
               <Text style={[styles.subtitle, { color: theme.textSecondaryStrong }]}>{subtitle}</Text>
             ) : null}
@@ -79,9 +81,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
     gap: Spacing.three,
-    paddingBottom: Spacing.five,
+    paddingBottom: Spacing.six + Spacing.three,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -91,11 +97,11 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   subtitle: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
   },
   footer: {
     paddingTop: Spacing.two,

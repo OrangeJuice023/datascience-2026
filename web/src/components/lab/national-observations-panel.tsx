@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Card } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/stat-card";
+import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { Tabs, TabPanel } from "@/components/ui/tabs";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
 import { DataStateNotice } from "@/components/ui/data-state-notice";
@@ -120,7 +120,7 @@ export function NationalObservationsPanel({
       <Card className="border-teal-200 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <EvidenceBadge kind="formal" />
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-900">Formal observed data</p>
+          <p className="text-sm font-semibold text-teal-900">Formal observed data</p>
         </div>
         <p className="mt-1 text-sm text-slate-700">
           This is reported historical disease data, not model output.
@@ -139,7 +139,7 @@ export function NationalObservationsPanel({
       </Card>
 
       {/* Coverage */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <StatStrip columns={4}>
         <StatCard label="Earliest observation" value={formatIsoDate(weekly.first!)} hint="Week start" />
         <StatCard label="Latest observation" value={formatIsoDate(weekly.last!)} hint="Week end" />
         <StatCard
@@ -148,7 +148,7 @@ export function NationalObservationsPanel({
           hint={`of ${formatCount(weekly.expected)} weeks in range`}
         />
         <StatCard label="Resolution" value="National · weekly" hint="No sub-national formal series used" />
-      </div>
+      </StatStrip>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         {/* Summary statistics */}
@@ -159,7 +159,7 @@ export function NationalObservationsPanel({
             weeks are excluded, not counted as zero.
           </p>
           {weekly.stats && (
-            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatStrip columns={4} className="mt-3">
               <StatCard label="Mean weekly count" value={weekly.stats.mean.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
               <StatCard label="Median weekly count" value={weekly.stats.median.toLocaleString("en-US", { maximumFractionDigits: 1 })} />
               <StatCard
@@ -172,10 +172,10 @@ export function NationalObservationsPanel({
                 value={formatCount(weekly.stats.min.value)}
                 hint={`Week of ${formatIsoDate(weekly.stats.min.periodStart)}`}
               />
-            </div>
+            </StatStrip>
           )}
           {completeYears.length > 0 && (
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <StatStrip columns={2} className="mt-3">
               <StatCard
                 label="Complete epi years"
                 value={String(completeYears.length)}
@@ -188,7 +188,7 @@ export function NationalObservationsPanel({
                   hint={`${peakCompleteYear.year} · sum of ${peakCompleteYear.recordedWeeks} weeks`}
                 />
               )}
-            </div>
+            </StatStrip>
           )}
           <p className="mt-2 text-[11px] text-slate-400">
             Annual totals are shown only for epi years with every week recorded; other years
@@ -365,7 +365,7 @@ export function NationalObservationsPanel({
           <Row label="Resolution">National / Weekly</Row>
           <Row label="License">{meta.license}</Row>
           <Row label="Input SHA-256">
-            <span className="break-all font-mono text-[10px] text-slate-500">{meta.sha256}</span>
+            <span className="break-all font-mono text-[11px] text-slate-500">{meta.sha256}</span>
           </Row>
         </dl>
       </Card>

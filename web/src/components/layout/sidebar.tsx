@@ -3,8 +3,47 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "./brand-mark";
-import { PRIMARY_NAV, SECONDARY_NAV, isNavActive } from "@/lib/nav";
+import { PRIMARY_NAV, SECONDARY_NAV, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+
+/** What each kind of evidence on the site currently is. Kept honest: nothing here is live. */
+const DATA_STATUS = [
+  { label: "Dengue data", value: "HDX DOH 2016–21 · OpenDengue", dot: "bg-teal-600" },
+  { label: "Access", value: "OSM snapshot · DOH prices", dot: "bg-teal-600" },
+  { label: "Forecast model", value: "None", dot: "bg-slate-300" },
+] as const;
+
+function NavLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex h-10 items-center gap-2.5 rounded-lg px-3 text-sm transition-colors lg:h-9",
+        active
+          ? "bg-frame-active font-medium text-ink"
+          : "text-slate-600 hover:bg-frame-active/60 hover:text-ink",
+      )}
+    >
+      <Icon
+        className={cn("h-4 w-4 shrink-0", active ? "text-ink" : "text-slate-500")}
+        strokeWidth={1.75}
+        aria-hidden="true"
+      />
+      {item.label}
+    </Link>
+  );
+}
 
 export function SidebarContent({
   onNavigate,
@@ -14,116 +53,68 @@ export function SidebarContent({
   logoSrc?: string | null;
 }) {
   const pathname = usePathname();
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2.5 border-b border-slate-200 px-5 py-5">
-        <BrandMark size={32} src={logoSrc} />
+    <div className="flex h-full w-full flex-col">
+      <div className="flex h-14 items-center gap-2.5 px-5 lg:h-12 lg:pt-2">
+        <BrandMark size={28} src={logoSrc} />
         <div className="leading-tight">
-          <p className="text-sm font-semibold tracking-tight text-slate-900">
-            SIGMA
-          </p>
-          <p className="text-[11px] text-slate-500">
-            Public-health intelligence
-          </p>
+          <p className="text-sm font-semibold tracking-tight text-ink">SIGMA</p>
+          <p className="text-xs text-slate-500">Philippines · public health</p>
         </div>
       </div>
 
-      <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="flex flex-col gap-1">
-          {PRIMARY_NAV.map((item) => {
-            const isActive = isNavActive(item.href, pathname);
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-current={isActive ? "page" : undefined}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
+      <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 pb-4 pt-5">
+        <ul className="flex flex-col gap-0.5">
+          {PRIMARY_NAV.map((item) => (
+            <li key={item.href}>
+              <NavLink item={item} active={isActive(item.href)} onNavigate={onNavigate} />
+            </li>
+          ))}
         </ul>
 
-        <p className="mt-6 px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          More
-        </p>
-        <ul className="mt-1 flex flex-col gap-1">
+        <p className="mt-7 px-3 text-xs text-slate-500">More</p>
+        <ul className="mt-1.5 flex flex-col gap-0.5">
           {SECONDARY_NAV.map((item) => {
-            const Icon = item.icon;
             if (item.disabled) {
+              const Icon = item.icon;
               return (
                 <li key={item.href}>
                   <span
-                    className="flex cursor-not-allowed items-center justify-between gap-2.5 rounded-md px-3 py-2 text-sm text-slate-400"
-                    title="Coming soon"
+                    className="flex h-10 cursor-not-allowed items-center justify-between gap-2.5 rounded-lg px-3 text-sm text-slate-500 lg:h-9"
+                    title="Not built yet"
+                    aria-disabled="true"
                   >
                     <span className="flex items-center gap-2.5">
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
                       {item.label}
                     </span>
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
-                      Soon
-                    </span>
+                    <span className="text-xs">Soon</span>
                   </span>
                 </li>
               );
             }
-            const isActive = pathname === item.href;
             return (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-current={isActive ? "page" : undefined}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {item.label}
-                </Link>
+                <NavLink item={item} active={isActive(item.href)} onNavigate={onNavigate} />
               </li>
             );
           })}
         </ul>
       </nav>
 
-      <div className="border-t border-slate-200 px-4 py-4">
-        <dl className="space-y-2 text-[11px]">
-          <div className="flex items-center justify-between gap-2">
-            <dt className="font-medium text-slate-400">Reporting units</dt>
-            <dd className="rounded-full bg-teal-50 px-2 py-0.5 font-medium text-teal-700 ring-1 ring-teal-200">
-              HDX · 2016–2021
+      <dl className="mx-3 mb-4 space-y-2 rounded-xl bg-sheet/70 px-3 py-3 text-xs">
+        {DATA_STATUS.map((row) => (
+          <div key={row.label} className="flex flex-col gap-0.5">
+            <dt className="text-slate-500">{row.label}</dt>
+            <dd className="flex items-start gap-1.5 font-medium text-slate-800">
+              <span className={cn("mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full", row.dot)} aria-hidden="true" />
+              {row.value}
             </dd>
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <dt className="font-medium text-slate-400">National series</dt>
-            <dd className="rounded-full bg-teal-50 px-2 py-0.5 font-medium text-teal-700 ring-1 ring-teal-200">
-              OpenDengue · 2012–2023
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <dt className="font-medium text-slate-400">Forecast model</dt>
-            <dd className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600 ring-1 ring-slate-200">
-              None
-            </dd>
-          </div>
-        </dl>
-      </div>
+        ))}
+      </dl>
     </div>
   );
 }

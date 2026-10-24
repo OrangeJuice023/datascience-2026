@@ -32,7 +32,6 @@ export function OverviewView({ formal, sigma }: { formal: FormalSummary | null; 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Public health intelligence"
         title="SIGMA"
         subtitle="Retrospective dengue surveillance for Philippine LGUs: when did weekly reports rise unusually fast (EARS), and when did they pass the DOH thresholds?"
       />

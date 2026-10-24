@@ -70,7 +70,7 @@ export function DataStateNotice({
   return (
     <div
       role={state === "source-unavailable" ? "alert" : "status"}
-      className={cn("flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-xs", config.className, className)}
+      className={cn("flex items-start gap-2.5 rounded-[var(--radius-card)] border px-3 py-2.5 text-[13px]", config.className, className)}
     >
       <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", config.iconClass)} aria-hidden="true" />
       <div className="min-w-0">
