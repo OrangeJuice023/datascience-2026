@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { SigmaData } from "@/lib/sigma/data";
 import { getAllPolicyEvidence } from "@/data/policy-evidence";
 import { accessUnit } from "@/lib/access/reference";
-import { buildEvidencePack, citedItems, foreignEvidenceIds, labItemsForUnit } from "./evidence";
+import { buildEvidencePack, citedItems, foreignEvidenceIds, labItemsForUnit, normalizeHyphens } from "./evidence";
 import { buildAnalyzePrompt } from "./prompt";
 
 /**
@@ -131,5 +131,24 @@ describe("city isolation", () => {
   it("tells the model plainly when a place has no verified local policy", () => {
     expect(buildAnalyzePrompt(pack("rizal"), "Dengue")).toMatch(/No verified local policy record is in SIGMA's evidence for rizal/);
     expect(buildAnalyzePrompt(pack("quezon-city"), "Dengue")).not.toMatch(/No verified local policy record/);
+  });
+
+  it("starts every prompt with the same place-free part, so the provider can cache it", () => {
+    const qc = buildAnalyzePrompt(pack("quezon-city"), "Dengue");
+    const abra = buildAnalyzePrompt(pack("abra"), "Dengue");
+    const split = qc.indexOf("THIS REQUEST\n");
+    expect(split).toBeGreaterThan(qc.length / 2);
+    expect(abra.slice(0, abra.indexOf("THIS REQUEST\n"))).toBe(qc.slice(0, split));
+    expect(qc.slice(0, split)).not.toMatch(/quezon-city|abra/i);
+    // Each place's own items come after the shared part, never before it.
+    expect(qc.indexOf("[lab-quezon-city-2019]")).toBeGreaterThan(split);
+    expect(qc.indexOf("[pe-national-ra11332-2019]")).toBeLessThan(split);
+  });
+
+  it("reads ids written with typographic hyphens as the ids SIGMA issued", () => {
+    const qc = pack("quezon-city");
+    const reply = normalizeHyphens("Cases peaked in 2019 [lab‑quezon‑city‑2019]; see [method‐ears].");
+    expect(citedItems(reply, qc).map((i) => i.id)).toEqual(["lab-quezon-city-2019", "method-ears"]);
+    expect(normalizeHyphens("2016–2020 — a range")).toBe("2016–2020 — a range");
   });
 });
