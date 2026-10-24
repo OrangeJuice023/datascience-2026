@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig, type Plugin } from "vitest/config";
+import { configDefaults, defineConfig, type Plugin } from "vitest/config";
 
 /**
  * Test configuration for the SIGMA API.
@@ -38,5 +38,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    // The browser tests in e2e/ run under Playwright (npm run e2e), never here.
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 });
