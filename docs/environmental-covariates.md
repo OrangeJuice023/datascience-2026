@@ -171,13 +171,13 @@ rest of SIGMA instead of the other way round.
   date is unconfirmed and the highest correlation is not a definition
   ([dengue-pipeline.md](dengue-pipeline.md#hdx-week-convention-known-vs-unconfirmed)).
   HDX suspected cases/deaths swap rows are excluded from it (no data, not
-  zero). The r values below were measured before that exclusion and need a
-  re-run.
+  zero). The r values below were re-measured on 2026-10-24 with the 665 swap
+  rows excluded.
 
 The remaining uncertainty is about the *meaning* of a label, not the
 convention. Matching the 10 shared cities over 2016–2020, the best alignment
-is **HDX date − 14 days = canonical week** (mean r = 0.83; −7 days gives
-0.81). This is the same as the earlier result of HDX − 13 d = CCHAIN Monday. Exact count matches are
+is **HDX date − 14 days = canonical week** (mean r = 0.834; −7 days gives
+0.823, 0 days 0.736). This is the same as the earlier result of HDX − 13 d = CCHAIN Monday. Exact count matches are
 only 2–32% at any offset, so these are different extracts or reporting
 vintages, not copies. Whether CCHAIN's Monday means week start, and whether it
 refers to onset, consultation or report week, is **not documented**.
