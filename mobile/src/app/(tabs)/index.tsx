@@ -21,7 +21,7 @@ import { useUnits } from '@/state/units-context';
  * historical, and the screen says so before anything else.
  */
 export default function OverviewScreen() {
-  const { baseUrl } = useSettings();
+  const { baseUrl, skippedBaseUrl } = useSettings();
   const theme = useTheme();
   const { resource: units } = useUnits();
 
@@ -49,6 +49,12 @@ export default function OverviewScreen() {
       onRefresh={refresh}
       refreshing={summary.refreshing || units.refreshing}
       staleError={staleError}>
+      {skippedBaseUrl ? (
+        <Banner tone="caution" title="Using the default API">
+          The saved address {skippedBaseUrl} could not be reached from this phone, so SIGMA connected to {baseUrl}{' '}
+          instead. Change it with the gear at the top.
+        </Banner>
+      ) : null}
       <SigiNote state={sigiStateForData({ loading, failed, hasResult: Boolean(series || scope) })}>
         {series || scope
           ? 'Sigi is with you. Everything here is a past record: the newest week SIGMA holds is shown below, and nothing describes this week.'

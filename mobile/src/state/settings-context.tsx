@@ -1,7 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { clearStoredBaseUrl, defaultBaseUrl, loadStoredBaseUrl, normalizeBaseUrl, storeBaseUrl } from '@/api/config';
+import { fetchHealth } from '@/api/endpoints';
+import { chooseBaseUrl, clearStoredBaseUrl, defaultBaseUrl, loadStoredBaseUrl, normalizeBaseUrl, storeBaseUrl } from '@/api/config';
+
+/** A short health check: a startup probe must not hold the app for the full request timeout. */
+const PROBE_TIMEOUT_MS = 6_000;
+
+async function answers(baseUrl: string): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+  try {
+    await fetchHealth(baseUrl, controller.signal);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 /**
  * The API address the app talks to.
@@ -17,6 +34,8 @@ interface SettingsContextValue {
   ready: boolean;
   /** The value the app would use with no stored override. */
   defaultBaseUrl: string;
+  /** A saved address the app passed over at startup because it could not be used. */
+  skippedBaseUrl: string | null;
   updateBaseUrl: (value: string) => Promise<void>;
   resetBaseUrl: () => Promise<void>;
 }
@@ -27,13 +46,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const fallback = useMemo(() => defaultBaseUrl(), []);
   const [baseUrl, setBaseUrl] = useState(fallback);
   const [ready, setReady] = useState(false);
+  const [skippedBaseUrl, setSkippedBaseUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     loadStoredBaseUrl()
-      .then((stored) => {
+      .then((stored) => chooseBaseUrl(stored, fallback, answers))
+      .then(async (choice) => {
         if (!active) return;
-        if (stored) setBaseUrl(normalizeBaseUrl(stored));
+        setBaseUrl(choice.baseUrl);
+        setSkippedBaseUrl(choice.skipped);
+        if (choice.clearStored) await clearStoredBaseUrl();
       })
       .catch(() => {
         // A storage failure is not fatal: the default still works.
@@ -44,22 +67,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [fallback]);
 
   const updateBaseUrl = useCallback(async (value: string) => {
     const normalized = normalizeBaseUrl(value);
     setBaseUrl(normalized);
+    setSkippedBaseUrl(null);
     await storeBaseUrl(normalized);
   }, []);
 
   const resetBaseUrl = useCallback(async () => {
     setBaseUrl(fallback);
+    setSkippedBaseUrl(null);
     await clearStoredBaseUrl();
   }, [fallback]);
 
   const value = useMemo<SettingsContextValue>(
-    () => ({ baseUrl, ready, defaultBaseUrl: fallback, updateBaseUrl, resetBaseUrl }),
-    [baseUrl, ready, fallback, updateBaseUrl, resetBaseUrl]
+    () => ({ baseUrl, ready, defaultBaseUrl: fallback, skippedBaseUrl, updateBaseUrl, resetBaseUrl }),
+    [baseUrl, ready, fallback, skippedBaseUrl, updateBaseUrl, resetBaseUrl]
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
