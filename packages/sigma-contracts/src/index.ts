@@ -480,14 +480,6 @@ export interface AccessMedicinesData {
 // Policy
 // ---------------------------------------------------------------------------
 
-export interface PolicyInsightRecord {
-  category: string;
-  title: string;
-  rationale: string;
-  evidenceType: string;
-  assessmentStatus: "for-assessment" | "monitoring";
-}
-
 export interface PolicyInfoData {
   scope: {
     isSample: boolean;
@@ -496,17 +488,18 @@ export interface PolicyInfoData {
     /** AI output is never a verified government position. */
     aiDisclosure: string;
   };
+  /** Counted from the policy evidence registry, one line per point. */
   evidenceSummary: string[];
-  areasForAssessment: PolicyInsightRecord[];
   whatSigmaDoesNot: string[];
   supportedDiseases: string[];
   /**
-   * Which diseases the copilot can answer about, and which locations it has
-   * data for. A client uses this to offer only combinations that will
-   * actually succeed, instead of letting the user pick one that will fail.
+   * Which diseases SIGI can answer about, and for which reporting units. A
+   * client uses this to offer only combinations that will actually succeed,
+   * instead of letting the user pick one that will fail.
    */
   chatScope: { disease: string; locationIds: string[] }[];
-  areas: { id: string; name: string; province: string; region: string }[];
+  /** The 126 HDX dengue reporting units, and whether any local policy record names each one. */
+  areas: { id: string; name: string; unitType: string; region: string; hasLocalPolicy: boolean }[];
   sources: ApiSource[];
   limitations: string[];
 }
