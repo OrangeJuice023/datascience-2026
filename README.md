@@ -43,6 +43,7 @@ Dengue early-warning for the Philippines, looked at in hindsight:<br>
 
 ## The app
 
+The mobile app can be accessed [here](https://drive.google.com/drive/folders/1COQuwj0S7cpUBmg8tq7f_EX0541tNH5v). 
 Three tabs, all on real data. Where a figure has no public source (medicine stock,
 search demand, population per unit), SIGMA says "unknown" instead of guessing.
 
