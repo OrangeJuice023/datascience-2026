@@ -220,7 +220,7 @@ export default function DataSourcesPage() {
           }
         />
 
-        <Card className="p-4 sm:p-5">
+        <Card className="mt-6 p-4 sm:p-5">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
             <div className="space-y-3 text-sm leading-relaxed text-slate-700">
               <h2 className="text-base font-semibold text-ink">How SIGMA uses data</h2>

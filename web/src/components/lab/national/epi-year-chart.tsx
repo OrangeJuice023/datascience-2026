@@ -26,7 +26,9 @@ export function EpiYearChart({ weeks }: { weeks: WeeklyPoint[] }) {
           tick={AXIS_TICK}
           axisLine={{ stroke: GRID }}
           tickLine={false}
-          interval={3}
+          // Every nth week, n as small as the width allows without labels overlapping or clipping.
+          interval="equidistantPreserveStart"
+          minTickGap={32}
           tickFormatter={(w: number) => `W${w}`}
         />
         <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={44} tickFormatter={compactCount} />
