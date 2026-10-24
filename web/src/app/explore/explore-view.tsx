@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Link from "next/link";
-import { X } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { SelectFilter } from "@/components/ui/select-filter";
 import { Button } from "@/components/ui/button";
 import { AnalyticalMap } from "@/components/maps/analytical/analytical-map";
-import { LocationDetailPanel } from "@/components/maps/location-detail-panel";
 import { SigmaDetailPanel } from "@/components/maps/sigma-detail-panel";
 import { EnvironmentDetailPanel } from "@/components/maps/environment-detail-panel";
 import {
@@ -18,9 +15,8 @@ import {
 } from "@/lib/environment/bundle";
 import type { WeatherSourceId, WeatherVariable } from "@/types/data";
 import { SIGMA_DATA_URL, type SigmaData } from "@/lib/sigma/data";
-import { AccessDetailPanel } from "@/components/access/access-detail-panel";
-import { ACCESS_METRIC_LABEL, type AccessMetricView } from "@/lib/access/bundle";
 import { MAP_MODES, getMapMode } from "@/lib/map/modes";
+import { isSigmaView } from "@/lib/map/modes/sigma";
 import type {
   FilterKey,
   MapDataBundle,
@@ -31,14 +27,9 @@ import type {
   MapViewMode,
   ModeFrame,
 } from "@/lib/map/types";
-import { SEVERITY_ORDER } from "@/lib/status";
-import { neighborKey } from "@/lib/neighbors";
-import { daysBetweenIso, formatCount, formatIsoDate } from "@/lib/map/format";
-import { EvidenceBadge } from "@/components/ui/evidence-badge";
 
 const DEFAULT_FILTERS: MapFilters = {
-  medicine: "oral-rehydration-salts",
-  accessMetric: "gap",
+  facilityType: "pharmacy",
   sigmaLayer: "ears",
   envVariable: "precipitation_mm",
   envSource: "cchain",
@@ -52,7 +43,7 @@ function rgb(feature: MapFeature) {
 }
 
 export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
-  const [modeId, setModeId] = useState<MapModeId>("sigma");
+  const [modeId, setModeId] = useState<MapModeId>("ears");
   const [filters, setFilters] = useState<MapFilters>(DEFAULT_FILTERS);
   const [view, setView] = useState<MapViewMode>("2d");
   const [toggleOverrides, setToggleOverrides] = useState<Partial<Record<MapModeId, MapLayerToggles>>>({});
@@ -60,7 +51,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
   const [playing, setPlaying] = useState(false);
   // The timeline position belongs to one mode; switching modes starts at that mode's latest slice.
   const [time, setTime] = useState<{ modeId: MapModeId; index: number } | null>(null);
-  // SIGMA is the default mode, so its results (~1 MB) are fetched on first render.
+  // The EARS view opens first, so the SIGMA results (~1 MB) are fetched on first render.
   const [sigma, setSigma] = useState<{ data?: SigmaData; error?: string }>({});
 
   useEffect(() => {
@@ -115,38 +106,6 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
   );
   const slice = prepared?.timeline.slices[index];
 
-  const selectedLgu = selectedId ? bundle.lgus.find((lgu) => lgu.id === selectedId) : undefined;
-  const selectedFeature = selectedId ? frame.features.find((f) => f.id === selectedId) : undefined;
-  const selectedSignal = useMemo(() => {
-    if (!selectedId) return undefined;
-    return bundle.signals
-      .filter((s) => s.locationId === selectedId)
-      .sort(
-        (a, b) => SEVERITY_ORDER[b.status] - SEVERITY_ORDER[a.status] || b.date.localeCompare(a.date),
-      )[0];
-  }, [bundle, selectedId]);
-
-  const nationalCoverage = useMemo(() => {
-    const weeks = bundle.nationalWeekly;
-    if (weeks.length === 0) return null;
-    let gaps = 0;
-    let missingWeeks = 0;
-    for (let i = 1; i < weeks.length; i++) {
-      const step = daysBetweenIso(weeks[i - 1].periodStart, weeks[i].periodStart) / 7;
-      if (step > 1) {
-        gaps++;
-        missingWeeks += step - 1;
-      }
-    }
-    return {
-      count: weeks.length,
-      first: weeks[0].periodStart,
-      last: weeks[weeks.length - 1].periodEnd,
-      gaps,
-      missingWeeks,
-    };
-  }, [bundle.nationalWeekly]);
-
   const ranked = useMemo(
     () => [...frame.features].sort((a, b) => b.rank - a.rank),
     [frame.features],
@@ -172,41 +131,8 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
     setPlaying(false);
   }
 
-  const filterControls: Record<FilterKey, ReactNode> = {
-    medicine: (
-      <SelectFilter
-        key="medicine"
-        label="Medicine (demo)"
-        value={filters.medicine}
-        onChange={(v) => updateFilter("medicine", v)}
-        options={bundle.access.medicines.map((m) => ({ value: m.id, label: m.name }))}
-      />
-    ),
-    accessMetric: (
-      <SelectFilter
-        key="accessMetric"
-        label="Access metric"
-        value={filters.accessMetric}
-        onChange={(v) => updateFilter("accessMetric", v)}
-        options={(Object.keys(ACCESS_METRIC_LABEL) as AccessMetricView[]).map((k) => ({
-          value: k,
-          label: ACCESS_METRIC_LABEL[k],
-        }))}
-      />
-    ),
-    sigmaLayer: (
-      <SelectFilter
-        key="sigmaLayer"
-        label="SIGMA layer"
-        value={filters.sigmaLayer}
-        onChange={(v) => updateFilter("sigmaLayer", v)}
-        options={[
-          { value: "ears", label: "EARS signal" },
-          { value: "doh", label: "DOH threshold" },
-          { value: "cases", label: "Reported cases" },
-        ]}
-      />
-    ),
+  // Only the filters a current view uses; the SIGMA views have none.
+  const filterControls: Partial<Record<FilterKey, ReactNode>> = {
     envVariable: (
       <SelectFilter
         key="envVariable"
@@ -233,33 +159,6 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
     ),
   };
 
-  const modeSummary = (
-    <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-        {mode.label} · {slice?.label ?? "No time slice"}
-      </p>
-      {selectedFeature ? (
-        <>
-          <p className="mt-1 flex items-center gap-2 text-sm font-medium text-slate-800">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: rgb(selectedFeature) }} aria-hidden="true" />
-            {selectedFeature.classLabel}
-          </p>
-          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-            {selectedFeature.rows.map((row) => (
-              <div key={row.label}>
-                <dt className="text-slate-400">{row.label}</dt>
-                <dd className="font-medium text-slate-700">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </>
-      ) : (
-        <p className="mt-1 text-xs text-slate-500">
-          No {mode.label.toLowerCase()} layer value for this area at the selected time.
-        </p>
-      )}
-    </div>
-  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -300,18 +199,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
         </Card>
 
         <div className="flex flex-col gap-4">
-          {mode.id === "access" && selectedId ? (
-            <Card className="overflow-hidden">
-              <AccessDetailPanel
-                bundle={bundle.access}
-                lgus={bundle.lgus}
-                selectedId={selectedId}
-                medicineId={filters.medicine}
-                weekIndex={index}
-                onClose={() => setSelectedId(undefined)}
-              />
-            </Card>
-          ) : mode.availability === "planned" ? (
+          {mode.availability === "planned" ? (
             <Card className="p-5">
               <p className="text-sm font-semibold text-slate-900">{mode.label}: not connected</p>
               <p className="mt-1 text-sm text-slate-600">{mode.unavailableReason}</p>
@@ -319,49 +207,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
                 Nothing is drawn for this mode rather than showing placeholder values.
               </p>
             </Card>
-          ) : mode.id === "disease" ? (
-            <Card className="p-5">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-slate-900">National formal observations</p>
-                <EvidenceBadge kind="formal" />
-              </div>
-              <p className="mt-1 text-sm text-slate-600">
-                OpenDengue v1.3 reports dengue for the Philippines at national resolution only.
-              </p>
-              {nationalCoverage ? (
-                <dl className="mt-3 space-y-1 text-xs">
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Weekly records</dt>
-                    <dd className="text-right text-slate-700">{formatCount(nationalCoverage.count)}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Coverage</dt>
-                    <dd className="text-right text-slate-700">
-                      {formatIsoDate(nationalCoverage.first)} – {formatIsoDate(nationalCoverage.last)}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-slate-400">Gaps in the record</dt>
-                    <dd className="text-right text-slate-700">
-                      {nationalCoverage.missingWeeks} weeks in {nationalCoverage.gaps} gaps
-                    </dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="mt-3 text-xs text-slate-500">No weekly national records available.</p>
-              )}
-              <p className="mt-2 text-xs text-slate-500">
-                Sub-national case maps are not drawn because no sub-national formal data is
-                connected here. Reporting-unit results are in the SIGMA mode, and open-source
-                signals are never shown as case counts.
-              </p>
-              <Link href="/lab" className="mt-4 block">
-                <Button variant="secondary" className="w-full">
-                  View full national record in Lab
-                </Button>
-              </Link>
-            </Card>
-          ) : mode.id === "sigma" && selectedId && sigma.data?.units.some((u) => u.id === selectedId) ? (
+          ) : isSigmaView(mode.id) && selectedId && sigma.data?.units.some((u) => u.id === selectedId) ? (
             <Card className="overflow-hidden">
               <SigmaDetailPanel
                 data={sigma.data}
@@ -381,38 +227,6 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
                 week={slice?.key}
                 onClose={() => setSelectedId(undefined)}
               />
-            </Card>
-          ) : selectedLgu && selectedSignal && bundle.trends[selectedLgu.id] ? (
-            <Card className="overflow-hidden">
-              <LocationDetailPanel
-                lgu={selectedLgu}
-                signal={selectedSignal}
-                trend={bundle.trends[selectedLgu.id]}
-                neighbors={bundle.neighbors[neighborKey(selectedSignal.disease, selectedLgu.id)] ?? []}
-                onClose={() => setSelectedId(undefined)}
-                summary={modeSummary}
-              />
-            </Card>
-          ) : selectedLgu ? (
-            <Card className="overflow-hidden">
-              <div className="flex items-start justify-between border-b border-slate-200 p-4">
-                <div>
-                  <p className="text-[11px] font-medium text-slate-400">{selectedLgu.province}</p>
-                  <h3 className="text-base font-semibold text-slate-900">{selectedLgu.name}</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(undefined)}
-                  aria-label="Close panel"
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-              {modeSummary}
-              <p className="p-4 text-xs text-slate-500">
-                No demo signal matches the current filters for this area.
-              </p>
             </Card>
           ) : (
             <Card className="overflow-hidden">

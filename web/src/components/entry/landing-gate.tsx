@@ -15,7 +15,7 @@ const WIPE_ROWS = 8;
 
 const WAYS_IN = [
   {
-    href: "/lab",
+    href: "/analyze/lab",
     name: "Lab",
     verb: "Trace the national record",
     detail: "Weekly dengue cases for the Philippines, 2012–2023 (OpenDengue).",
@@ -29,18 +29,18 @@ const WAYS_IN = [
     status: "Observed data",
   },
   {
-    href: "/policy",
+    href: "/analyze/policy",
     name: "Policy",
     verb: "Act on the evidence",
     detail: "Curated LGU evidence and a Copilot that cites it. Verify every answer before use.",
     status: "AI-assisted",
   },
   {
-    href: "/access",
+    href: "/analyze/access",
     name: "Access",
     verb: "Check medicine access",
-    detail: "How facility reports and searches could show access gaps. Illustrative data for now.",
-    status: "Demo",
+    detail: "Hospitals, clinics and pharmacies mapped for every reporting unit, and what DOH hospitals pay for dengue medicines.",
+    status: "Real data · snapshot",
   },
 ];
 

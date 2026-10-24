@@ -9,19 +9,16 @@ export const EVIDENCE_KIND: Record<ModeEvidence, EvidenceKind> = {
   scenario: "model",
   context: "context",
 };
-import { ACCESS_MODE } from "./access";
-import { DISEASE_MODE } from "./disease";
 import { ENVIRONMENT_MODE } from "./environment";
-import { SIGMA_MODE } from "./sigma";
+import { CASES_MODE, DOH_MODE, EARS_MODE } from "./sigma";
 
-/** Display order follows TRACE → ANALYZE. */
-export const MAP_MODES: MapModeDefinition[] = [
-  DISEASE_MODE,
-  SIGMA_MODE,
-  ENVIRONMENT_MODE,
-  ACCESS_MODE,
-];
+/**
+ * Explore's four views: reported cases, the EARS signal and the DOH
+ * threshold (all SIGMA results on the 126 reporting units), then weekly
+ * city weather as context. ACCESS has its own page under Analyze.
+ */
+export const MAP_MODES: MapModeDefinition[] = [CASES_MODE, EARS_MODE, DOH_MODE, ENVIRONMENT_MODE];
 
 export function getMapMode(id: MapModeId): MapModeDefinition {
-  return MAP_MODES.find((mode) => mode.id === id) ?? SIGMA_MODE;
+  return MAP_MODES.find((mode) => mode.id === id) ?? EARS_MODE;
 }

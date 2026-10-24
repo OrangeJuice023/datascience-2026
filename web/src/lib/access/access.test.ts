@@ -1,272 +1,151 @@
+import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
-import type { LGU } from "@/types";
-import type { Facility, InventorySnapshot, MedicineSearchEvent, Medicine } from "@/types/access";
-import { ACCESS_SCOPE_DOES_NOT_SUPPORT, buildAccessMetrics } from "@/lib/api/access";
-import { accessAssessments } from "./assessments";
-import { packAccessBundle } from "./bundle";
-import { computeAccessMetrics, facilityStates } from "./metrics";
+import { ACCESS_REFERENCE, FACILITY_TYPES, accessUnitForLgu, isPriced, totalMapped } from "./reference";
+import { accessReadiness } from "./readiness";
+import { buildAccessMedicines, buildAccessUnits, buildRetiredAccessMetrics } from "@/lib/api/access";
+import { GET as unitsGet } from "@/app/api/v1/access/units/route";
+import { ACCESS_MODE } from "@/lib/map/modes/access";
+import type { MapDataBundle, MapFilters } from "@/lib/map/types";
 
 /**
- * ACCESS rules, pinned on a small synthetic world (all ids are test fixtures,
- * not real places). The rules that matter most here: a stale report is
- * uncertainty, never unavailability; thin reporting is "insufficient data",
- * never a gap; and every API payload states that the data is simulated.
+ * ACCESS on real data: mapped facilities (OpenStreetMap via HOT/HDX), DOH
+ * medicine prices and reported dengue cases. These tests pin what makes it
+ * trustworthy: the readiness gate, totals that add up, unknowns that stay
+ * unknown, and nothing attributed to the wrong place.
  */
 
-const THRESHOLDS = { fresh: 48, aging: 168 };
-const WEEKS = [
-  { index: 0, periodStart: "2026-01-04", periodEnd: "2026-01-10", asOf: "2026-01-10T23:59:59Z" },
-  { index: 1, periodStart: "2026-01-11", periodEnd: "2026-01-17", asOf: "2026-01-17T23:59:59Z" },
-  { index: 2, periodStart: "2026-01-18", periodEnd: "2026-01-24", asOf: "2026-01-24T23:59:59Z" },
-];
-const MEDICINE: Medicine = { id: "test-med", name: "Test medicine", category: "test", isSample: true };
-
-function facility(id: string, areaId: string, psgcCode: string | null): Facility {
-  return {
-    id,
-    name: `Test facility ${id}`,
-    type: "pharmacy",
-    psgcCode,
-    areaId,
-    latitude: 0,
-    longitude: 0,
-    source: "test",
-    updatedAt: "2026-01-01T00:00:00Z",
-    isSample: true,
-  };
-}
-
-function snapshot(facilityId: string, availability: InventorySnapshot["availability"], updatedAt: string): InventorySnapshot {
-  return {
-    id: `snap-${facilityId}-${updatedAt}`,
-    facilityId,
-    medicineId: MEDICINE.id,
-    availability,
-    quantityBucket: null,
-    updatedAt,
-    source: "test",
-    isSample: true,
-  };
-}
-
-/** `total` searches in an area during a week, `notFound` of them finding nothing nearby. */
-function searches(areaId: string, week: number, total: number, notFound: number): MedicineSearchEvent[] {
-  return Array.from({ length: total }, (_, i) => ({
-    id: `ev-${areaId}-${week}-${i}`,
-    medicineId: MEDICINE.id,
-    areaId,
-    psgcCode: null,
-    timestamp: `${WEEKS[week].periodStart}T12:00:00Z`,
-    resultType: i < notFound ? ("not_found_nearby" as const) : ("available_found" as const),
-    isSample: true,
-  }));
-}
-
-const FRESH = "2026-01-24T12:00:00Z"; // 12 h before the last week ends
-const STALE = "2025-12-01T00:00:00Z"; // weeks before the last week ends
-
-// Area A: 3 facilities, all fresh; 1 of 3 confirms availability.
-// Area B: 3 facilities, only 1 fresh; the 2 stale reports say "unavailable".
-const FACILITIES = [
-  facility("a1", "area-a", "TEST-PSGC-A"),
-  facility("a2", "area-a", "TEST-PSGC-A"),
-  facility("a3", "area-a", "TEST-PSGC-A"),
-  facility("b1", "area-b", null),
-  facility("b2", "area-b", null),
-  facility("b3", "area-b", null),
-];
-const SNAPSHOTS = [
-  snapshot("a1", "available", FRESH),
-  snapshot("a2", "unavailable", FRESH),
-  snapshot("a3", "unavailable", FRESH),
-  snapshot("b1", "available", FRESH),
-  snapshot("b2", "unavailable", STALE),
-  snapshot("b3", "unavailable", STALE),
-];
-
-function run(events: MedicineSearchEvent[], facilities = FACILITIES, snapshots = SNAPSHOTS) {
-  const states = facilityStates(facilities, [MEDICINE.id], snapshots, WEEKS, THRESHOLDS);
-  const metrics = computeAccessMetrics({
-    facilities,
-    medicineIds: [MEDICINE.id],
-    states,
-    events,
-    weeks: WEEKS,
-    psgcByArea: Object.fromEntries(facilities.map((f) => [f.areaId, f.psgcCode])),
-  });
-  return { states, metrics };
-}
-
-const lastWeek = (metrics: ReturnType<typeof run>["metrics"], areaId: string) =>
-  metrics.find((m) => m.areaId === areaId && m.periodStart === WEEKS[2].periodStart)!;
-
-// Early-period baseline of 10 searches a week, then a doubling with half not found.
-const RISING = [
-  ...searches("area-a", 0, 10, 0),
-  ...searches("area-a", 1, 10, 0),
-  ...searches("area-a", 2, 20, 10),
-  ...searches("area-b", 0, 10, 0),
-  ...searches("area-b", 1, 10, 0),
-  ...searches("area-b", 2, 20, 10),
-];
-
-describe("the access-gap rule", () => {
-  it("classes rising demand, few confirmations and failed searches as elevated", () => {
-    const m = lastWeek(run(RISING).metrics, "area-a");
-
-    expect(m.demandRatio).toBe(2);
-    expect(m.facilityCoverage).toBe(1);
-    expect(m.confirmedAvailable).toBe(1);
-    expect(m.reportedUnavailable).toBe(2);
-    expect(m.accessGap).toBe("elevated");
-    expect(m.confidence).toBe("high");
+describe("ACCESS readiness", () => {
+  it("is ready on the built reference data", () => {
+    expect(accessReadiness(ACCESS_REFERENCE)).toEqual({ ready: true, reasons: [] });
   });
 
-  it("reports thin facility coverage as insufficient data, never as a gap", () => {
-    const m = lastWeek(run(RISING).metrics, "area-b");
+  it("is not ready on sample data, with no facilities, or with an unpinned source", () => {
+    const sample = { ...ACCESS_REFERENCE, meta: { ...ACCESS_REFERENCE.meta, isSample: true } };
+    expect(accessReadiness(sample).ready).toBe(false);
 
-    expect(m.facilityCoverage).toBeCloseTo(0.33, 2);
-    expect(m.accessGap).toBe("insufficient_data");
-    expect(m.reasons.join(" ")).toMatch(/current report/);
-  });
+    const empty = {
+      ...ACCESS_REFERENCE,
+      meta: { ...ACCESS_REFERENCE.meta, facilityCounts: { ...ACCESS_REFERENCE.meta.facilityCounts, kept: 0 } },
+    };
+    expect(accessReadiness(empty).reasons).toContain("No facility records are loaded.");
 
-  it("counts a stale report as uncertainty, not as unavailable", () => {
-    const m = lastWeek(run(RISING).metrics, "area-b");
-
-    expect(m.staleInventory).toBe(2);
-    expect(m.reportedUnavailable).toBe(0);
-  });
-
-  it("does not judge a gap from too few searches", () => {
-    const few = [...searches("area-a", 0, 3, 0), ...searches("area-a", 1, 3, 0), ...searches("area-a", 2, 5, 5)];
-    const m = lastWeek(run(few).metrics, "area-a");
-
-    expect(m.searchDemand).toBe(5);
-    expect(m.accessGap).toBe("low");
-    expect(m.reasons).toContain("Too few searches to assess an access gap");
-  });
-
-  it("classes a high share of failed searches as moderate even with good availability", () => {
-    const allAvailable = SNAPSHOTS.map((s) => ({ ...s, availability: "available" as const }));
-    const steady = [...searches("area-a", 0, 10, 0), ...searches("area-a", 1, 10, 0), ...searches("area-a", 2, 10, 3)];
-    const m = lastWeek(run(steady, FACILITIES, allAvailable).metrics, "area-a");
-
-    expect(m.demandRatio).toBe(1);
-    expect(m.accessGap).toBe("moderate");
-  });
-
-  it("marks every metric as sample data", () => {
-    expect(run(RISING).metrics.every((m) => m.isSample)).toBe(true);
+    const unpinned = {
+      ...ACCESS_REFERENCE,
+      meta: {
+        ...ACCESS_REFERENCE.meta,
+        sources: ACCESS_REFERENCE.meta.sources.map((s, i) => (i === 0 ? { ...s, sha256: undefined } : s)),
+      },
+    };
+    expect(accessReadiness(unpinned).ready).toBe(false);
   });
 });
 
-function bundleFor(events: MedicineSearchEvent[]) {
-  const { states, metrics } = run(events);
-  return packAccessBundle({
-    isSample: true,
-    medicines: [MEDICINE],
-    facilities: FACILITIES,
-    weeks: WEEKS,
-    states,
-    metrics,
-    freshnessThresholds: THRESHOLDS,
-  });
-}
+describe("ACCESS reference data", () => {
+  const { meta, units, medicines } = ACCESS_REFERENCE;
 
-describe("areas for assessment (ACCESS → Policy)", () => {
-  it("lists only areas with a potential gap, most serious first, as review prompts", () => {
-    const assessments = accessAssessments(bundleFor(RISING));
-
-    expect(assessments.map((a) => [a.areaId, a.gap])).toEqual([
-      ["area-a", "elevated"],
-      ["area-b", "insufficient_data"],
-    ]);
-    expect(assessments[0].areaForAssessment).toMatch(/^Review /);
-    expect(assessments[1].areaForAssessment).toMatch(/reporting coverage/);
-  });
-});
-
-const LGUS: LGU[] = [
-  { id: "area-a", name: "Test Area A", province: "Test Province", region: "Test Region", latitude: 1, longitude: 2 },
-  { id: "area-b", name: "Test Area B", province: "Test Province", region: "Test Region", latitude: 3, longitude: 4 },
-];
-
-function payload(overrides: Partial<Parameters<typeof buildAccessMetrics>[0]> = {}) {
-  const bundle = bundleFor(RISING);
-  return buildAccessMetrics({
-    bundle,
-    assessments: accessAssessments(bundle),
-    source: "Test source",
-    sourceNote: "Test note",
-    lgus: LGUS,
-    limit: 1000,
-    ...overrides,
-  });
-}
-
-describe("the ACCESS API payload", () => {
-  it("states that the data is simulated and what it cannot support", () => {
-    const data = payload();
-
-    expect(data.scope.isSample).toBe(true);
-    expect(data.scope.doesNotSupport).toEqual(ACCESS_SCOPE_DOES_NOT_SUPPORT);
-    expect(data.scope.coverage).toEqual({ from: "2026-01-04", to: "2026-01-24" });
-    expect(data.metrics.every((m) => m.isSample)).toBe(true);
+  it("covers the 126 reporting units, and unit totals add up to the facilities kept", () => {
+    expect(units).toHaveLength(126);
+    expect(new Set(units.map((u) => u.id)).size).toBe(126);
+    expect(units.reduce((sum, u) => sum + totalMapped(u), 0)).toBe(meta.facilityCounts.kept);
+    for (const u of units) for (const t of FACILITY_TYPES) expect(u.mappedFacilities[t]).toBeGreaterThanOrEqual(0);
   });
 
-  it("keeps an area's PSGC code instead of dropping it", () => {
-    const data = payload();
-
-    expect(data.metrics.filter((m) => m.areaId === "area-a").every((m) => m.psgcCode === "TEST-PSGC-A")).toBe(true);
-    expect(data.metrics.filter((m) => m.areaId === "area-b").every((m) => m.psgcCode === null)).toBe(true);
+  it("never fills population, stock or searches", () => {
+    for (const u of units) expect(u.population).toBeNull();
+    for (const u of buildAccessUnits().units) {
+      expect(u.medicineAvailability).toBeNull();
+      expect(u.searchDemand).toBeNull();
+    }
   });
 
-  it("names areas from the geography list", () => {
-    const data = payload();
-
-    expect(data.areas.map((a) => [a.id, a.name, a.facilityCount])).toEqual([
-      ["area-a", "Test Area A", 3],
-      ["area-b", "Test Area B", 3],
-    ]);
+  it("sums dengue cases over usable weeks only, never more weeks than the year has", () => {
+    for (const u of units) {
+      for (const y of u.dengue ?? []) {
+        expect(y.usableWeeks).toBeLessThanOrEqual(y.weeks);
+        if (y.usableWeeks === 0) expect(y.reportedCases).toBe(0);
+      }
+    }
   });
 
-  it("applies the area filter and the row limit", () => {
-    expect(payload({ areaId: "area-b" }).metrics.every((m) => m.areaId === "area-b")).toBe(true);
-    expect(payload({ areaId: "area-b" }).areasForAssessment.map((a) => a.areaId)).toEqual(["area-b"]);
-    expect(payload({ limit: 2 }).metrics).toHaveLength(2);
+  it("keeps each price range ordered and never prices an item the DOH hides", () => {
+    for (const m of medicines) {
+      for (const item of m.items) {
+        if (isPriced(item)) {
+          expect(item.lowestPhp).toBeLessThanOrEqual(item.medianPhp);
+          expect(item.medianPhp).toBeLessThanOrEqual(item.highestPhp);
+          expect(item.reportingFacilities).toBeGreaterThan(0);
+        } else {
+          expect(item).not.toHaveProperty("medianPhp");
+        }
+      }
+    }
+    expect(buildAccessMedicines().medicines.every((m) => m.onPnfEml)).toBe(true);
+  });
+
+  it("states its sources with links, licences and pinned hashes", () => {
+    for (const s of meta.sources) {
+      expect(s.url).toMatch(/^https:\/\//);
+      expect(s.license).toBeTruthy();
+      expect(s.sha256).toMatch(/^[0-9a-f]{64}$/);
+    }
   });
 });
 
-describe("ACCESS missing data is never zero or 0,0", () => {
-  it("refuses a metric for a week outside the calendar instead of overwriting week 0", () => {
-    const bundle = bundleFor(RISING);
-    const { metrics } = run(RISING);
-    const stray = { ...metrics[0], periodStart: "2030-01-06" };
-    expect(() =>
-      packAccessBundle({
-        isSample: bundle.isSample,
-        medicines: bundle.medicines,
-        facilities: bundle.facilities,
-        weeks: bundle.weeks,
-        states: [],
-        metrics: [stray],
-        freshnessThresholds: bundle.freshnessThresholds,
-      }),
-    ).toThrow(/unknown week 2030-01-06/);
+describe("ACCESS places", () => {
+  it("maps an LGU to its own reporting unit, and never to someone else's", () => {
+    expect(accessUnitForLgu("quezon-city")?.id).toBe("quezon-city");
+    expect(accessUnitForLgu("pasig")?.id).toBe("pasig-city");
+    // Antipolo is reported inside Rizal, so it has no figures of its own.
+    expect(accessUnitForLgu("antipolo")).toBeUndefined();
   });
 
-  it("gives an area with no known location null coordinates, not 0,0", () => {
-    const data = payload({ lgus: LGUS.filter((l) => l.id !== "area-b") });
-    const b = data.areas.find((a) => a.id === "area-b");
-    expect(b).toMatchObject({ latitude: null, longitude: null });
+  it("rejects an unknown unit in the API and answers a known one", async () => {
+    const request = (q: string) => new NextRequest(`http://localhost/api/v1/access/units${q}`);
+    const bad = await unitsGet(request("?unitId=atlantis"));
+    expect(bad.status).toBe(400);
+    const ok = await unitsGet(request("?unitId=quezon-city"));
+    const body = await ok.json();
+    expect(body.meta.status).toBe("live");
+    expect(body.data.units.map((u: { id: string }) => u.id)).toEqual(["quezon-city"]);
   });
 
-  it("has no weekly search total when an area has no metric that week", async () => {
-    const { weeklySearchTotal } = await import("@/lib/map/modes/access");
-    const bundle = bundleFor(RISING);
-    const total = weeklySearchTotal(bundle, ["area-a", "area-b"], MEDICINE.id, 0);
-    expect(typeof total).toBe("number");
-    expect(weeklySearchTotal(bundle, ["area-a", "area-missing"], MEDICINE.id, 0)).toBeNull();
-    expect(weeklySearchTotal(bundle, [], MEDICINE.id, 0)).toBeNull();
+  it("keeps the retired metrics endpoint empty and says where the real data is", () => {
+    const retired = buildRetiredAccessMetrics();
+    expect(retired.metrics).toEqual([]);
+    expect(retired.scope.coverage).toEqual({ from: null, to: null });
+    expect(retired.scope.sourceNote).toContain("/api/v1/access/units");
+  });
+});
+
+describe("the ACCESS map", () => {
+  const filters = { facilityType: "pharmacy" } as MapFilters;
+
+  it("draws nothing and says why when the facility points failed to load", () => {
+    const failed = ACCESS_MODE.prepare!({ accessPointsError: "HTTP 404" } as MapDataBundle, filters);
+    expect(failed.legend.metric).toContain("HTTP 404");
+    expect(failed.frameAt(0, { links: false, columns: false, areas: true }).features).toEqual([]);
+  });
+
+  it("draws only the selected facility type and shades units by mapped density", () => {
+    const bundle = {
+      accessPoints: {
+        meta: {
+          license: "ODbL 1.0",
+          attribution: "© OpenStreetMap contributors, ODbL",
+          source: "",
+          snapshot: "2026-10-13",
+          types: ["hospital", "clinic", "pharmacy", "laboratory"],
+          units: ["quezon-city"],
+        },
+        points: [
+          [121.05, 14.65, 2, 0, "A pharmacy"],
+          [121.06, 14.66, 0, 0, "A hospital"],
+        ],
+      },
+    } as MapDataBundle;
+    const frame = ACCESS_MODE.prepare!(bundle, filters).frameAt(0, { links: false, columns: false, areas: true });
+    expect(frame.features.map((f) => f.name)).toEqual(["A pharmacy"]);
+    expect(frame.features[0].rows.find((r) => r.label === "Medicine stock")?.value).toMatch(/Unknown/);
+    expect(frame.areas?.fills["quezon-city"]).toBeDefined();
   });
 });

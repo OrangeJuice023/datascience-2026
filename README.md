@@ -44,6 +44,7 @@ TRACE (Lab) ──► ANALYZE (Explore) ──► ACT (Policy)
 | Lab | `/lab` | Investigate the pattern behind a signal | **Real** OpenDengue national weekly series |
 | ACCESS | `/access` | Medicine availability, search demand and potential access gaps | **Demo** (simulated facilities, inventory and searches) |
 | Policy | `/policy` | LGU decision support: areas for verification and assessment, Policy Copilot | Demo evidence; Copilot needs a server-side model key |
+| Data Sources | `/data-sources` | Every dataset SIGMA uses: purpose, where it appears, coverage, update behaviour, licence and credit line; demo and planned sources listed separately | Rendered from the source catalogue (`web/src/data/source-catalog.ts`), the same one `GET /api/v1/sources` serves |
 | Documentation | `/documentation` | Rendered API reference | Generated from the API registry |
 
 ## Architecture
@@ -205,8 +206,7 @@ and mobile lint, typecheck and tests, the web build, and a Python compile check.
 - Connect the EARS results to `/api/v1/dengue/signals`.
 - A real ACCESS data source and provider, with a privacy review
   ([docs/access-data-model.md](docs/access-data-model.md#implementation-status-and-open-decisions)).
-- Live signal ingestion (GDELT, Philippine news) and the Data Sources page
-  (shown disabled in the navigation).
+- Live signal ingestion (GDELT, Philippine news).
 - Weather for reporting units beyond the 12 CCHAIN cities, CHIRPS rainfall past
   2022, and the fitted forecasting models from the research plan
   ([docs/environmental-covariates.md](docs/environmental-covariates.md)).

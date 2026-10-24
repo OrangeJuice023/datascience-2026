@@ -1,30 +1,14 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card } from "@/components/ui/card";
 import { EvidenceBadge } from "@/components/ui/evidence-badge";
-import { MapPanel } from "@/components/maps/map-panel";
-import { MapLegend } from "@/components/maps/map-legend";
-import { SignalTable } from "@/components/dashboard/signal-table";
 import { ProcessStrip } from "@/components/dashboard/process-strip";
-import { Sigi, sigiStateForData } from "@/components/mascot/sigi";
-import { DEMO_SIGNALS } from "@/data/demo-signals";
-import { getLguById } from "@/data/demo-lgus";
-import { signalsToMapMarkers } from "@/lib/map-markers";
+import { Sigi } from "@/components/mascot/sigi";
+import { SOURCE_CATALOG } from "@/data/source-catalog";
 import { formatCount, formatIsoDate } from "@/lib/map/format";
-import { SEVERITY_ORDER, SIGNAL_STATUS_CONFIG } from "@/lib/status";
-
-const MARKERS = signalsToMapMarkers(DEMO_SIGNALS);
-
-const RECENT_SIGNALS = [...DEMO_SIGNALS]
-  .sort((a, b) => {
-    const bySeverity = SEVERITY_ORDER[b.status] - SEVERITY_ORDER[a.status];
-    return bySeverity !== 0 ? bySeverity : b.date.localeCompare(a.date);
-  })
-  .slice(0, 8);
+import type { SigmaSummary } from "@/lib/sigma/summary";
 
 /** Computed on the server from real formal observations; null if unavailable. */
 export interface FormalSummary {
@@ -36,139 +20,152 @@ export interface FormalSummary {
   source: string;
 }
 
-export function OverviewView({ formal }: { formal: FormalSummary | null }) {
-  const [selectedId, setSelectedId] = useState<string | undefined>();
-  const selectedLgu = selectedId ? getLguById(selectedId) : undefined;
-  const selectedSignal = selectedId
-    ? [...DEMO_SIGNALS]
-        .filter((s) => s.locationId === selectedId)
-        .sort((a, b) => SEVERITY_ORDER[b.status] - SEVERITY_ORDER[a.status])[0]
-    : undefined;
+const CONNECTED_SOURCES = SOURCE_CATALOG.filter((s) => s.status === "connected");
 
+/**
+ * Overview: what SIGMA is, what data it really holds and how its two
+ * signals work. Every figure is counted from the data on the server; the
+ * page describes historical analysis, never current conditions.
+ */
+export function OverviewView({ formal, sigma }: { formal: FormalSummary | null; sigma: SigmaSummary | null }) {
+  const loaded = formal !== null || sigma !== null;
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Public health intelligence"
         title="SIGMA"
-        subtitle="Trace signals across space and time. Investigate patterns. Support verification."
+        subtitle="Retrospective dengue surveillance for Philippine LGUs: when did weekly reports rise unusually fast (EARS), and when did they pass the DOH thresholds?"
       />
 
       <ProcessStrip />
 
       <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white/60 p-3 sm:p-4">
-        <Sigi state={sigiStateForData({ connected: formal !== null, hasResult: formal !== null })} size={72} />
+        {/* A result was read, or the source could not be: the same rule as sigiStateForData. */}
+        <Sigi state={loaded ? "insight" : "unavailable"} size={72} />
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-slate-900">Sigi, the SIGMA companion</p>
-          <p className="text-xs text-slate-500">
-            {formal
-              ? "The historical national record is loaded. The signals on this page are demo data, and the anomaly model is not fitted."
-              : "The formal record could not be read. Nothing on this page describes current conditions."}
+          <p className="text-sm font-semibold text-slate-900">What this page shows</p>
+          <p className="text-sm text-slate-600">
+            {loaded
+              ? "Historical records only. SIGMA looks back at 2016–2021 reporting-unit data and the 2012–2023 national series; it is not a real-time alert system and does not forecast."
+              : "The data files could not be read, so nothing is summarised here."}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {formal ? (
+        {sigma ? (
           <>
             <StatCard
-              label="Historical dengue observations"
-              value={`${formatCount(formal.weeklyCount)} weeks`}
-              hint={`${formatIsoDate(formal.first)} – ${formatIsoDate(formal.last)} · ${formal.missingWeeks} weeks missing`}
+              label="Reporting units"
+              value={formatCount(sigma.units)}
+              hint={`Weekly, ${formatIsoDate(sigma.firstWeek)} – ${formatIsoDate(sigma.lastWeek)} · ${sigma.weeks} weeks · DOH-EB via HDX`}
               badge={<EvidenceBadge kind="formal" />}
             />
             <StatCard
-              label="Latest formal observation"
-              value={`${formatCount(formal.latest.value)} cases`}
-              hint={`Week of ${formatIsoDate(formal.latest.periodStart)} · national · ${formal.source}`}
-              badge={<EvidenceBadge kind="formal" />}
+              label="Unit-weeks with an EARS alarm"
+              value={formatCount(sigma.earsAlarmUnitWeeks)}
+              hint={`of ${formatCount(sigma.usableUnitWeeks)} usable unit-weeks · peak ${sigma.peak.units} units, week of ${formatIsoDate(sigma.peak.week)}`}
+              badge={<EvidenceBadge kind="model" />}
+            />
+            <StatCard
+              label="Unit-weeks above a DOH threshold"
+              value={formatCount(sigma.dohCrossingUnitWeeks)}
+              hint="Alert or epidemic threshold; thresholds start in 2019"
+              badge={<EvidenceBadge kind="model" />}
             />
           </>
         ) : (
           <StatCard
-            label="Formal observations"
+            label="Reporting-unit results"
             value="Unavailable"
             tone="muted"
-            hint="The formal data source could not be read"
+            hint="The SIGMA results file could not be read"
             badge={<EvidenceBadge kind="formal" />}
           />
         )}
-        <StatCard
-          label="Open-source signals"
-          value="Demo only"
-          tone="muted"
-          hint={`${DEMO_SIGNALS.length} sample signals · no live feed connected`}
-          badge={<EvidenceBadge kind="signal" />}
-        />
-        <StatCard
-          label="Baseline / anomaly model"
-          value="Not fitted"
-          tone="muted"
-          hint="No model output on formal data yet"
-          badge={<EvidenceBadge kind="model" />}
-        />
+        {formal ? (
+          <StatCard
+            label="National weekly series"
+            value={`${formatCount(formal.weeklyCount)} weeks`}
+            hint={`${formatIsoDate(formal.first)} – ${formatIsoDate(formal.last)} · ${formal.missingWeeks} weeks missing · ${formal.source}`}
+            badge={<EvidenceBadge kind="formal" />}
+          />
+        ) : (
+          <StatCard
+            label="National weekly series"
+            value="Unavailable"
+            tone="muted"
+            hint="The OpenDengue series could not be read"
+            badge={<EvidenceBadge kind="formal" />}
+          />
+        )}
       </div>
 
-      {formal && (
-        <p className="-mt-2 text-xs text-slate-500">
-          Formal data is historical and national-only; it does not describe current conditions or
-          any single LGU.{" "}
-          <Link href="/lab" className="font-medium text-accent hover:underline">
-            Explore the record in Lab →
-          </Link>
-        </p>
+      {sigma && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Card className="p-5">
+            <h2 className="text-sm font-semibold text-slate-900">EARS: an unusually fast rise</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              CDC EARS C1, C2 and C3 compare each week with that place&apos;s own recent weeks (a{" "}
+              {sigma.meta.ears.baselineWeeks}-week baseline, at least {sigma.meta.ears.minBaseline} usable). A week
+              alarms when C1 or C2 exceeds {sigma.meta.ears.c1c2Threshold} or C3 exceeds{" "}
+              {sigma.meta.ears.c3Threshold}, and only with at least {sigma.meta.ears.minCount} cases.
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              An alarm is a retrospective statistical signal. It is not a forecast, a measure of local risk or
+              incidence, or an official declaration.
+            </p>
+          </Card>
+          <Card className="p-5">
+            <h2 className="text-sm font-semibold text-slate-900">DOH threshold: high for the season</h2>
+            <p className="mt-2 text-sm text-slate-600">{sigma.meta.doh}</p>
+            <p className="mt-2 text-xs text-slate-500">
+              Computed here from the reporting-unit series to compare with EARS; it is not the DOH&apos;s own
+              published status for any week.
+            </p>
+          </Card>
+          <Card className="p-5 lg:col-span-2">
+            <h2 className="text-sm font-semibold text-slate-900">Assumptions the results depend on</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+              {sigma.meta.assumptions.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+              <li>{sigma.meta.weekNote.replace(/`/g, "")}</li>
+              <li>
+                {sigma.emptyWeeks} week{sigma.emptyWeeks === 1 ? "" : "s"} with no usable report for any unit
+                {sigma.emptyWeeks === 1 ? " is" : " are"} shown as gaps, never as zero.
+              </li>
+            </ul>
+          </Card>
+        </div>
       )}
 
-      <Card className="p-4 sm:p-5">
-        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-slate-900">Demo signal landscape</h2>
-              <EvidenceBadge kind="signal" />
-            </div>
-            <p className="text-xs text-slate-500">
-              Illustrative demo signals across selected Philippine localities. Not case counts.
-            </p>
-          </div>
-          <MapLegend />
-        </div>
-        <MapPanel
-          markers={MARKERS}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          heightClassName="h-80 sm:h-96"
-        />
-        <div className="mt-3 min-h-[1.25rem] text-xs text-slate-500">
-          {selectedLgu && selectedSignal ? (
-            <p>
-              <span className="font-medium text-slate-700">{selectedLgu.name}:</span>{" "}
-              {selectedSignal.disease} — {SIGNAL_STATUS_CONFIG[selectedSignal.status].label}
-            </p>
-          ) : (
-            <p>Select a marker to see its most recent demo signal.</p>
-          )}
-        </div>
-      </Card>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-slate-900">Recent signals</h2>
-            <EvidenceBadge kind="signal" />
-            <span className="text-xs text-slate-400">Demo data</span>
-          </div>
-          <Link href="/lab" className="text-xs font-medium text-accent hover:underline">
-            View in Lab →
+      <Card className="p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-900">Data sources</h2>
+          <Link href="/documentation" className="text-xs font-medium text-accent hover:underline">
+            API and method documentation →
           </Link>
         </div>
-        <SignalTable signals={RECENT_SIGNALS} />
-      </div>
-
-      <Card className="p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Why this matters</h2>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          SIGMA combines observed health indicators and open-source signals to help analysts
-          identify unusual patterns that may warrant verification.
-        </p>
+        <ul className="mt-3 divide-y divide-slate-100">
+          {CONNECTED_SOURCES.map((s) => (
+            <li key={s.sourceId} className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
+              <span className="text-sm font-medium text-slate-800 sm:w-80 sm:shrink-0">
+                {s.url ? (
+                  <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-accent hover:underline">
+                    {s.name}
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                ) : (
+                  s.name
+                )}
+              </span>
+              <span className="text-sm text-slate-600">
+                {s.purpose} <span className="text-slate-400">· {s.licence ?? "licence not verified"}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </Card>
     </div>
   );

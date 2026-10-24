@@ -196,8 +196,13 @@ function prepare(bundle: MapDataBundle, filters: MapFilters): PreparedMode {
   };
 }
 
+/**
+ * The SIGMA results with the layer chosen by `filters.sigmaLayer`. Explore
+ * does not register this directly: it shows one view per layer (below), so
+ * cases, EARS and DOH thresholds are three first-class views.
+ */
 export const SIGMA_MODE: MapModeDefinition = {
-  id: "sigma",
+  id: "ears",
   label: "SIGMA",
   question: "Did EARS warn before DOH thresholds were crossed?",
   availability: "observed",
@@ -209,3 +214,42 @@ export const SIGMA_MODE: MapModeDefinition = {
   defaultToggles: { areas: true },
   prepare,
 };
+
+function sigmaView(layer: SigmaLayer, label: string, question: string, evidence: MapModeDefinition["evidence"]): MapModeDefinition {
+  return {
+    ...SIGMA_MODE,
+    id: layer,
+    label,
+    question,
+    evidence,
+    filters: [],
+    // Area fills carry categorical states only, never counts.
+    layerToggles: layer === "cases" ? [] : ["areas"],
+    defaultToggles: layer === "cases" ? {} : { areas: true },
+    prepare: (bundle, filters) => prepare(bundle, { ...filters, sigmaLayer: layer }),
+  };
+}
+
+export const CASES_MODE = sigmaView(
+  "cases",
+  "Reported cases",
+  "How many dengue cases did each reporting unit report each week?",
+  "health_observations",
+);
+export const EARS_MODE = sigmaView(
+  "ears",
+  "EARS signal",
+  "Which weeks rose unusually fast against each area's own recent weeks?",
+  "model_output",
+);
+export const DOH_MODE = sigmaView(
+  "doh",
+  "DOH threshold",
+  "Which weeks were above the DOH alert or epidemic threshold for the season?",
+  "model_output",
+);
+
+/** Explore's views that draw SIGMA results. */
+export function isSigmaView(id: string): boolean {
+  return id === "cases" || id === "ears" || id === "doh";
+}

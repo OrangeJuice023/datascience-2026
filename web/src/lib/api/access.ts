@@ -1,163 +1,134 @@
 import type {
-  AccessArea,
-  AccessAssessmentRecord,
-  AccessMetricRecord,
+  AccessMedicinesData,
   AccessMetricsData,
+  AccessSourceRecord,
+  AccessUnitsData,
 } from "@sigma/contracts";
-import type { LGU } from "@/types";
-import type { AccessBundle, AccessMetricPoint } from "@/lib/access/bundle";
-import { GAP_LABEL, areaIds } from "@/lib/access/bundle";
-import type { AccessAssessment } from "@/lib/access/assessments";
+import { ACCESS_REFERENCE, isPriced, totalMapped, type AccessSource } from "@/lib/access/reference";
 
 /**
- * ACCESS service layer.
- *
- * The ACCESS module is a fully wired prototype running on simulated records.
- * Every response therefore carries an explicit scope block stating what the
- * data can and cannot support, so a client cannot present demo coverage as
- * real medicine availability.
- *
- * A facility appearing in a list means only that a demo record exists for it.
- * It does not establish that the facility is operating, stocked, staffed or
- * clinically accessible. That distinction is stated in the response.
+ * ACCESS service layer, over the real reference data built by
+ * scripts/access/build-access.mjs. Every response says what the data can and
+ * cannot support: facilities are what is mapped in OpenStreetMap, prices are
+ * DOH hospital procurement prices, and medicine stock and search demand are
+ * never reported because no public source exists for them.
  */
 
 export const ACCESS_SCOPE_SUPPORTS = [
-  "How many facilities have a current (fresh or aging) report in a given week.",
-  "How many of those reports indicate availability, unavailability, or staleness.",
-  "Relative search demand per area and medicine, as a demand signal only.",
-  "A rule-based gap class (low, moderate, elevated, insufficient data) with an explicit confidence level.",
+  "How many hospitals, clinics, pharmacies and laboratories are mapped in OpenStreetMap in each reporting unit, and how dense they are per 100 km².",
+  "Each reporting unit's reported dengue cases per year (2016-2020), summed over usable weeks only.",
+  "What DOH hospitals paid for dengue medicines in 2025 procurement, and whether each medicine is on the PNF essential list.",
 ];
 
 export const ACCESS_SCOPE_DOES_NOT_SUPPORT = [
-  "Whether a medicine is actually in stock at a real pharmacy or health centre.",
-  "Whether a facility is operating, staffed, or clinically accessible.",
-  "A shortage declaration, procurement instruction, or any clinical recommendation.",
-  "Any statement about a real LGU, because every record in this module is simulated.",
+  "Whether a medicine is in stock at any pharmacy or health centre (no public source reports it).",
+  "What people search for (SIGMA collects no search data).",
+  "Per-person rates: population by reporting unit is not in the dataset.",
+  "A shortage declaration, procurement instruction or clinical recommendation.",
 ];
 
-export interface BuildAccessMetricsInput {
-  bundle: AccessBundle;
-  assessments: AccessAssessment[];
-  /** The demo source label, e.g. "Demo inventory (prototype)". */
-  source: string;
-  sourceNote: string;
-  /** SIGMA geography ids of the areas covered by the bundle. */
-  lgus: LGU[];
-  medicineId?: string;
-  areaId?: string;
-  limit: number;
+export function toSourceRecord(s: AccessSource): AccessSourceRecord {
+  return {
+    id: s.id,
+    title: s.title,
+    publisher: s.publisher,
+    url: s.url,
+    license: s.license,
+    attribution: s.attribution,
+    snapshot: s.snapshot ?? null,
+    edition: s.edition ?? null,
+    sha256: s.sha256 ?? null,
+  };
 }
 
-export function buildAccessMetrics(input: BuildAccessMetricsInput): AccessMetricsData {
-  const { bundle } = input;
-  const nameById = new Map(input.lgus.map((lgu) => [lgu.id, lgu]));
-  const areaName = (id: string) => nameById.get(id)?.name ?? id;
-  // The bundle drops psgcCode from each metric point (it is constant per
-  // area), so recover it from the area's facilities rather than reporting null.
-  const psgcByArea = new Map<string, string>();
-  for (const f of bundle.facilities) {
-    if (f.psgcCode && !psgcByArea.has(f.areaId)) psgcByArea.set(f.areaId, f.psgcCode);
-  }
-
-  const areas: AccessArea[] = areaIds(bundle).map((id) => {
-    const lgu = nameById.get(id);
-    return {
-      id,
-      name: areaName(id),
-      province: lgu?.province ?? "",
-      region: lgu?.region ?? "",
-      // An area with no known location has no coordinates (null), never 0,0.
-      latitude: lgu?.latitude ?? null,
-      longitude: lgu?.longitude ?? null,
-      facilityCount: bundle.facilities.filter((f) => f.areaId === id).length,
-    };
-  });
-
-  const metrics: AccessMetricRecord[] = [];
-  for (const medicine of bundle.medicines) {
-    if (input.medicineId && medicine.id !== input.medicineId) continue;
-    for (const [areaId, series] of Object.entries(bundle.metrics[medicine.id] ?? {})) {
-      if (input.areaId && areaId !== input.areaId) continue;
-      series.forEach((point: AccessMetricPoint, weekIndex: number) => {
-        const week = bundle.weeks[weekIndex];
-        if (!week) return;
-        metrics.push({
-          medicineId: medicine.id,
-          medicineName: medicine.name,
-          areaId,
-          areaName: areaName(areaId),
-          psgcCode: psgcByArea.get(areaId) ?? null,
-          periodStart: week.periodStart,
-          periodEnd: week.periodEnd,
-          searchDemand: point.searchDemand,
-          notFoundSearches: point.notFoundSearches,
-          demandRatio: point.demandRatio,
-          facilities: point.facilities,
-          confirmedAvailable: point.confirmedAvailable,
-          reportedUnavailable: point.reportedUnavailable,
-          staleInventory: point.staleInventory,
-          unknownInventory: point.unknownInventory,
-          facilityCoverage: point.facilityCoverage,
-          accessGap: point.accessGap,
-          accessGapLabel: GAP_LABEL[point.accessGap],
-          confidence: point.confidence,
-          reasons: point.reasons,
-          isSample: true,
-        });
-      });
-    }
-  }
-
-  const assessments: AccessAssessmentRecord[] = input.assessments
-    .filter(
-      (a) =>
-        (!input.medicineId || a.medicineId === input.medicineId) &&
-        (!input.areaId || a.areaId === input.areaId),
-    )
-    .map((a: AccessAssessment) => ({
-      areaId: a.areaId,
-      areaName: areaName(a.areaId),
-      medicineId: a.medicineId,
-      medicineName: a.medicineName,
-      gap: a.gap,
-      gapLabel: a.gapLabel,
-      confidence: a.confidence,
-      observed: a.observed,
-      areaForAssessment: a.areaForAssessment,
-    }));
-
-  const weeks = bundle.weeks.map((w) => ({
-    index: w.index,
-    periodStart: w.periodStart,
-    periodEnd: w.periodEnd,
-  }));
-
+export function buildAccessUnits(input: { unitId?: string } = {}): AccessUnitsData {
+  const { meta, units } = ACCESS_REFERENCE;
+  const selected = input.unitId ? units.filter((u) => u.id === input.unitId) : units;
   return {
     scope: {
-      isSample: bundle.isSample,
-      source: input.source,
-      sourceNote: input.sourceNote,
-      areas: areas.length,
-      facilities: bundle.facilities.length,
-      medicines: bundle.medicines.length,
-      weeks: weeks.length,
-      coverage: {
-        from: weeks[0]?.periodStart ?? "",
-        to: weeks[weeks.length - 1]?.periodEnd ?? "",
-      },
-      supports: [...ACCESS_SCOPE_SUPPORTS],
-      doesNotSupport: [...ACCESS_SCOPE_DOES_NOT_SUPPORT],
+      question: meta.question,
+      units: selected.length,
+      facilitiesMapped: selected.reduce((sum, u) => sum + totalMapped(u), 0),
+      supports: ACCESS_SCOPE_SUPPORTS,
+      doesNotSupport: ACCESS_SCOPE_DOES_NOT_SUPPORT,
+      limitations: meta.limitations,
     },
-    medicines: bundle.medicines.map((m) => ({
+    sources: meta.sources.map(toSourceRecord),
+    units: selected.map((u) => ({
+      id: u.id,
+      name: u.name,
+      unitType: u.unitType,
+      regionId: u.regionId,
+      psgcCode: u.psgcCode,
+      areaSqKm: u.areaSqKm,
+      mappedFacilities: u.mappedFacilities,
+      mappedPer100SqKm: u.mappedPer100SqKm,
+      population: null,
+      medicineAvailability: null,
+      searchDemand: null,
+      dengue: u.dengue,
+    })),
+  };
+}
+
+export function buildAccessMedicines(): AccessMedicinesData {
+  const { meta, medicines } = ACCESS_REFERENCE;
+  return {
+    scope: {
+      priceBasis:
+        "Unit prices DOH hospitals paid in 2025 procurement (2026 interim Drug Price Reference Index): lowest, median and highest across reporting hospitals. Not private pharmacy shelf prices.",
+      doesNotSupport: ACCESS_SCOPE_DOES_NOT_SUPPORT.slice(0, 1).concat([
+        "Prices for dengue rapid tests (no public source).",
+      ]),
+    },
+    sources: meta.sources.filter((s) => s.id === "doh-dpri-dashboard").map(toSourceRecord),
+    medicines: medicines.map((m) => ({
       id: m.id,
       name: m.name,
-      category: m.category,
-      isSample: m.isSample,
+      role: m.role,
+      onPnfEml: m.onPnfEml,
+      pnfPage: m.pnfPage,
+      basis: m.basis,
+      prices: m.items.map((item) =>
+        isPriced(item)
+          ? {
+              item: item.item,
+              status: item.status,
+              lowestPhp: item.lowestPhp,
+              medianPhp: item.medianPhp,
+              highestPhp: item.highestPhp,
+              reportingFacilities: item.reportingFacilities,
+            }
+          : { item: item.item, status: item.status, lowestPhp: null, medianPhp: null, highestPhp: null, reportingFacilities: null },
+      ),
     })),
-    areas,
-    weeks,
-    metrics: metrics.slice(0, input.limit),
-    areasForAssessment: assessments,
+  };
+}
+
+/**
+ * GET /access/metrics served weekly demo inventory and searches. Those
+ * inputs have no real source, so the endpoint now returns empty lists and
+ * says where the real ACCESS data is.
+ */
+export function buildRetiredAccessMetrics(): AccessMetricsData {
+  return {
+    scope: {
+      isSample: false,
+      source: "Retired: no public source for weekly medicine stock or searches",
+      sourceNote:
+        "This endpoint served demo inventory. Real ACCESS data (mapped facilities, DOH medicine prices) is at /api/v1/access/units and /api/v1/access/medicines.",
+      areas: 0,
+      facilities: 0,
+      medicines: 0,
+      weeks: 0,
+      coverage: { from: null, to: null },
+      supports: [],
+      doesNotSupport: ACCESS_SCOPE_DOES_NOT_SUPPORT,
+    },
+    medicines: [],
+    areas: [],
+    weeks: [],
+    metrics: [],
+    areasForAssessment: [],
   };
 }

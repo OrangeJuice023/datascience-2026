@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "./brand-mark";
-import { PRIMARY_NAV, SECONDARY_NAV } from "@/lib/nav";
+import { PRIMARY_NAV, SECONDARY_NAV, isNavActive } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 export function SidebarContent({
@@ -32,7 +32,7 @@ export function SidebarContent({
       <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="flex flex-col gap-1">
           {PRIMARY_NAV.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isNavActive(item.href, pathname);
             const Icon = item.icon;
             return (
               <li key={item.href}>
@@ -104,22 +104,22 @@ export function SidebarContent({
 
       <div className="border-t border-slate-200 px-4 py-4">
         <dl className="space-y-2 text-[11px]">
-          <div className="flex items-center justify-between">
-            <dt className="font-medium text-slate-400">Formal data</dt>
+          <div className="flex items-center justify-between gap-2">
+            <dt className="font-medium text-slate-400">Reporting units</dt>
             <dd className="rounded-full bg-teal-50 px-2 py-0.5 font-medium text-teal-700 ring-1 ring-teal-200">
-              OpenDengue · static
+              HDX · 2016–2021
             </dd>
           </div>
-          <div className="flex items-center justify-between">
-            <dt className="font-medium text-slate-400">Signals</dt>
-            <dd className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700 ring-1 ring-amber-200">
-              Demo data
+          <div className="flex items-center justify-between gap-2">
+            <dt className="font-medium text-slate-400">National series</dt>
+            <dd className="rounded-full bg-teal-50 px-2 py-0.5 font-medium text-teal-700 ring-1 ring-teal-200">
+              OpenDengue · 2012–2023
             </dd>
           </div>
-          <div className="flex items-center justify-between">
-            <dt className="font-medium text-slate-400">Models</dt>
+          <div className="flex items-center justify-between gap-2">
+            <dt className="font-medium text-slate-400">Forecast model</dt>
             <dd className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600 ring-1 ring-slate-200">
-              Not fitted
+              None
             </dd>
           </div>
         </dl>

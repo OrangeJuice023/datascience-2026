@@ -9,7 +9,7 @@ const SOURCES = [
   {
     id: "opendengue",
     name: "OpenDengue v1.3",
-    role: "Lab · Trend",
+    role: "Lab · National trend",
     publisher: "OpenDengue project (Clarke J et al., Sci Data 2024;11:296)",
     coverage: "Philippines, national · weekly · Dec 30, 2012 – Nov 25, 2023",
     note: "Temporal extract (WPRO). 544 recorded weeks; 25 weeks have no record and are shown as gaps.",
@@ -19,7 +19,7 @@ const SOURCES = [
   {
     id: "hdx-doh-epi-dengue",
     name: "Philippine Dengue Cases and Deaths (HDX)",
-    role: "Explore · SIGMA (EARS and DOH thresholds)",
+    role: "Lab · Reporting units and Method; Explore · SIGMA map (EARS and DOH thresholds)",
     publisher: "Cirrolytix on HDX; data attributed to the DOH Epidemiology Bureau",
     coverage: "126 DOH reporting units · weekly · 2016 – 2021",
     note: "Suspected cases/deaths swap rows and missing weeks are treated as no data, never zero.",
@@ -63,7 +63,7 @@ export function SourcesTab() {
 
       <p className="text-xs text-slate-500">
         Both datasets are historical, processed offline and bundled with the site; neither is a live
-        feed. Other diseases in Lab use illustrative demo signals, labelled as demo where shown.
+        feed. Lab shows dengue only, from these two sources; it has no demo or illustrative data.
       </p>
     </div>
   );

@@ -20,9 +20,9 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
       <span
         className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700"
-        title="Formal dengue data is real (OpenDengue, historical, national). Signals and anomaly outputs are demo data."
+        title="Real, historical data: DOH-EB dengue counts 2016-2021 (HDX), OpenDengue national 2012-2023, OpenStreetMap facilities, DOH medicine prices. Not a real-time alert system."
       >
-        Prototype<span className="hidden sm:inline"> · mixed real and demo data</span>
+        Prototype<span className="hidden sm:inline"> · historical data, not real-time</span>
       </span>
     </header>
   );
