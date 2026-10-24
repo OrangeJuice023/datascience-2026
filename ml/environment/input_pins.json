@@ -1,1 +1,32 @@
-{}
+{
+  "cchain/brgy_geography.csv": {
+    "sha256": "ea4afaa5879e3a8574436c0ed68500b95283e924bdd1d889ce661abff49c6fdd",
+    "pinned_at": "2026-10-24T11:22:14+00:00",
+    "previous": []
+  },
+  "cchain/climate_atmosphere.csv": {
+    "sha256": "b90d0803bc244a6311ee63b3deff46421ff833c6300c277f998cd7bd432383e3",
+    "pinned_at": "2026-10-24T11:21:21+00:00",
+    "previous": []
+  },
+  "cchain/disease_pidsr_totals.csv": {
+    "sha256": "c2bcbd52f753b0bcb6c10cda6d8b0342784426c2b0e5d3cc5902dd8985215a42",
+    "pinned_at": "2026-10-24T10:45:52+00:00",
+    "previous": []
+  },
+  "cchain/location.csv": {
+    "sha256": "32347494bc6cdc9d2052af4e087edc25f9e7a9af438c1a69b415ef1844b8b293",
+    "pinned_at": "2026-10-24T11:21:28+00:00",
+    "previous": []
+  },
+  "cchain/worldpop_population.csv": {
+    "sha256": "9d8e3d771f31a14f06dcf35fba0f47a2d6a3d4d2de9d0fb7340cef27bfca80a2",
+    "pinned_at": "2026-10-24T11:21:44+00:00",
+    "previous": []
+  },
+  "hdx_dengue/DOH-Epi Dengue Data 2016-2021.csv": {
+    "sha256": "4e993553f10081b4e6b35a0d4b3c9bd0cc271765645a123fcb2e0c5d7084633c",
+    "pinned_at": "2026-10-24T11:22:23+00:00",
+    "previous": []
+  }
+}
