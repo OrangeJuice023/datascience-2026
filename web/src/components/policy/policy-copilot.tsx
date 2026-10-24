@@ -183,6 +183,7 @@ export function PolicyCopilot({
                   Ask SIGI
                 </h2>
                 <StatusBadge label="AI-generated · verify before use" tone="warning" />
+                <StatusBadge label="Free LLM · some chats are rate limited" />
               </div>
               <p className="text-sm leading-relaxed text-slate-600">{intro}</p>
             </div>
@@ -209,6 +210,7 @@ export function PolicyCopilot({
               Ask SIGI
             </h2>
             <StatusBadge label="AI-generated · verify before use" tone="warning" />
+            <StatusBadge label="Free LLM · some chats are rate limited" />
           </div>
           <p className="text-sm text-slate-600">
             Answers about <span className="font-medium text-ink">{place}</span>
