@@ -322,3 +322,69 @@ Built for the Philippine Junior Data Science Challenge (PJDSC) 2026.
 Data: DOH Epidemiology Bureau via HDX and Cirrolytix · OpenDengue · © OpenStreetMap
 contributors (ODbL), via the Humanitarian OpenStreetMap Team · DOH Pharmaceutical Division
 (DPRI) · OCHA COD-AB · geoBoundaries · PSA · Project CCHAIN · Open-Meteo.
+
+## References (APA 7th edition)
+
+Data, methods and policy documents SIGMA uses. Web pages and data sets that change are cited with the date they were retrieved.
+
+Anselin, L. (1995). Local indicators of spatial association—LISA. *Geographical Analysis, 27*(2), 93–115. https://doi.org/10.1111/j.1538-4632.1995.tb00338.x
+
+Bacolod City Government. (2025). *Bacolod City 2025 resolutions: City Resolution 662*. Retrieved October 24, 2026, from https://bacolodcity.gov.ph/2025-resolutions/
+
+Cirrolytix. (2022). *Philippine dengue cases and deaths* [Data set; data from the Department of Health Epidemiology Bureau]. Humanitarian Data Exchange. https://data.humdata.org/dataset/philippine-dengue-cases-and-deaths
+
+City Government of Davao. (2026, January 29). *Davao City 2025 dengue figure down vs 2024*. https://davaocity.gov.ph/health/davao-city-2025-dengue-figure-down-vs-2024/
+
+Clarke, J., Lim, A., Gupte, P., Pigott, D. M., van Panhuis, W. G., & Brady, O. J. (2024). A global dataset of publicly available dengue case count data. *Scientific Data, 11*, Article 296. https://doi.org/10.1038/s41597-024-03120-7
+
+Congress of the Philippines. (2019a). *Republic Act No. 11223: Universal Health Care Act*. https://lawphil.net/statutes/repacts/ra2019/ra_11223_2019.html
+
+Congress of the Philippines. (2019b). *Republic Act No. 11332: Mandatory Reporting of Notifiable Diseases and Health Events of Public Health Concern Act*. https://lawphil.net/statutes/repacts/ra2019/ra_11332_2019.html
+
+Davao City Government. (2023). *Implementing rules and regulations of City Ordinance 0401-20 (Executive Order No. 15, s. 2023)*. https://www.davaocity.gov.ph/wp-content/uploads/2023/09/Signed_RCD-2023-90847_ASD092523-17-EO-25-23_compressed.pdf
+
+Department of Health, Pharmaceutical Division. (2026). *Drug price reference index* (2026 interim ed.) [Data set]. Retrieved October 24, 2026, from https://dpri.doh.gov.ph/drug_search
+
+Department of the Interior and Local Government. (2019, August 9). *Memorandum Circular No. 2019-130: Advocacy on the prevention of dengue and other mosquito-borne diseases*. https://www.dilg.gov.ph/PDF_File/issuances/memo_circulars/dilg-memocircular-201989_f9e6e9c92b.pdf
+
+Department of the Interior and Local Government. (2025, February 24). *Memorandum Circular No. 2025-011: Strengthening local government actions for dengue prevention and control*. https://www.dilg.gov.ph/PDF_File/issuances/memo_circulars/dilg-memocircular-2025224_45c21fce86.pdf
+
+geoBoundaries. (n.d.). *geoBoundaries gbOpen: Philippines, ADM3* [Data set]. William & Mary geoLab. Retrieved October 24, 2026, from https://www.geoboundaries.org/
+
+Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horányi, A., Muñoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., & Thépaut, J.-N. (2023). *ERA5 hourly data on single levels from 1940 to present* [Data set]. Copernicus Climate Change Service Climate Data Store. https://doi.org/10.24381/cds.adbb2d47
+
+Humanitarian OpenStreetMap Team. (2026). *Philippines health facilities (OpenStreetMap export)* [Data set]. Humanitarian Data Exchange. Retrieved October 13, 2026, from https://data.humdata.org/dataset/hotosm_phl_health_facilities
+
+Hutwagner, L., Thompson, W., Seeman, G. M., & Treadwell, T. (2003). The bioterrorism preparedness and response Early Aberration Reporting System (EARS). *Journal of Urban Health, 80*(Suppl. 1), i89–i96. https://doi.org/10.1007/PL00022319
+
+Knox, E. G. (1964). The detection of space-time interactions. *Journal of the Royal Statistical Society: Series C (Applied Statistics), 13*(1), 25–30. https://doi.org/10.2307/2985220
+
+Moran, P. A. P. (1950). Notes on continuous stochastic phenomena. *Biometrika, 37*(1/2), 17–23. https://doi.org/10.2307/2332142
+
+National Epidemiology Center. (2014). *Manual of procedures for the Philippine Integrated Disease Surveillance and Response* (3rd ed., Vol. 1). Department of Health. https://medbox.org/index.php/dl/5e148832db60a2044c2d3bf2
+
+Office for the Coordination of Humanitarian Affairs. (n.d.). *Philippines: Subnational administrative boundaries* (COD-AB, Version 03) [Data set]. Humanitarian Data Exchange. Retrieved October 24, 2026, from https://data.humdata.org/dataset/cod-ab-phl
+
+OpenAI. (2025). *gpt-oss-20b* [Large language model]. Hugging Face. https://huggingface.co/openai/gpt-oss-20b
+
+OpenDengue. (n.d.). *OpenDengue* (Version 1.3) [Data set]. Retrieved October 24, 2026, from https://opendengue.org/
+
+OpenStreetMap contributors. (2026). *OpenStreetMap* [Data set]. OpenStreetMap Foundation. https://www.openstreetmap.org/
+
+Ord, J. K., & Getis, A. (1995). Local spatial autocorrelation statistics: Distributional issues and an application. *Geographical Analysis, 27*(4), 286–306. https://doi.org/10.1111/j.1538-4632.1995.tb00912.x
+
+Pasig City Government. (2025a, March 6). *Patuloy na pagbaba ng kaso ng dengue sa Pasig, dahil sa sama-samang aksyon* [Continued decline in dengue cases in Pasig through collective action]. https://pasigcity.gov.ph/news-and-releases/patuloy-na-pagbaba-ng-kaso-ng-dengue-sa-pasig-dahil-sa-sama-samang-aksyon-465
+
+Pasig City Government. (2025b, July). *1st semester procurement monitoring report CY2025*. https://assets.pasigcity.gov.ph/storage/annual_procurement_plan/2025/07/13/68737fe0c9f2c17523998401st%20Semester%20Procurement%20Monitoring%20Report%20for%20CY%202025.pdf
+
+Philippine Statistics Authority. (2026). *Philippine Standard Geographic Code (PSGC)* (3rd quarter 2026) [Data set]. https://psa.gov.ph/classification/psgc
+
+Quezon City Government. (2024). *Annual procurement plan FY 2024*. https://quezoncity.gov.ph/wp-content/uploads/2024/01/Annual-Procurement-Plan-F.Y.-2024.pdf
+
+Quezon City Government. (2025, December 15). *Quezon City local government annual report, July 2024–June 2025*. https://quezoncity.gov.ph/wp-content/uploads/2025/12/Quezon-City-Local-Government-Annual-Report-2024-2025.pdf
+
+Republic of the Philippines. (1991). *Republic Act No. 7160: Local Government Code of 1991*. Official Gazette. https://officialgazette.gov.ph/1991/10/10/republic-act-no-7160/
+
+Thinking Machines Data Science. (2024). *Project CCHAIN* [Data set]. Humanitarian Data Exchange. https://data.humdata.org/dataset/project-cchain
+
+Zippenfenig, P. (2023). *Open-Meteo.com weather API* [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.7970649
