@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabPanel } from "@/components/ui/tabs";
 import { MethodTab } from "@/components/lab/method-tab";
 import { SourcesTab } from "@/components/lab/sources-tab";
@@ -61,26 +60,18 @@ export function LabView({ load, units }: { load: NationalLoad; units: UnitsLoad 
     <div className="flex flex-col gap-6">
       <PageHeader
         title="SIGMA Lab"
-        subtitle="Investigate the pattern behind the signal."
+        subtitle="Investigate the pattern behind the signal: dengue only, from real data only."
       />
 
-      <Card className="flex flex-wrap items-end gap-x-8 gap-y-3 p-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-medium text-slate-500">Disease</p>
-          <p className="py-1.5 text-sm font-medium text-slate-900">Dengue</p>
-        </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-[11px] font-medium text-slate-500">Evidence</p>
-          <p className="flex flex-wrap items-center gap-2 py-1.5 text-sm text-slate-700">
-            <EvidenceBadge kind="formal" />
-            Formal observations · {evidence}
-          </p>
-        </div>
-      </Card>
-
-      <Card>
+      <div className="flex flex-col gap-4">
         <Tabs items={TABS} activeId={activeTab} onChange={setActiveTab} />
-        <div className="p-4">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-600">
+          <EvidenceBadge kind="formal" />
+          <span>
+            <span className="font-medium text-ink">Dengue</span> · Formal observations · {evidence}
+          </span>
+        </p>
+        <div>
           <TabPanel id="national" activeId={activeTab}>
             {load.status === "ok" ? (
               <NationalObservationsPanel national={load.national} meta={load.meta} anomalies={load.anomalies} />
@@ -104,7 +95,7 @@ export function LabView({ load, units }: { load: NationalLoad; units: UnitsLoad 
             <SourcesTab />
           </TabPanel>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

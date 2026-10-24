@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { EvidenceBadge } from "@/components/ui/evidence-badge";
 
 /**
  * The two datasets behind SIGMA's dengue analysis. Details mirror what is
@@ -35,14 +36,12 @@ export function SourcesTab() {
         {SOURCES.map((source) => (
           <Card key={source.id} className="flex flex-col gap-2 p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
-                Formal data
-              </span>
-              <span className="text-[11px] text-slate-400">{source.license}</span>
+              <EvidenceBadge kind="formal" />
+              <span className="text-xs text-slate-500">{source.license}</span>
             </div>
-            <p className="text-sm font-semibold text-slate-900">{source.name}</p>
+            <p className="text-base font-semibold leading-snug text-ink">{source.name}</p>
             <p className="text-xs text-slate-500">Used in {source.role}</p>
-            <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 text-xs">
+            <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs">
               <dt className="text-slate-400">Publisher</dt>
               <dd className="text-slate-700">{source.publisher}</dd>
               <dt className="text-slate-400">Coverage</dt>
@@ -53,7 +52,7 @@ export function SourcesTab() {
               href={source.url}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-medium text-teal-700 hover:underline"
+              className="mt-auto pt-1 text-[13px] font-medium text-accent hover:underline"
             >
               {source.url.replace("https://", "")} ↗
             </a>
