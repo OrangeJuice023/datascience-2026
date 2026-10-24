@@ -18,25 +18,10 @@ import { formatIsoDate } from "@/lib/map/format";
 import type { AnomalyResult } from "@/types/data";
 import { AXIS_TICK, GRID, OBSERVED, compactCount } from "./weekly-history-chart";
 
-/** Planned progression for this national series; nothing past level 0 (observed data) runs on it yet. */
-const ROADMAP: Array<{ level: number; name: string; detail: string; status?: string }> = [
-  { level: 1, name: "Seasonal / historical baseline", detail: "Expected weekly activity from prior years at the same point in the season." },
-  {
-    level: 2,
-    name: "Farrington / EARS-style anomaly detection",
-    detail:
-      "Excess over the baseline with an explicit alert threshold. EARS C1–C3 and the DOH thresholds already run per reporting unit (Reporting units tab), not on this national series.",
-    status: "Reporting units only",
-  },
-  { level: 3, name: "Forecasting baseline", detail: "SARIMA or Holt-Winters, backtested with rolling origins." },
-  { level: 4, name: "ML benchmark", detail: "XGBoost or comparable, compared against levels 1–3." },
-  { level: 5, name: "Spatiotemporal model", detail: "Requires reconciled sub-national formal data." },
-  { level: 6, name: "Scenario simulation", detail: "Assumption-driven what-ifs; never presented as forecasts." },
-];
-
 /**
  * Observed vs expected vs alert threshold. Renders a chart only from real
- * AnomalyResult records; with none, it says so instead of inventing a score.
+ * AnomalyResult records; with none, it says where SIGMA's anomaly detection
+ * does run (per reporting unit) instead of inventing a score.
  */
 export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
   const fitted = results.length > 0;
@@ -59,16 +44,17 @@ export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
           <p className="text-sm font-semibold text-ink">Historical baseline</p>
           <EvidenceBadge kind="model" />
         </div>
-        <p className="text-xs text-slate-500">
-          Baseline:{" "}
-          <span className="font-medium text-slate-700">
-            {fitted && model ? `${model.name} v${model.version}` : "Not yet fitted"}
-          </span>
-        </p>
+        {fitted && model ? (
+          <p className="text-xs text-slate-500">
+            Baseline: <span className="font-medium text-slate-700">{`${model.name} v${model.version}`}</span>
+          </p>
+        ) : null}
       </div>
       <p className="mt-1 max-w-3xl text-xs text-slate-500">
-        SIGMA will compare current observations against historical expected activity before
-        producing anomaly indicators.
+        SIGMA runs its anomaly detection, EARS C1–C3 and the DOH alert and epidemic thresholds, on each of the 126
+        reporting units: see the Reporting units tab, Explore, and{" "}
+        <code className="rounded bg-raised px-1">/api/v1/dengue/signals</code>. This national series is shown as
+        observed counts only.
       </p>
 
       {fitted ? (
@@ -86,26 +72,11 @@ export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
           </ComposedChart>
         </ResponsiveContainer>
       ) : (
-        <DataStateNotice state="model-not-fitted" className="mt-3">
-          No baseline has been fitted to the formal series, so no expected range, alert threshold
-          or anomaly score is shown. When a model runs, its outputs arrive as typed
-          <code className="mx-1 rounded bg-white/70 px-1">AnomalyResult</code>
-          records (observed, expected, range, score, classification, model and version) and this
-          panel draws observed vs expected vs alert threshold.
+        <DataStateNotice state="no-data" title="No baseline on the national series" className="mt-3">
+          No expected range, alert threshold or anomaly score is drawn here, because none is computed for the
+          national series. Forecasting is out of scope for this prototype: SIGMA has no validated forecast model.
         </DataStateNotice>
       )}
-
-      <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {ROADMAP.map((step) => (
-          <li key={step.level} className="rounded-[var(--radius-control)] border border-border px-3 py-2.5">
-            <p className="text-xs text-slate-500">
-              Level {step.level} · {step.status ?? "Not started"}
-            </p>
-            <p className="mt-0.5 text-sm font-medium text-ink">{step.name}</p>
-            <p className="mt-0.5 text-xs text-slate-500">{step.detail}</p>
-          </li>
-        ))}
-      </ol>
     </Card>
   );
 }
