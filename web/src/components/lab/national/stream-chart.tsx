@@ -36,7 +36,7 @@ function StreamTooltip({ active, payload }: { active?: boolean; payload?: Array<
           <span className="font-semibold tabular-nums text-slate-900">{formatCount(bar.value)}</span>
         </p>
       )}
-      {bar.sourceRecordId && <p className="mt-0.5 text-[11px] text-slate-400">Record {bar.sourceRecordId}</p>}
+      {bar.sourceRecordId && <p className="mt-0.5 text-xs text-slate-400">Record {bar.sourceRecordId}</p>}
     </div>
   );
 }

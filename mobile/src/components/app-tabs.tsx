@@ -7,8 +7,10 @@ import { Colors } from '@/constants/theme';
 /**
  * The tab bar.
  *
- * Five destinations, each mapping to one part of the API: overview, the
- * dengue series, ACCESS indicators, policy, and settings.
+ * The same three destinations as the web app: Overview, Explore (one
+ * reporting unit's record and the national series) and Analyze (ACCESS,
+ * Policy and Lab). Settings is a utility, reached from the gear in each
+ * screen's header rather than from a tab of its own.
  */
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -25,27 +27,17 @@ export default function AppTabs() {
       labelStyle={{ selected: { color: colors.text } }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Overview</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={icon('shield-check-outline')} />
+        <NativeTabs.Trigger.Icon src={icon('home-variant-outline')} />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="dengue">
-        <NativeTabs.Trigger.Label>Dengue</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={icon('virus-outline')} />
+      <NativeTabs.Trigger name="explore">
+        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon src={icon('map-search-outline')} />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="access">
-        <NativeTabs.Trigger.Label>Access</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={icon('pill')} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="policy">
-        <NativeTabs.Trigger.Label>Policy</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={icon('chat-processing-outline')} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="settings">
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon src={icon('cog-outline')} />
+      <NativeTabs.Trigger name="analyze">
+        <NativeTabs.Trigger.Label>Analyze</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon src={icon('chart-box-outline')} />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

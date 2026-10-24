@@ -16,6 +16,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { EVIDENCE_KIND } from "@/lib/map/modes";
 import { EVIDENCE_CONFIG, EvidenceBadge } from "@/components/ui/evidence-badge";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { AnalyticalLegend } from "../legend/analytical-legend";
 import { MapTimeline } from "../timeline/map-timeline";
 import type { MapHover } from "./map-canvas";
@@ -49,7 +50,7 @@ const TOGGLE_LABEL: Record<MapModeId, Partial<Record<LayerToggleId, string>>> = 
   ears: { areas: "Area fills" },
   doh: { areas: "Area fills" },
   environment: {},
-  access: { columns: "3D columns" },
+  access: { areas: "Area fills", columns: "3D columns" },
 };
 
 export interface AnalyticalMapProps {
@@ -105,50 +106,26 @@ export function AnalyticalMap({
     <div className="flex flex-col">
       {/* Modes */}
       <div className={cn("border-b border-rule px-3 py-3 sm:px-4", hideModeTabs && "hidden")}>
-        <div
-          role="radiogroup"
-          aria-label="Map mode"
-          className="grid grid-cols-2 gap-1 rounded-[10px] bg-slate-100 p-1 sm:inline-flex sm:max-w-full sm:flex-wrap"
-        >
-          {modes.map((m) => {
-            const active = m.id === mode.id;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                title={m.unavailableReason ?? m.question}
-                onClick={() => onModeChange(m.id)}
-                className={cn(
-                  "flex min-h-10 items-center justify-center gap-1.5 rounded-[7px] px-3 text-sm font-medium transition-colors sm:min-h-8 sm:justify-start",
-                  active
-                    ? "bg-sheet text-ink ring-1 ring-control"
-                    : m.availability === "planned"
-                      ? "text-slate-500 hover:text-slate-700"
-                      : "text-slate-600 hover:bg-sheet/60 hover:text-ink",
-                )}
-              >
-                <span
-                  className={cn("h-1.5 w-1.5 rounded-full", EVIDENCE_CONFIG[EVIDENCE_KIND[m.evidence]].dotClass)}
-                  aria-hidden="true"
-                />
-                {m.label}
-                <span className="sr-only">({EVIDENCE_CONFIG[EVIDENCE_KIND[m.evidence]].label} evidence)</span>
-                {m.availability === "planned" && (
-                  <span
-                    className={cn(
-                      "rounded px-1 text-[11px] font-semibold",
-                      active ? "bg-slate-100 text-slate-600" : "bg-sheet/70 text-slate-500",
-                    )}
-                  >
-                    Planned
-                  </span>
-                )}
-              </button>
-            );
+        <SegmentedControl
+          ariaLabel="Map mode"
+          phoneGrid
+          value={mode.id}
+          onChange={onModeChange}
+          items={modes.map((m) => {
+            const evidence = EVIDENCE_CONFIG[EVIDENCE_KIND[m.evidence]];
+            return {
+              id: m.id,
+              label: m.label,
+              title: m.unavailableReason ?? m.question,
+              srLabel: `(${evidence.label} evidence)`,
+              leading: <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", evidence.dotClass)} aria-hidden="true" />,
+              trailing:
+                m.availability === "planned" ? (
+                  <span className="rounded bg-slate-100 px-1 text-xs font-medium text-slate-600">Planned</span>
+                ) : undefined,
+            };
           })}
-        </div>
+        />
       </div>
 
       {/* Mode context, layers and view */}
@@ -157,14 +134,14 @@ export function AnalyticalMap({
           <EvidenceBadge kind={EVIDENCE_KIND[mode.evidence]} />
           <span
             className={cn(
-              "rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
+              "inline-flex flex-none items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium leading-4 ring-1",
               AVAILABILITY_BADGE[mode.availability].className,
             )}
           >
             {AVAILABILITY_BADGE[mode.availability].label}
           </span>
-          <p className="text-sm font-medium text-slate-800">{mode.question}</p>
-          <p className="text-xs text-slate-500">{mode.evidenceLabel}</p>
+          <p className="w-full text-sm font-medium text-ink">{mode.question}</p>
+          <p className="w-full text-xs text-slate-500">{mode.evidenceLabel}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -176,7 +153,7 @@ export function AnalyticalMap({
                   <label
                     key={id}
                     className={cn(
-                      "flex min-h-8 cursor-pointer items-center gap-1.5 text-[13px]",
+                      "flex min-h-11 cursor-pointer items-center gap-2 text-[13px] sm:min-h-8",
                       needs3d ? "cursor-not-allowed text-slate-500" : "text-slate-700",
                     )}
                     title={needs3d ? "Switch to 3D to see extrusion" : undefined}
@@ -189,7 +166,7 @@ export function AnalyticalMap({
                       className="h-4 w-4 accent-[var(--ink)]"
                     />
                     {TOGGLE_LABEL[mode.id][id]}
-                    {needs3d && <span className="text-[11px]">(3D)</span>}
+                    {needs3d && <span className="text-xs">(3D)</span>}
                   </label>
                 );
               })}
@@ -197,34 +174,21 @@ export function AnalyticalMap({
           )}
 
           <div className="flex items-center gap-2">
-            <div
-              role="radiogroup"
-              aria-label="Map view"
-              className="flex rounded-[10px] bg-slate-100 p-1"
-            >
-              {VIEWS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="radio"
-                  aria-checked={view === id}
-                  onClick={() => onViewChange(id)}
-                  className={cn(
-                    "flex h-8 items-center gap-1.5 rounded-[7px] px-2.5 text-[13px] font-medium transition-colors",
-                    view === id
-                      ? "bg-sheet text-ink ring-1 ring-control"
-                      : "text-slate-600 hover:text-ink",
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                  {label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              ariaLabel="Map view"
+              size="sm"
+              value={view}
+              onChange={onViewChange}
+              items={VIEWS.map(({ id, label, icon: Icon }) => ({
+                id,
+                label,
+                leading: <Icon className="h-3.5 w-3.5" aria-hidden="true" />,
+              }))}
+            />
             <button
               type="button"
               onClick={() => setResetToken((t) => t + 1)}
-              className="flex h-10 items-center gap-1.5 rounded-[var(--radius-control)] border border-control bg-sheet px-3 text-[13px] font-medium text-slate-700 hover:bg-slate-50"
+              className="flex h-11 items-center gap-1.5 rounded-[var(--radius-control)] border border-control bg-sheet px-3 text-[13px] font-medium text-slate-700 hover:bg-raised sm:h-9"
               title="Reset view"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
@@ -300,13 +264,13 @@ export function AnalyticalMap({
 
           {prepared &&
             (legendOpen ? (
-              <div className="absolute bottom-3 left-3 hidden w-64 rounded-[var(--radius-card)] border border-border bg-sheet p-3 pr-2 shadow-[0_4px_16px_rgba(34,35,31,0.08)] md:block">
+              <div className="absolute bottom-3 left-3 hidden w-72 max-w-[calc(100%-1.5rem)] rounded-[var(--radius-card)] border border-border bg-sheet p-3 pr-2 shadow-[0_4px_16px_rgba(34,35,31,0.08)] md:block">
                 <button
                   type="button"
                   onClick={() => setLegendOpen(false)}
                   aria-label="Hide legend"
                   title="Hide legend"
-                  className="absolute right-1.5 top-1.5 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-ink"
+                  className="absolute right-1.5 top-1.5 rounded-[var(--radius-control)] p-1.5 text-slate-500 hover:bg-slate-100 hover:text-ink"
                 >
                   <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -330,7 +294,7 @@ export function AnalyticalMap({
           </div>
         )}
 
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs leading-relaxed text-slate-500">
           Basemap: {basemap.label}
           {basemap.provider === "osm-fallback" &&
             !issue &&
@@ -375,7 +339,7 @@ function MapTooltip({
   };
   return (
     <div
-      className="pointer-events-none absolute z-10 w-56 rounded-[var(--radius-control)] border border-border bg-sheet px-3 py-2 text-xs shadow-[0_6px_20px_rgba(34,35,31,0.12)]"
+      className="pointer-events-none absolute z-10 w-60 rounded-[var(--radius-control)] border border-border bg-sheet px-3 py-2 text-xs shadow-[0_6px_20px_rgba(34,35,31,0.12)]"
       style={style}
       role="tooltip"
     >
@@ -389,7 +353,7 @@ function MapTooltip({
           </div>
         ))}
       </dl>
-      <p className="mt-1.5 text-[11px] text-slate-500">Click to open details</p>
+      <p className="mt-1.5 text-slate-500">Click to open details</p>
     </div>
   );
 }

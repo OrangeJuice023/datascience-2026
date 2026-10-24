@@ -30,7 +30,7 @@ import {
 
 /** Column shading: weeks with no data, and weeks above a DOH threshold. */
 export const BAND = {
-  noData: { fill: "#cbd5e1", opacity: 0.5 },
+  noData: { fill: "#cfccc4", opacity: 0.5 },
   alert: { fill: SIGMA_HEX.alert, opacity: 0.2 },
   epidemic: { fill: SIGMA_HEX.epidemic, opacity: 0.16 },
 } as const;
@@ -70,7 +70,7 @@ function UnitWeekTooltip({
   return (
     <div className="max-w-[17rem] rounded-md border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
       <p className="font-medium text-slate-700">Week of {formatIsoDate(w.week)}</p>
-      <p className="text-[11px] text-slate-400">
+      <p className="text-xs text-slate-400">
         MMWR {year}-W{String(week).padStart(2, "0")}
       </p>
       <p className="mt-1">
@@ -191,7 +191,7 @@ export function UnitWeeklyChart({
         />
         <Tooltip
           content={<UnitWeekTooltip byWeek={byWeek} data={data} />}
-          cursor={{ stroke: "#94a3b8", strokeWidth: 1 }}
+          cursor={{ stroke: "#6f6d66", strokeWidth: 1 }}
         />
         {showThresholds && (
           <Line

@@ -6,6 +6,7 @@ import { BookOpen, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { EVIDENCE_CONFIG, EvidenceBadge } from "@/components/ui/evidence-badge";
+import { StatCard, StatStrip } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SOURCE_CATALOG, type SourceCatalogEntry } from "@/data/source-catalog";
 import { buildSources } from "@/lib/api/sources";
@@ -33,9 +34,9 @@ function EvidenceTag({ evidence }: { evidence: SourceCatalogEntry["evidence"] })
   return (
     <span
       title="Places, codes and boundaries; not health data"
-      className="inline-flex items-center gap-1.5 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 ring-1 ring-slate-300"
+      className="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-full bg-sheet px-2 py-0.5 text-[11px] font-medium leading-4 text-slate-700 ring-1 ring-control"
     >
-      <span className="h-1.5 w-1.5 rounded-full border border-slate-400" aria-hidden="true" />
+      <span className="h-1.5 w-1.5 rounded-full border border-slate-500" aria-hidden="true" />
       Geography
     </span>
   );
@@ -80,7 +81,7 @@ function UsedIn({ usage }: { usage: SourceUsage | undefined }) {
             <li key={`${use.href}-${use.detail ?? ""}`}>
               <Link
                 href={use.href}
-                className="inline-flex max-w-full items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs text-teal-800 ring-1 ring-teal-200 transition-colors hover:bg-teal-100"
+                className="inline-flex min-h-11 max-w-full items-center gap-1 rounded-full bg-accent-soft px-3 py-0.5 text-xs text-teal-800 ring-1 ring-teal-200 transition-colors hover:bg-teal-100 sm:min-h-0 sm:px-2"
               >
                 <span className="font-medium">{use.label}</span>
                 {use.detail && <span className="text-teal-700/80">· {use.detail}</span>}
@@ -108,14 +109,14 @@ function SourceCard({ entry, scope }: { entry: SourceCatalogEntry; scope: string
           />
         )}
       </div>
-      <SourceName entry={entry} className="mt-2.5 text-base font-semibold leading-snug text-slate-900" />
+      <SourceName entry={entry} className="mt-2.5 text-base font-semibold leading-snug text-ink" />
       <p className="mt-1 text-sm text-slate-600">{entry.purpose}</p>
 
       <div className="mt-3">
         <UsedIn usage={usage} />
       </div>
 
-      <dl className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
+      <dl className="mb-4 mt-4 grid grid-cols-1 gap-x-4 gap-y-3 border-t border-rule pt-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
         <Field label="Coverage">{entry.resolution}</Field>
         <Field label="Updates">{entry.updateBehavior}</Field>
         <Field label="How it is obtained">{entry.accessMethod}</Field>
@@ -124,11 +125,10 @@ function SourceCard({ entry, scope }: { entry: SourceCatalogEntry; scope: string
         <Field label="Licence">{entry.licence ?? "Not verified"}</Field>
       </dl>
 
-      <figure className="mt-4 rounded-md bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
-        <figcaption className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-          Credit line to show
-        </figcaption>
-        <p className={`mt-1 text-sm text-slate-800 ${WRAP}`}>{entry.attribution}</p>
+      {/* Pinned to the card's foot, so credit lines sit level across a row. */}
+      <figure className="mt-auto rounded-[var(--radius-control)] bg-raised px-3 py-2.5">
+        <figcaption className="text-xs font-medium text-slate-500">Credit line to show</figcaption>
+        <p className={`mt-1 text-sm text-ink ${WRAP}`}>{entry.attribution}</p>
       </figure>
     </Card>
   );
@@ -143,7 +143,7 @@ function NotConnectedRow({ entry, scope }: { entry: SourceCatalogEntry; scope: s
         <EvidenceTag evidence={entry.evidence} />
         <StatusBadge label={status.label} tone={status.tone} />
       </div>
-      <SourceName entry={entry} className="text-sm font-semibold text-slate-900" />
+      <SourceName entry={entry} className="text-sm font-semibold text-ink" />
       <p className="text-sm text-slate-600">{entry.purpose}</p>
       <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
         <Field label="Why not yet">
@@ -159,7 +159,7 @@ function NotConnectedRow({ entry, scope }: { entry: SourceCatalogEntry; scope: s
       </dl>
       {usage && usage.uses.length > 0 && (
         <div>
-          <p className="mb-1.5 text-xs text-slate-500">Where the stand-ins appear:</p>
+          <p className="mb-1.5 text-xs text-slate-600">Where the stand-ins appear:</p>
           <UsedIn usage={usage} />
         </div>
       )}
@@ -170,21 +170,11 @@ function NotConnectedRow({ entry, scope }: { entry: SourceCatalogEntry; scope: s
 function SectionHeading({ id, title, intro, count }: { id: string; title: string; intro: string; count: number }) {
   return (
     <div className="mb-3">
-      <h2 id={id} className="flex scroll-mt-20 items-baseline gap-2 text-lg font-semibold tracking-tight text-slate-900">
+      <h2 id={id} className="flex scroll-mt-20 items-baseline gap-2 text-lg font-semibold tracking-tight text-ink">
         {title}
-        <span className="text-sm font-normal tabular-nums text-slate-400">{count}</span>
+        <span className="text-sm font-normal tabular-nums text-slate-500">{count}</span>
       </h2>
-      <p className="mt-1 max-w-3xl text-sm text-slate-500">{intro}</p>
-    </div>
-  );
-}
-
-function Fact({ label, value, hint }: { label: string; value: number; hint: string }) {
-  return (
-    <div className="rounded-md bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
-      <dt className="text-xs font-medium text-slate-500">{label}</dt>
-      <dd className="mt-1 text-xl font-semibold tabular-nums text-slate-900">{value}</dd>
-      <dd className="text-[11px] leading-snug text-slate-500">{hint}</dd>
+      <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-600">{intro}</p>
     </div>
   );
 }
@@ -222,7 +212,7 @@ export default function DataSourcesPage() {
           actions={
             <Link
               href="/documentation"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-control)] border border-control bg-sheet px-3.5 text-sm font-medium text-slate-800 transition-colors hover:bg-raised sm:h-9"
             >
               <BookOpen className="h-4 w-4" aria-hidden="true" />
               API documentation
@@ -232,8 +222,8 @@ export default function DataSourcesPage() {
 
         <Card className="p-4 sm:p-5">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="space-y-3 text-sm text-slate-600">
-              <h2 className="text-sm font-semibold text-slate-900">How SIGMA uses data</h2>
+            <div className="space-y-3 text-sm leading-relaxed text-slate-700">
+              <h2 className="text-base font-semibold text-ink">How SIGMA uses data</h2>
               <p>
                 SIGMA works only from public datasets it can name. Every connected dataset except the basemap is a fixed
                 copy: downloaded once and processed offline, and what the site needs is bundled with it. Nothing on
@@ -252,15 +242,23 @@ export default function DataSourcesPage() {
                 Sources that are not connected are listed separately at the end.
               </p>
             </div>
-            <dl className="grid grid-cols-2 gap-2 self-start">
-              <Fact label="Connected" value={connected.length} hint="real records flow through SIGMA" />
-              <Fact label="Fixed copies" value={connected.length - live.length} hint="downloaded once, rebuilt by hand" />
-              <Fact label="Live" value={live.length} hint={live.length === 1 ? "basemap tiles only" : "loaded as pages open"} />
-              <Fact label="Not connected" value={notConnected.length} hint={`${demo} demo, ${planned} planned`} />
-            </dl>
+            <StatStrip columns={2} className="self-start">
+              <StatCard label="Connected" value={String(connected.length)} hint="Real records flow through SIGMA" />
+              <StatCard
+                label="Fixed copies"
+                value={String(connected.length - live.length)}
+                hint="Downloaded once, rebuilt by hand"
+              />
+              <StatCard
+                label="Live"
+                value={String(live.length)}
+                hint={live.length === 1 ? "Basemap tiles only" : "Loaded as pages open"}
+              />
+              <StatCard label="Not connected" value={String(notConnected.length)} hint={`${demo} demo, ${planned} planned`} />
+            </StatStrip>
           </div>
 
-          <ul className="mt-5 flex flex-col gap-1.5 border-t border-slate-100 pt-4 text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-5">
+          <ul className="mt-5 flex flex-col gap-2 border-t border-rule pt-4 text-xs text-slate-600 sm:flex-row sm:flex-wrap sm:gap-x-5">
             {(["formal", "context"] as const).map((kind) => (
               <li key={kind} className="flex items-center gap-2">
                 <EvidenceBadge kind={kind} />
@@ -281,10 +279,10 @@ export default function DataSourcesPage() {
             <li key={s.id}>
               <a
                 href={`#${s.id}`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sheet px-3.5 text-[13px] font-medium text-slate-700 ring-1 ring-border transition-colors hover:bg-raised hover:text-ink sm:min-h-8"
               >
                 {s.title}
-                <span className="tabular-nums text-slate-400">{s.count}</span>
+                <span className="tabular-nums text-slate-500">{s.count}</span>
               </a>
             </li>
           ))}
@@ -328,8 +326,8 @@ export default function DataSourcesPage() {
             intro="Identified in research but not feeding any real number in SIGMA. A demo source has synthetic stand-ins, labelled demo wherever they appear; a planned source has nothing ingested."
             count={notConnected.length}
           />
-          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 sm:p-5">
-            <ul className="divide-y divide-slate-200">
+          <div className="rounded-[var(--radius-card)] border border-dashed border-control bg-raised p-4 sm:p-5">
+            <ul className="divide-y divide-border">
               {notConnected.map((entry) => (
                 <NotConnectedRow key={entry.sourceId} entry={entry} scope={scopes.get(entry.sourceId)?.scope} />
               ))}
@@ -339,14 +337,14 @@ export default function DataSourcesPage() {
       )}
 
       <p className="text-xs text-slate-500">
-        The same catalogue is served as JSON by <code className="font-mono text-[11px]">GET /api/v1/sources</code>; see
+        The same catalogue is served as JSON by <code className="font-mono text-[0.92em]">GET /api/v1/sources</code>; see
         the{" "}
         <Link href="/documentation#group-service" className="font-medium text-accent hover:underline">
           API documentation
         </Link>
         . Pinned download URLs and hashes are recorded in{" "}
-        <code className="font-mono text-[11px]">scripts/geo/sources.json</code> and{" "}
-        <code className="font-mono text-[11px]">scripts/access/sources.json</code>. SIGMA is a hackathon prototype;
+        <code className="font-mono text-[0.92em]">scripts/geo/sources.json</code> and{" "}
+        <code className="font-mono text-[0.92em]">scripts/access/sources.json</code>. SIGMA is a hackathon prototype;
         nothing here is a validated public-health claim.
       </p>
     </div>

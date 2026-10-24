@@ -29,7 +29,7 @@ export function SelectFilter({
           id={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full cursor-pointer appearance-none rounded-[var(--radius-control)] border border-control bg-sheet pl-3 pr-8 text-sm text-ink hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:h-9"
+          className="h-11 w-full cursor-pointer appearance-none rounded-[var(--radius-control)] border border-control bg-sheet pl-3 pr-8 text-sm text-ink hover:border-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:h-9"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>

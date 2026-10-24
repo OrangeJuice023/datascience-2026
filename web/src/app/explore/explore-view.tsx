@@ -164,7 +164,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Signal Explorer"
-        subtitle="Explore formal observations, EARS and DOH threshold results, weather and access across space and time. Every layer states what kind of evidence it shows."
+        subtitle="Reported dengue cases, EARS and DOH-threshold results for 126 reporting units, and weekly city weather, across space and time. Every layer states what kind of evidence it shows."
       />
 
       {mode.filters.length > 0 && (
@@ -177,7 +177,7 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
       )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <Card className="min-w-0">
+        <Card className="min-w-0 self-start">
           <AnalyticalMap
             modes={MAP_MODES}
             mode={mode}
@@ -197,12 +197,13 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
           />
         </Card>
 
-        <div className="flex flex-col gap-4">
+        {/* The side column runs as tall as the map card; its list scrolls inside it. */}
+        <div className="relative flex min-h-0 flex-col gap-4">
           {mode.availability === "planned" ? (
             <Card className="p-5">
-              <p className="text-sm font-semibold text-slate-900">{mode.label}: not connected</p>
+              <p className="text-sm font-semibold text-ink">{mode.label}: not connected</p>
               <p className="mt-1 text-sm text-slate-600">{mode.unavailableReason}</p>
-              <p className="mt-3 text-xs text-slate-400">
+              <p className="mt-3 text-xs text-slate-500">
                 Nothing is drawn for this mode rather than showing placeholder values.
               </p>
             </Card>
@@ -228,36 +229,36 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
               />
             </Card>
           ) : (
-            <Card className="overflow-hidden">
-              <div className="border-b border-slate-200 px-4 py-3">
-                <p className="text-sm font-semibold text-slate-900">Areas in view</p>
+            <Card className="flex flex-col overflow-hidden xl:absolute xl:inset-0">
+              <div className="border-b border-border px-4 py-3">
+                <p className="text-sm font-semibold text-ink">Areas in view</p>
                 <p className="text-xs text-slate-500">
                   {slice ? `${slice.label} · ` : ""}
                   {ranked.length} area{ranked.length === 1 ? "" : "s"}. Select one for detail.
                 </p>
               </div>
               {ranked.length > 0 ? (
-                <ul className="max-h-[28rem] divide-y divide-slate-100 overflow-y-auto">
+                <ul className="max-h-[28rem] min-h-0 flex-1 divide-y divide-rule overflow-y-auto xl:max-h-none">
                   {ranked.map((feature) => (
                     <li key={feature.id}>
                       <button
                         type="button"
                         onClick={() => setSelectedId(feature.id)}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50"
+                        className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-raised"
                       >
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ background: rgb(feature) }}
                           aria-hidden="true"
                         />
-                        <span className="flex-1 text-sm text-slate-700">{feature.name}</span>
-                        <span className="text-xs text-slate-500">{feature.classLabel}</span>
+                        <span className="min-w-0 flex-1 text-sm text-ink">{feature.name}</span>
+                        <span className="max-w-[48%] text-right text-xs text-slate-500">{feature.classLabel}</span>
                       </button>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="px-4 py-6 text-center text-xs text-slate-400">
+                <p className="px-4 py-6 text-center text-xs text-slate-500">
                   No areas match the current filters at this time.
                 </p>
               )}

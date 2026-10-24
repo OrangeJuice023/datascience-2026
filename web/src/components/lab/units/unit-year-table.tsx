@@ -28,7 +28,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-left text-xs">
           <thead>
-            <tr className="border-b border-slate-200 text-[11px] font-medium text-slate-500">
+            <tr className="border-b border-border text-xs font-medium text-slate-500">
               <th scope="col" className="py-2 pr-3">Epi year</th>
               <th scope="col" className="py-2 pr-3">Weeks with data</th>
               <th scope="col" className="py-2 pr-3 text-right">Reported cases</th>
@@ -39,7 +39,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
               <th scope="col" className="py-2">Which came first</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-rule">
             {rows.map((r) => {
               const noDoh = r.dohEvaluatedWeeks === 0;
               return (
@@ -51,7 +51,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
                   <td className="py-2 pr-3 tabular-nums text-slate-700">
                     {r.usableWeeks} of {r.weeks}
                     {(r.missingWeeks > 0 || r.swapWeeks > 0) && (
-                      <span className="block text-[11px] text-slate-400">
+                      <span className="block text-xs text-slate-400">
                         {[
                           r.missingWeeks > 0 && `${r.missingWeeks} missing`,
                           r.swapWeeks > 0 && `${r.swapWeeks} suspect swap`,
@@ -66,7 +66,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
                   </td>
                   <td className="py-2 pr-3 text-right tabular-nums text-slate-800">
                     {r.earsAlarmWeeks}
-                    <span className="block text-[11px] text-slate-400">of {r.earsEvaluatedWeeks} with a result</span>
+                    <span className="block text-xs text-slate-400">of {r.earsEvaluatedWeeks} with a result</span>
                   </td>
                   <td className="py-2 pr-3 text-right tabular-nums text-slate-800">
                     {noDoh ? (
@@ -74,7 +74,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
                     ) : (
                       <>
                         {r.dohAlertWeeks} / {r.dohEpidemicWeeks}
-                        <span className="block text-[11px] text-slate-400">of {r.dohEvaluatedWeeks} compared</span>
+                        <span className="block text-xs text-slate-400">of {r.dohEvaluatedWeeks} compared</span>
                       </>
                     )}
                   </td>
@@ -104,7 +104,7 @@ export function UnitYearTable({ rows }: { rows: UnitYearRow[] }) {
           </tbody>
         </table>
       </div>
-      <div className="mt-2 space-y-1 text-[11px] leading-snug text-slate-400">
+      <div className="mt-2 space-y-1 text-xs leading-snug text-slate-400">
         <p>
           Reported cases are the sum of the weeks with data; missing and suspect-swap weeks are left out, not
           counted as zero, so a year with gaps has no annual total.

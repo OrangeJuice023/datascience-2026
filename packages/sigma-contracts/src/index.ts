@@ -251,6 +251,49 @@ export interface DengueSignalsData {
   limitations: string[];
 }
 
+/**
+ * One HDX dengue reporting unit and one MMWR epi year, from the SIGMA export
+ * (ml/export_sigma_web.py). Usable weeks only: a missing or suspect week adds
+ * no cases and is never read as zero.
+ */
+export interface DengueUnitYear {
+  /** MMWR epi year (the year holding the week's Wednesday). */
+  year: number;
+  /** Reported cases summed over usable weeks; null when the year has none. Not an annual total unless `usableWeeks` equals `weeks`. */
+  cases: number | null;
+  usableWeeks: number;
+  /** Weeks of this epi year in the export. */
+  weeks: number;
+  /** Usable weeks with an EARS C1, C2 or C3 alarm; null when no week of the year had an EARS result. */
+  earsWeeks: number | null;
+  /** Usable weeks with an EARS result (alarm or none). */
+  earsEvaluatedWeeks: number;
+  /** Usable weeks above the DOH alert or epidemic threshold; null when no week could be compared (thresholds start in 2019). */
+  dohWeeks: number | null;
+  /** Usable weeks compared with a DOH threshold. */
+  dohEvaluatedWeeks: number;
+}
+
+export interface DengueUnitRecord {
+  /** HDX dengue reporting-unit id, the same id the SIGMA map and ACCESS use. */
+  id: string;
+  name: string;
+  unitType: string;
+  regionId: string;
+  years: DengueUnitYear[];
+}
+
+export interface DengueUnitsData {
+  units: DengueUnitRecord[];
+  scope: {
+    source: string;
+    period: { from: string; to: string; weeks: number; epiYears: number[] };
+    /** Units in this response. */
+    units: number;
+    notes: string[];
+  };
+}
+
 export interface DemoSignalRecord {
   id: string;
   disease: string;

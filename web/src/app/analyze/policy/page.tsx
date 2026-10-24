@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ACCESS_REFERENCE } from "@/lib/access/reference";
 import { accessReadiness } from "@/lib/access/readiness";
 import { readSigmaData } from "@/lib/sigma/summary";
@@ -9,12 +10,15 @@ export default async function PolicyPage() {
   const units = ACCESS_REFERENCE.units
     .map((u) => ({ id: u.id, name: u.name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+  // PolicyView reads ?unit= from the URL, which needs a Suspense boundary.
   return (
-    <PolicyView
-      // ACCESS facts reach Policy only once ACCESS runs on real records.
-      accessReady={accessReadiness(ACCESS_REFERENCE).ready}
-      units={units}
-      unitYears={sigma ? unitYearSummaries(sigma) : null}
-    />
+    <Suspense>
+      <PolicyView
+        // ACCESS facts reach Policy only once ACCESS runs on real records.
+        accessReady={accessReadiness(ACCESS_REFERENCE).ready}
+        units={units}
+        unitYears={sigma ? unitYearSummaries(sigma) : null}
+      />
+    </Suspense>
   );
 }

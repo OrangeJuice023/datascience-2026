@@ -51,13 +51,27 @@ export function MapTimeline({
   }, [playing, last, slices.length]);
 
   if (!current) {
-    return <p className="text-xs text-slate-400">No time slices available for this mode.</p>;
+    return <p className="text-xs text-slate-500">No time slices available for this mode.</p>;
   }
 
   const max = Math.max(...slices.map((s) => s.value ?? 0), 1);
   const show = (value: number | null) => (value === null ? "No data" : spec.formatValue(value));
   const hovered = hoverIndex === null ? null : slices[hoverIndex];
   const cursorPct = last > 0 ? (index / last) * 100 : 0;
+
+  // One slice (a single snapshot) has nothing to play or scrub: state it in one line.
+  if (slices.length === 1) {
+    return (
+      <div className="flex flex-col gap-1">
+        <p className="text-sm text-ink">
+          <span className="font-semibold">{current.label}</span>
+          <span className="text-slate-500"> · </span>
+          <span className="tabular-nums text-slate-600">{show(current.value)}</span>
+        </p>
+        <p className="text-xs leading-snug text-slate-500">{spec.interpretation}</p>
+      </div>
+    );
+  }
 
   function togglePlay() {
     if (playing) {
@@ -96,12 +110,12 @@ export function MapTimeline({
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </TimelineButton>
         </div>
-        <p className="min-w-0 text-sm text-slate-800" aria-live={playing ? "off" : "polite"}>
+        <p className="min-w-0 text-sm text-ink" aria-live={playing ? "off" : "polite"}>
           <span className="font-semibold">{current.label}</span>
-          <span className="text-slate-400"> · </span>
+          <span className="text-slate-500"> · </span>
           <span className="tabular-nums text-slate-600">{show(current.value)}</span>
         </p>
-        <p className="ml-auto hidden text-[11px] text-slate-400 lg:block">{spec.trackLabel}</p>
+        <p className="ml-auto hidden text-xs text-slate-500 lg:block">{spec.trackLabel}</p>
       </div>
 
       <div className="relative rounded-md focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2">
@@ -111,31 +125,39 @@ export function MapTimeline({
           className="block h-9 w-full"
           aria-hidden="true"
         >
-          <line x1={0} x2={slices.length} y1={TRACK_HEIGHT - 0.25} y2={TRACK_HEIGHT - 0.25} stroke="#e2e8f0" strokeWidth={0.5} vectorEffect="non-scaling-stroke" />
+          <line x1={0} x2={slices.length} y1={TRACK_HEIGHT - 0.25} y2={TRACK_HEIGHT - 0.25} style={{ stroke: "var(--border)" }} strokeWidth={0.5} vectorEffect="non-scaling-stroke" />
           {slices.map((slice, i) => {
             const value = slice.value ?? 0;
             const h = Math.max(value > 0 ? 2 : 0, (value / max) * (TRACK_HEIGHT - 4));
             return (
               <g key={slice.key}>
                 {slice.gapBefore && (
-                  <line x1={i} x2={i} y1={0} y2={TRACK_HEIGHT} stroke="#94a3b8" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+                  <line x1={i} x2={i} y1={0} y2={TRACK_HEIGHT} style={{ stroke: "var(--faint)" }} strokeWidth={1} vectorEffect="non-scaling-stroke" />
                 )}
                 {slice.value === null && (
-                  <line x1={i + 0.12} x2={i + 0.88} y1={TRACK_HEIGHT - 1} y2={TRACK_HEIGHT - 1} stroke="#94a3b8" strokeWidth={1} strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
+                  <line x1={i + 0.12} x2={i + 0.88} y1={TRACK_HEIGHT - 1} y2={TRACK_HEIGHT - 1} style={{ stroke: "var(--faint)" }} strokeWidth={1} strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
                 )}
                 <rect
                   x={i + 0.12}
                   y={TRACK_HEIGHT - h}
                   width={0.76}
                   height={h}
-                  fill={i === index ? "#0d9488" : i === hoverIndex ? "#64748b" : i < index ? "#94a3b8" : "#cbd5e1"}
+                  style={
+                    i === index
+                      ? { fill: "var(--chart-1)" }
+                      : i === hoverIndex
+                        ? { fill: "var(--muted-foreground)" }
+                        : i < index
+                          ? { fill: "var(--faint)", fillOpacity: 0.55 }
+                          : { fill: "var(--chart-muted)" }
+                  }
                 />
               </g>
             );
           })}
         </svg>
         <div
-          className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-slate-900"
+          className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-ink"
           style={{ left: `${((index + 0.5) / slices.length) * 100}%` }}
           aria-hidden="true"
         />
@@ -161,22 +183,22 @@ export function MapTimeline({
         />
         {hovered && hoverIndex !== null && hoverIndex !== index && (
           <div
-            className="pointer-events-none absolute bottom-full z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] shadow-sm"
+            className="pointer-events-none absolute bottom-full z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-control)] border border-border bg-sheet px-2 py-1 text-xs shadow-[0_4px_12px_rgba(34,35,31,0.1)]"
             style={{ left: `${((hoverIndex + 0.5) / slices.length) * 100}%` }}
           >
-            <span className="font-medium text-slate-700">{hovered.label}</span>
-            <span className="text-slate-400"> · </span>
+            <span className="font-medium text-ink">{hovered.label}</span>
+            <span className="text-slate-500"> · </span>
             <span className="tabular-nums text-slate-600">{show(hovered.value)}</span>
           </div>
         )}
       </div>
 
-      <div className="flex justify-between text-[11px] tabular-nums text-slate-400">
+      <div className="flex justify-between text-xs tabular-nums text-slate-500">
         <span>{slices[0].shortLabel}</span>
         <span className="sr-only">Position {Math.round(cursorPct)}%</span>
         <span>{slices[last].shortLabel}</span>
       </div>
-      <p className="text-[11px] leading-snug text-slate-500">{spec.interpretation}</p>
+      <p className="text-xs leading-snug text-slate-500">{spec.interpretation}</p>
     </div>
   );
 }
@@ -205,10 +227,10 @@ function TimelineButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+        "flex h-11 w-11 items-center justify-center rounded-[var(--radius-control)] transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:w-8",
         primary
-          ? "bg-slate-900 text-white hover:bg-slate-800"
-          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+          ? "bg-ink text-white hover:bg-slate-800"
+          : "border border-control bg-sheet text-slate-600 hover:bg-raised",
       )}
     >
       {children}

@@ -15,18 +15,17 @@ import { useTheme } from '@/hooks/use-theme';
 import { ThemedText } from './themed-text';
 
 const TABS = [
-  { name: 'overview', href: '/', label: 'Overview', icon: 'shield-check-outline' },
-  { name: 'dengue', href: '/dengue', label: 'Dengue', icon: 'virus-outline' },
-  { name: 'access', href: '/access', label: 'Access', icon: 'pill' },
-  { name: 'policy', href: '/policy', label: 'Policy', icon: 'chat-processing-outline' },
-  { name: 'settings', href: '/settings', label: 'Settings', icon: 'cog-outline' },
+  { name: 'index', href: '/', label: 'Overview', icon: 'home-variant-outline' },
+  { name: 'explore', href: '/explore', label: 'Explore', icon: 'map-search-outline' },
+  { name: 'analyze', href: '/analyze', label: 'Analyze', icon: 'chart-box-outline' },
 ] as const;
 
 /**
- * The web tab bar. Mirrors the native tab bar: the same five destinations in a
- * full-width bar along the bottom, an icon over a short label, the current tab
- * marked by ink and a neutral fill. Content scrolls behind it, never under a
- * floating pill at the top.
+ * The web tab bar. Mirrors the native tab bar: the same three destinations in
+ * a full-width bar along the bottom, an icon over a short label, the current
+ * tab marked by ink and a neutral fill. Three equal tabs fit a 390px screen
+ * with room to spare. Settings is the gear in each screen's header. Content
+ * scrolls behind the bar, never under a floating pill at the top.
  */
 export default function AppTabs() {
   return (

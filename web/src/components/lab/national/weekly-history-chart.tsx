@@ -14,7 +14,7 @@ import { formatCount, formatIsoDate } from "@/lib/map/format";
 import { epiWeek, type WeeklyPoint } from "@/lib/national-observations";
 
 export const OBSERVED = "#2468c9";
-export const AXIS_TICK = { fontSize: 11, fill: "#6f6d66" };
+export const AXIS_TICK = { fontSize: 12, fill: "#6f6d66" };
 export const GRID = "#ebe8e1";
 
 export function compactCount(value: number) {
@@ -33,7 +33,7 @@ export function WeeklyTooltip({
   return (
     <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
       <p className="font-medium text-slate-700">Week of {formatIsoDate(point.periodStart)}</p>
-      <p className="text-[11px] text-slate-400">
+      <p className="text-xs text-slate-400">
         MMWR {point.epiYear}-W{String(point.epiWeek).padStart(2, "0")}
       </p>
       {point.value === null ? (
@@ -45,7 +45,7 @@ export function WeeklyTooltip({
             <span className="font-semibold tabular-nums text-slate-900">{formatCount(point.value)}</span>
           </p>
           {point.sourceRecordId && (
-            <p className="mt-0.5 text-[11px] text-slate-400">Record {point.sourceRecordId}</p>
+            <p className="mt-0.5 text-xs text-slate-400">Record {point.sourceRecordId}</p>
           )}
         </>
       )}
