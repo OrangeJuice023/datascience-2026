@@ -21,6 +21,9 @@ SIGMA now has three main tabs (Overview, Explore, Analyze), shows only real data
 - [x] Epi (MMWR) years used everywhere results are grouped by year. (#16)
 
 - [x] Spatial analysis of the EARS signals (method doc §4.2 steps 3–7 and the §4.4 validation): neighbour weights, weekly Moran's I, local Moran / Gi*, Knox space-time test, local vs aggregate lead time; results in `docs/geo/spatial-analysis-report.md`, meaning in `docs/geo/spatial-assessment-and-method.md` §6.2. (`feat/spatial-analysis`)
+- [x] EARS results served by `/api/v1/dengue/signals` (per unit and week, from the committed export); `/health` reports the engine as ok and the retired `/access/metrics` as disabled. (`feat/mcp-api-mobile`)
+- [x] MCP server (`mcp/`): the read-only API as tools for Claude and other MCP clients. (`feat/mcp-api-mobile`)
+- [x] Mobile: Overview and Explore rebuilt on the 2026-10-24 design references (dashboards, map, signal donut); the app finds the API automatically; Android emulator screenshots in `docs/mobile-view/`. (`feat/mcp-api-mobile`)
 
 ## In progress
 
@@ -32,7 +35,6 @@ SIGMA now has three main tabs (Overview, Explore, Analyze), shows only real data
 - [ ] Live-test SIGI answers with a model key: run the suggested questions for 3–5 units, check that every claim cites the right place, and refine `web/src/lib/analyze-chat/playbook.ts`.
 - [ ] Policy coverage: only Quezon City, Pasig, Davao City and Bacolod City have local records. Add verified local issuances for more units, starting with the highest-burden ones.
 - [ ] National DOH issuances behind doh.gov.ph's Cloudflare block (AO 2018-0021 Enhanced 4S, the dengue programme AO): obtain official copies and add them.
-- [ ] Connect EARS results to `/api/v1/dengue/signals` (still `not_connected`).
 - [ ] Map cluster layer: only if a local cluster class is made stable across neighbour definitions (today κ 0.11–0.23 between W1 and W2/W3; see `docs/geo/spatial-assessment-and-method.md` §6.2). The weekly Moran's I and Knox results can be shown as national context now.
 - [ ] End-to-end browser tests in CI (navigation, Analyze subtabs, SIGI empty/error states).
 - [ ] Confirm the meaning of the HDX `date` column and pick one week offset for the map and the environment track (GEO-4).

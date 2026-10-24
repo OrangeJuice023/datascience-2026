@@ -112,12 +112,28 @@ first (`cd web && npm run dev`).
 
 ### Pointing the app at the API
 
-The base URL is a setting, not a constant, and the app always shows the
-address it is using. It resolves in this order:
+The app **finds the API by itself**; nobody has to type an address. At start-up
+(`src/api/discovery.ts`, `src/state/settings-context.tsx`) it probes `/health`
+on each candidate at once, with a 3-second timeout, and takes the first that
+answers **in this priority order**:
 
-1. The value saved in **Settings** (stored on the device).
-2. `EXPO_PUBLIC_API_BASE_URL` baked into the build.
-3. A platform-appropriate localhost default.
+1. The value saved in **Settings**, if any. This is an explicit choice, so it
+   is used as is, without probing.
+2. `EXPO_PUBLIC_API_BASE_URL` baked into the build (preview and production
+   builds point at the deployed API).
+3. Your development machine: the host Expo served the JavaScript from
+   (`hostUri`, e.g. `192.168.1.20:8081`) on port 3000. This is what lets a
+   phone running Expo Go on the same Wi-Fi find `npm run dev` without setup.
+4. The platform loopback (`10.0.2.2` on the Android emulator, `localhost` elsewhere).
+5. The deployed API, `https://datascience-2026.vercel.app/api/v1`.
+
+The screens wait until this has finished, so none of them fetches from a guess.
+**Settings** and **About these numbers** show the address in use and how it
+was found ("Found automatically: your development machine", ...), and
+**Find automatically** runs discovery again (for example after starting the
+web server). Saving an address overrides discovery until it is cleared.
+
+If you do want to set it by hand:
 
 | Where the app runs | Address to use |
 | ------------------ | -------------- |

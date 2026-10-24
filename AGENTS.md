@@ -98,6 +98,7 @@ End PR descriptions with the attribution line your tool requires, if any.
 | --- | --- | --- |
 | `web/` | Next.js + TypeScript + Tailwind frontend (MapLibre, deck.gl, Recharts). Read `web/AGENTS.md`. | `cd web && npm ci && npm run lint && npx tsc --noEmit && npm run build` |
 | `ml/` | Python dengue pipeline: `clean_dengue.py` → `ears.py` → `export_sigma_web.py` (map data), QA reports in `ml/qa/` → `docs/reports/`; spatial analysis of the EARS signals in `ml/spatial/` (`python -m spatial.run && python -m spatial.report` from `ml/`). Docs: `docs/dengue-pipeline.md`, `docs/geo/spatial-assessment-and-method.md`. | `pip install -r ml/requirements.txt`, `python -m compileall -q ml`, `python -m unittest discover -s ml/tests` |
+| `mcp/` | MCP server (Node ≥ 20): the read-only SIGMA API as tools for AI clients. Docs: `mcp/README.md`. | `cd mcp && npm ci && npm test` |
 | `scripts/geo/` | Geography track (Node ≥ 20, no npm deps): HDX dengue reporting units → COD-AB / PSA PSGC. Docs: `scripts/geo/README.md`, `docs/geo/`. | `node scripts/geo/fetch-sources.mjs && node scripts/geo/build-geo.mjs && node scripts/geo/build-boundaries.mjs` |
 | `data/reference/` | Small committed reference tables (crosswalks, hub rows, curated decisions). | |
 | `data/sample/` | Small sample data safe to commit. | |
