@@ -155,8 +155,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-* {
-  border-color: var(--border);
+/* In the base layer, so border-colour utilities (border-accent, border-control,
+   divide-rule…) still apply: unlayered, this rule beat every one of them. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 :focus-visible {
