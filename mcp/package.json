@@ -1,0 +1,22 @@
+{
+  "name": "sigma-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server exposing the read-only SIGMA API (dengue EARS signals, reporting units, ACCESS, policy evidence) to MCP clients.",
+  "type": "module",
+  "bin": {
+    "sigma-mcp": "src/server.mjs"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test",
+    "check": "node --check src/server.mjs && node --check src/tools.mjs && node --check src/api.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "zod": "4.6.5"
+  }
+}
