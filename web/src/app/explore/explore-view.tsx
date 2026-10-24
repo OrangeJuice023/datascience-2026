@@ -244,15 +244,17 @@ export function ExploreView({ bundle }: { bundle: MapDataBundle }) {
                       <button
                         type="button"
                         onClick={() => setSelectedId(feature.id)}
-                        className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-raised"
+                        className="flex min-h-11 w-full items-start gap-3 px-4 py-2 text-left transition-colors hover:bg-raised"
                       >
                         <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ background: rgb(feature) }}
                           aria-hidden="true"
                         />
-                        <span className="min-w-0 flex-1 text-sm text-ink">{feature.name}</span>
-                        <span className="max-w-[48%] text-right text-xs text-slate-500">{feature.classLabel}</span>
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="text-sm text-ink">{feature.name}</span>
+                          <span className="text-xs text-slate-500">{feature.classLabel}</span>
+                        </span>
                       </button>
                     </li>
                   ))}
