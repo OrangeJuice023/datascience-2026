@@ -1323,6 +1323,12 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
         required: true,
         notes: "One of the 126 HDX dengue reporting units (e.g. `quezon-city`). `policy/info` lists them under `chatScope`.",
       },
+      {
+        name: "compareLocationId",
+        type: "body",
+        required: false,
+        notes: "A second reporting unit to compare with; its evidence is added and kept separate.",
+      },
     ],
     responseShape: [
       "reply — the generated answer",
@@ -1330,6 +1336,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "contextScope — one line describing what the model was given",
       "limitations[] — the limits of model output, repeated in every response",
       "replySignature — send back as this reply's signature in a later request's history",
+      "citations[] — the evidence items the reply cites: id, kind, jurisdiction, unitId, title, source, href",
+      "rejectedCitationIds[] — ids the reply named that SIGI was not given; never shown as sources",
     ],
     status: "live",
     possibleStatuses: ["live"],

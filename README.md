@@ -240,9 +240,9 @@ says what kind of data it carries.
 | `GET /api/v1/access/units` | Mapped facilities and dengue burden per reporting unit | `live` |
 | `GET /api/v1/access/medicines` | DOH medicine prices and formulary status | `live` |
 | `GET /api/v1/access/metrics` | Retired; answers with empty lists | `not_connected` |
-| `GET /api/v1/policy/info` | Copilot scope and AI disclosure (being moved to real data) | `demo` |
-| `GET /api/v1/policy/evidence` | The policy evidence records | `demo` label (records are sourced; relabel pending) |
-| `POST /api/v1/chat` | SIGI's answer with server-checked citations | `demo` label, or `not_configured` without a key |
+| `GET /api/v1/policy/info` | Policy evidence summary, SIGI's 126 units and AI disclosure | `live` |
+| `GET /api/v1/policy/evidence` | The policy evidence records | `live` |
+| `POST /api/v1/chat` | SIGI's answer with server-checked citations | `live`, or `not_configured` without a key |
 
 ```bash
 curl "https://datascience-2026.vercel.app/api/v1/dengue/observations?limit=2"
