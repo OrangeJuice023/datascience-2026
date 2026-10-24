@@ -5,7 +5,8 @@ import type { SigmaData } from "@/lib/sigma/data";
 import { getAllPolicyEvidence } from "@/data/policy-evidence";
 import { accessUnit } from "@/lib/access/reference";
 import { buildEvidencePack, citedItems, foreignEvidenceIds, labItemsForUnit, normalizeHyphens } from "./evidence";
-import { buildAnalyzePrompt } from "./prompt";
+import { PROMPT_BUDGET_CHARS } from "@/lib/api/chat";
+import { buildAnalyzePrompt, NO_EVIDENCE_REPLY } from "./prompt";
 
 /**
  * SIGI's evidence pack, on the real committed data. What matters: each place
@@ -143,6 +144,28 @@ describe("city isolation", () => {
     // Each place's own items come after the shared part, never before it.
     expect(qc.indexOf("[lab-quezon-city-2019]")).toBeGreaterThan(split);
     expect(qc.indexOf("[pe-national-ra11332-2019]")).toBeLessThan(split);
+  });
+
+  it("fits the free model tier even for the largest place compared with another", () => {
+    // Groq refuses a request over ~8K tokens outright; the budget keeps every prompt near 6K.
+    const qcWithAgusan = buildEvidencePack({
+      unitId: "quezon-city",
+      unitName: "Quezon City",
+      sigma: SIGMA,
+      national: null,
+      accessUnit: accessUnit("quezon-city"),
+      policyRecords: getAllPolicyEvidence(),
+      compare: { unitId: "agusan-del-sur-remainder", unitName: "Agusan del Sur", accessUnit: accessUnit("agusan-del-sur-remainder"), hasUnitData: true },
+    });
+    const prompt = buildAnalyzePrompt(qcWithAgusan, "Dengue");
+    expect(prompt).toContain("[lab-agusan-del-sur-remainder-2019]");
+    expect(prompt.length).toBeLessThan(PROMPT_BUDGET_CHARS);
+    expect(prompt).not.toMatch(/https?:\/\//);
+  });
+
+  it("tells SIGI the exact reply for a question SIGMA has no evidence for", () => {
+    expect(buildAnalyzePrompt(pack("abra"), "Dengue")).toContain(`reply with exactly: ${NO_EVIDENCE_REPLY}`);
+    expect(NO_EVIDENCE_REPLY).toBe("SIGMA will answer it after some research.");
   });
 
   it("reads ids written with typographic hyphens as the ids SIGMA issued", () => {
