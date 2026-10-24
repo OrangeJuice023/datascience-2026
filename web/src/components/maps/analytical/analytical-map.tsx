@@ -45,8 +45,9 @@ const AVAILABILITY_BADGE: Record<MapModeDefinition["availability"], { label: str
 };
 
 const TOGGLE_LABEL: Record<MapModeId, Partial<Record<LayerToggleId, string>>> = {
-  sigma: { areas: "Area fills" },
-  disease: {},
+  cases: {},
+  ears: { areas: "Area fills" },
+  doh: { areas: "Area fills" },
   environment: {},
   access: { columns: "3D columns" },
 };

@@ -85,7 +85,8 @@ ever returned. `chatEnabled` is false when no key is configured *or* when
 
 The source catalogue. Each source states its status (`connected`, `demo`,
 `planned`), what it is for, and what it cannot answer. A planned source
-stays `planned`; nothing is reported as connected before it is.
+stays `planned`; nothing is reported as connected before it is. The web app
+renders the same catalogue, with licences and credit lines, at `/data-sources`.
 
 ### `GET /api/v1/dengue/observations`
 

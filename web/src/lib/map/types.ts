@@ -1,5 +1,5 @@
 import type { HealthObservation } from "@/types/data";
-import type { AccessBundle } from "@/lib/access/bundle";
+import type { AccessFacilityType, AccessPoints } from "@/lib/access/reference";
 import type { LGU, NeighborSummary, Signal, TrendPoint } from "@/types";
 import type { SigmaData } from "@/lib/sigma/data";
 import type { EnvironmentBundle } from "@/lib/environment/bundle";
@@ -7,9 +7,11 @@ import type { WeatherSourceId, WeatherVariable } from "@/types/data";
 
 export type MapViewMode = "2d" | "3d" | "globe";
 
+/** Explore shows cases, ears, doh and environment; access is used by the ACCESS page. */
 export type MapModeId =
-  | "disease"
-  | "sigma"
+  | "cases"
+  | "ears"
+  | "doh"
   | "environment"
   | "access";
 
@@ -136,17 +138,14 @@ export interface LegendSpec {
 }
 
 export type FilterKey =
-  | "medicine"
-  | "accessMetric"
+  | "facilityType"
   | "sigmaLayer"
   | "envVariable"
   | "envSource";
 
 export interface MapFilters {
-  /** ACCESS: selected medicine id. */
-  medicine: string;
-  /** ACCESS: which indicator the map encodes. */
-  accessMetric: "availability" | "demand" | "freshness" | "gap";
+  /** ACCESS: which kind of mapped facility the map draws and shades by. */
+  facilityType: AccessFacilityType;
   /** SIGMA: which result the map encodes. */
   sigmaLayer: SigmaLayer;
   /** ENVIRONMENT: which weather variable the map encodes. */
@@ -180,8 +179,10 @@ export interface MapDataBundle {
   neighbors: Record<string, NeighborSummary[]>;
   /** Formal national observations (OpenDengue), weekly rows only, trimmed to what the map draws. */
   nationalWeekly: NationalWeeklyPoint[];
-  /** ACCESS demo bundle (aggregated on the server). */
-  access: AccessBundle;
+  /** ACCESS facility points (OpenStreetMap, ODbL); fetched on the client when the page opens. */
+  accessPoints?: AccessPoints;
+  /** Why `accessPoints` could not be loaded, if it failed. */
+  accessPointsError?: string;
   /** SIGMA reporting-unit results; fetched on the client when the mode opens. */
   sigma?: SigmaData;
   /** Why `sigma` could not be loaded, if it failed. */

@@ -10,7 +10,7 @@
 import fs from "node:fs";
 import zlib from "node:zlib";
 
-function readZip(buffer) {
+export function readZip(buffer) {
   // End of central directory record: signature 0x06054b50, searched from the end.
   let eocd = -1;
   for (let i = buffer.length - 22; i >= Math.max(0, buffer.length - 65557); i--) {

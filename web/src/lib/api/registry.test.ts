@@ -8,6 +8,8 @@ import { describe, expect, it } from "vitest";
 
 import { GET as indexGet } from "@/app/api/v1/route";
 import { GET as accessGet } from "@/app/api/v1/access/metrics/route";
+import { GET as accessUnitsGet } from "@/app/api/v1/access/units/route";
+import { GET as accessMedicinesGet } from "@/app/api/v1/access/medicines/route";
 import { GET as evidenceGet } from "@/app/api/v1/policy/evidence/route";
 import { GET as healthGet } from "@/app/api/v1/health/route";
 import { GET as observationsGet } from "@/app/api/v1/dengue/observations/route";
@@ -170,6 +172,13 @@ async function callRealHandler(
         status: 200,
         body: await (await accessGet(request("/access/metrics", "?limit=2"))).json(),
       };
+    case "GET /access/units":
+      return {
+        status: 200,
+        body: await (await accessUnitsGet(request("/access/units", "?unitId=quezon-city"))).json(),
+      };
+    case "GET /access/medicines":
+      return { status: 200, body: await (await accessMedicinesGet(request("/access/medicines"))).json() };
     case "GET /policy/info":
       return { status: 200, body: await (await policyInfoGet(request("/policy/info"))).json() };
     case "GET /policy/evidence":

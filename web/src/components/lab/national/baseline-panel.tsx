@@ -18,10 +18,16 @@ import { formatIsoDate } from "@/lib/map/format";
 import type { AnomalyResult } from "@/types/data";
 import { AXIS_TICK, GRID, OBSERVED, compactCount } from "./weekly-history-chart";
 
-/** Planned progression; nothing past level 0 (observed data) exists yet. */
-const ROADMAP = [
+/** Planned progression for this national series; nothing past level 0 (observed data) runs on it yet. */
+const ROADMAP: Array<{ level: number; name: string; detail: string; status?: string }> = [
   { level: 1, name: "Seasonal / historical baseline", detail: "Expected weekly activity from prior years at the same point in the season." },
-  { level: 2, name: "Farrington / EARS-style anomaly detection", detail: "Excess over the baseline with an explicit alert threshold." },
+  {
+    level: 2,
+    name: "Farrington / EARS-style anomaly detection",
+    detail:
+      "Excess over the baseline with an explicit alert threshold. EARS C1–C3 and the DOH thresholds already run per reporting unit (Reporting units tab), not on this national series.",
+    status: "Reporting units only",
+  },
   { level: 3, name: "Forecasting baseline", detail: "SARIMA or Holt-Winters, backtested with rolling origins." },
   { level: 4, name: "ML benchmark", detail: "XGBoost or comparable, compared against levels 1–3." },
   { level: 5, name: "Spatiotemporal model", detail: "Requires reconciled sub-national formal data." },
@@ -93,7 +99,7 @@ export function BaselinePanel({ results }: { results: AnomalyResult[] }) {
         {ROADMAP.map((step) => (
           <li key={step.level} className="rounded-md border border-slate-200 px-3 py-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              Level {step.level} · Not started
+              Level {step.level} · {step.status ?? "Not started"}
             </p>
             <p className="mt-0.5 text-sm font-medium text-slate-800">{step.name}</p>
             <p className="mt-0.5 text-xs text-slate-500">{step.detail}</p>

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Radar, LineChart, ShieldCheck } from "lucide-react";
 
 const STEPS = [
-  { key: "TRACE", title: "Find the signal.", href: "/lab", icon: Radar },
+  { key: "TRACE", title: "Find the signal.", href: "/analyze/lab", icon: Radar },
   { key: "ANALYZE", title: "Understand the pattern.", href: "/explore", icon: LineChart },
-  { key: "ACT", title: "Support verification and decision-making.", href: "/policy", icon: ShieldCheck },
+  { key: "ACT", title: "Support verification and decision-making.", href: "/analyze/policy", icon: ShieldCheck },
 ] as const;
 
 export function ProcessStrip() {

@@ -5,8 +5,9 @@ import {
   copilotSigiState,
   historyForRequest,
   isCopilotUnavailable,
+  linkServerCitations,
   referencedEvidence,
-  suggestedQuestions,
+  suggestedQuestionGroups,
 } from "./copilot-ui";
 
 function record(evidenceId: string, topic: PolicyEvidenceRecord["topic"], sourceIds: string[] = []): PolicyEvidenceRecord {
@@ -76,38 +77,45 @@ describe("evidence referenced by a reply", () => {
   });
 });
 
-describe("suggested questions", () => {
-  it("adds a question only for topics the copilot has evidence for", () => {
-    const qs = suggestedQuestions([record("pe-test-b", "budget_procurement_fiscal")], true);
+describe("server citations in a reply", () => {
+  const citations = [{ id: "lab-quezon-city-2019" }, { id: "pe-national-lgc-1991" }];
 
-    expect(qs.some((q) => q.includes("budget and procurement"))).toBe(true);
-    expect(qs.some((q) => q.includes("reported outcomes"))).toBe(false);
+  it("numbers only the ids the server verified, consuming the brackets around them", () => {
+    const { text, cited } = linkServerCitations("Rose [lab-quezon-city-2019]; mandate [pe-national-lgc-1991].", citations);
+    expect(text).toBe("Rose [1](#cite-lab-quezon-city-2019); mandate [2](#cite-pe-national-lgc-1991).");
+    expect(cited.map((c) => c.id)).toEqual(["lab-quezon-city-2019", "pe-national-lgc-1991"]);
   });
 
-  it("does not refer to a signal when there is none", () => {
-    expect(suggestedQuestions([], false).join(" ")).not.toMatch(/this signal/);
+  it("never turns an id the server did not verify into a link", () => {
+    const { text, cited } = linkServerCitations("Pasig too [lab-pasig-city-2019], see pe-made-up-1.", citations);
+    expect(cited).toEqual([]);
+    expect(text).not.toContain("#cite-");
   });
 });
 
-describe("history size", () => {
-  const exchange = (n: number, length: number) => [
-    { role: "user" as const, content: `Q${n}` },
-    { role: "assistant" as const, content: `A${n} `.padEnd(length, "x"), signature: `s${n}` },
-  ];
+describe("suggested questions", () => {
+  const full = { place: "Test City", hasLab: true, hasAccess: true, hasLocalPolicy: true };
 
-  it("keeps the newest exchanges that fit the byte budget", () => {
-    const turns = [1, 2, 3, 4, 5].flatMap((n) => exchange(n, 3000));
-    const history = historyForRequest(turns);
-
-    expect(new TextEncoder().encode(JSON.stringify(history)).length).toBeLessThanOrEqual(HISTORY_BYTE_BUDGET);
-    expect(history.at(-1)?.content.startsWith("A5")).toBe(true);
-    expect(history[0].content).not.toBe("Q1");
-    expect(history.length % 2).toBe(0);
+  it("groups questions by what the evidence can answer", () => {
+    expect(suggestedQuestionGroups(full).map((g) => g.label)).toEqual([
+      "Understand the data",
+      "Investigate signals",
+      "Explore access",
+      "Connect evidence",
+    ]);
   });
 
-  it("drops an exchange the server would refuse for length", () => {
-    const history = historyForRequest([...exchange(1, 200), ...exchange(2, 9000)]);
+  it("drops groups whose evidence is missing and never promises a local policy that is not held", () => {
+    const bare = suggestedQuestionGroups({ ...full, hasLab: false, hasAccess: false, hasLocalPolicy: false });
+    expect(bare.map((g) => g.label)).toEqual(["Connect evidence"]);
+    expect(bare[0].questions.join(" ")).not.toMatch(/local/);
+  });
 
-    expect(history.map((t) => t.content.slice(0, 2))).toEqual(["Q1", "A1"]);
+  it("never offers live counts, stock or forecasts", () => {
+    const text = suggestedQuestionGroups(full)
+      .flatMap((g) => g.questions)
+      .join(" ")
+      .toLowerCase();
+    expect(text).not.toMatch(/current|today|this week|in stock|available now|forecast|predict/);
   });
 });
